@@ -1,0 +1,275 @@
+import {useState,useEffect,useContext,useRef} from 'react'
+
+import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
+
+
+import ArrowIcon from '../assets/icons/ArrowIcon.svg?react'
+import ThreeDotMenu from '../assets/icons/ThreeDotMenu.svg?react'
+
+
+import {ItemsPreviewList,ItemPreviewContainer} from './ItemsPreviewList.tsx'
+import {ItemEdit} from './ItemEdit.tsx'
+import SelectionModeComponent from './SelectionModeComponent.tsx'
+import BatchPrintBtn from './BatchPrintBtn.tsx'
+import BatchEditBtn from './BatchEditBtn.tsx'
+
+
+import SecondaryPage from '../components/secondary-page.tsx'
+
+
+import {getFailedItems,clearFailedItem} from '../hooks/useIndexDB.tsx'
+import {useSaveItemsV2} from '../hooks/useSaveItemsV2.tsx'
+
+
+
+
+
+
+
+const OfflineItemsPage = ({handleClose, zIndex,holdScrollElement}) => {
+    
+    const {showMessage} = useContext(ServerMessageContext)
+    const [items,setItems] = useState([])
+    const [forceRenderParent,setForceRenderParent] = useState(false)
+    const {uploadItem} = useSaveItemsV2()
+    const [selectionMode,setSelectionMode] = useState(false)
+    const [selectedItems,setSelectedItems] = useState({})
+    const [progressIndex,setProgressIndex] = useState('0%')
+    const [uploadingItem,setUploadingItem] = useState(false)
+    const timeoutRef = useRef(null)
+    const [toggleBatchEdit,setToggleBatchEdit] = useState(false)
+    const imgBlobs = useRef([])
+
+
+   
+    useEffect(()=>{
+
+        const handleItemsFetch = async (setItems)=>{
+            const result = await getFailedItems()
+            setItems(result)
+
+        }
+
+        handleItemsFetch(setItems)
+
+        return()=>{
+            if(imgBlobs.current.length > 0){
+                imgBlobs.current.forEach(blob=> URL.revokeObjectURL(blob))
+            }
+            if(timeoutRef.curret){
+                clearTimeout(timeoutRef.current)
+            }
+        }
+
+    },[forceRenderParent])
+
+    const handleDelitionItems = (itemsIdList,handleCloseItemEdit=null)=>{
+        if(Object.keys(selectedItems).length > 0){
+            for( const i in selectedItems){
+                clearFailedItem(selectedItems[i].offlineIndexKey)
+            }
+        }else{  
+            itemsIdList.forEach(art => clearFailedItem(art))
+        }
+        
+        
+        if(handleCloseItemEdit){
+           
+            handleCloseItemEdit()
+            setForceRenderParent(prev=>!prev)
+        }
+    }
+
+    const handleUploadAll= async(itemList) =>{
+        setUploadingItem(true)
+        setProgressIndex('0%')
+        const concurrency = 3
+        let index = 0
+        let completed = 0
+
+        let success_count = 0
+        let fail_count = 0
+
+        const worker = async() =>{
+            while(index < itemList.length){
+                
+                const currentIndex = index++
+
+                const item = itemList[currentIndex]
+                try{
+                    const res = await uploadItem({
+                        itemData:item,
+                        type:item.fetchType,
+                        showServerMessage:false,
+                        allowArticleChange:true
+                    })
+                   
+                    if(res.success  ){
+                        success_count++
+                    }else{
+                        fail_count++
+                    }
+                    
+                }catch(err){
+                    console.log('upload fail for item:',item,err)
+                    fail_count ++
+                    
+                }finally{
+                    completed ++
+                    setProgressIndex(`${Math.round((completed  / itemList.length)* 100)}%`)
+                    console.log(completed)
+
+                }
+            }
+        }
+
+        if(timeoutRef.curret){
+            clearTimeout(timeoutRef.current)
+        }
+        timeoutRef.current = setTimeout(()=>{
+            setProgressIndex('10%')
+        },100)
+
+        await Promise.all(Array.from({length:concurrency},worker))
+        
+        if(fail_count > 0){
+            showMessage({status:100,message:`Fail to upload ${fail_count} items. Successful uploads: ${success_count} items`})
+        }else{
+            showMessage({status:200,message:`${success_count} Items Uploaded.`})
+        }
+
+
+        if(timeoutRef.curret){
+            clearTimeout(timeoutRef.current)
+        }
+        setForceRenderParent(prev =>!prev)
+        timeoutRef.current = setTimeout(()=>{
+            setUploadingItem(false)
+            
+            
+        },400)
+
+        
+    }
+
+    const handleBatchOfflineUpload = async(itemData)=>{
+
+       let itemsObjList = Object.values(selectedItems).map((obj)=>{
+        return {...obj,...itemData}
+       })
+       
+       await handleUploadAll(itemsObjList)
+       
+        
+    }
+
+   
+    return ( 
+        <div className="flex-column " style={{height:'100dvh',overflow:'hidden'}}>
+
+            {toggleBatchEdit && 
+                <SecondaryPage BodyComponent={ItemEdit}
+                    bodyProps={{
+                            preRenderInfo:{'handleBatchOfflineUpload':handleBatchOfflineUpload},
+                            fetchWhenOpen:false,
+                            setForceRenderParent:setForceRenderParent,
+                            handleDelitionItems:handleDelitionItems,
+                            pageSetUp:new Set(['noHistory','noImages','noType','noCategory','noIssues'])
+                    }}
+                    zIndex={zIndex +1}
+                    pageId={'offlineItems'}
+                    interactiveBtn ={{iconClass:'svg-15 padding-05 position-relative content-end', order:3,icon:<ThreeDotMenu/>}}
+                    header={{'display': `Editing ${Object.keys(selectedItems).length} items`, class:'flex-1 content-center',order:2}}
+                    closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 content-start',order:0}}
+                    
+                    startAnimation={'slideLeft'}
+                    endAnimation ={'slideRight'}
+                    handleClose={()=>{setToggleBatchEdit(false);setSelectionMode(false);setSelectedItems({})}}    
+                />
+            }
+
+            { selectionMode && 
+                <SelectionModeComponent 
+                    props={{
+                        setSelectionMode,
+                        selectedItemsLength:Object.keys(selectedItems).length,
+                        setSelectedItems,
+                        componentsListPreview:Object.keys(selectedItems).map((objKey,i)=>
+                            <ItemPreviewContainer
+                                key={`itemSelection_${i}`}
+                                itemObj={selectedItems[objKey]}
+                                imgBlobs={imgBlobs.current}
+                                containerHeight={'110px'}
+                                handlePressStart={(_,itemObj)=>{ setSelectedItems(prev => {
+                                    const {[objKey]:_,...current} = prev
+                                    return current
+                                })}}
+                                
+
+                            />
+                        ),
+                        componentOptionsToSelect:[
+                            <BatchPrintBtn selectedItems={selectedItems} key={'OfflinePageBatchPrint'}/>,
+                            <BatchEditBtn setToggleBatchEdit={setToggleBatchEdit} selectedItems={selectedItems} key={'OfflinePageBatchEdit'}/>
+                        ]
+                    }}
+                />
+
+            }
+
+            
+            {uploadingItem && 
+                <div className=" width100 height100 flex-column items-center content-center" style={{position:'absolute',backgroundColor:'rgba(0,0,0,0.5)',zIndex:5 }}>
+                    <div className="flex-column items-center  bg-containers padding-20 " style={{borderRadius:'5px'}}>
+                        <div className="flex-column padding-bottom-10">
+                            some animation
+                        </div>
+                        
+                        <div className="flex-row padding-10" style={{ width:'200px'}}>
+                            <div style={{height:'10px',borderRadius:'20px' ,width:progressIndex ,background:'linear-gradient(270deg, #4caf50 25%,  rgba(255, 255, 255, 0.7) 50%,  #4caf50 75%',backgroundSize:'200% 100%', animation:'moveShine 2s linear infinite', transition:'width 0.4s ease-in-out'}}>
+
+                            </div>
+                        </div>
+                        
+                        <div className="flex-row">
+                            <span  style={{color:'rgba(149, 149, 149, 1)'}}>uploading items... {progressIndex}</span>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            {items.length > 0 ?
+                <div className="flex-column height100 ">
+                    <ItemsPreviewList
+                        data={items}
+                        handleDelitionItems={handleDelitionItems}
+                        setForceRenderParent = {setForceRenderParent}
+                        fetchWhenOpen={false}
+                        selectionMode={selectionMode}
+                        setSelectionMode={setSelectionMode}
+                        selectedItems={selectedItems}
+                        setSelectedItems ={setSelectedItems}
+                        selectionTargetKey = {'offlineIndexKey'}
+                        containerHeight = {'110px'}
+                        zIndex={zIndex + 1}
+                        holdScrollElement={holdScrollElement}
+                    />
+                    <div className="flex-row items-center content-center width100 push-bottom padding-20">
+                        <div className="btn bg-secondary padding-10"
+                            onClick={()=>{handleUploadAll(items)}}
+                        >
+                            <span className="color-primary">Upload All</span>
+                        </div>
+                    </div>
+                </div>
+            :
+                <div className="flex-column items-center content-center height100 width100">
+                    <span className="text-20">No Offline items</span>
+                </div>
+            }
+            
+        </div>
+     );
+}
+ 
+export default OfflineItemsPage;

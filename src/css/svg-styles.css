@@ -1,0 +1,48 @@
+
+.svg-45 svg{
+    width:45px;
+    height:45px
+}
+.svg-40 svg{
+    width:40px;
+    height:40px
+}
+
+.svg-30 svg{
+    width:30px;
+    height:30px
+}
+
+
+
+.svg-25 svg{
+    width:25px;
+    height:25px
+}
+
+.svg-20 svg{
+    width:20px;
+    height:20px
+}
+.svg-18 svg{
+    width:18px ;
+    height:18px ;
+}
+.svg-15 svg{
+    width:15px ;
+    height:15px ;
+}
+.svg-12 svg{
+    width:12px ;
+    height:12px ;
+}
+
+.svg-bg-container svg{
+    fill: var(--container-color);
+    stroke:var(--container-color);
+    
+}
+.svg-bg-container path{
+    fill: var(--container-color);
+    stroke:var(--container-color);
+}

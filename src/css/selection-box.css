@@ -1,0 +1,13 @@
+.selection-box{
+    padding: 15px 10px;
+    background-color:rgb(71, 71, 71);
+    min-width:100px;
+    max-width:150px; 
+}
+.selection-box span{
+    text-align:center;
+}
+.selection-box.active{
+    border-color:#9E8600;
+    box-shadow: 0 0 10px 5px #9e86004d;
+}

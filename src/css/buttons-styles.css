@@ -1,0 +1,47 @@
+.btn{
+    display:flex;
+    padding:5px 10px;
+    border-radius:5px;
+    justify-content:center;
+    align-items:center;
+    transition: transform 0.1s ease;
+    will-change:transform;
+}
+.btn:active{
+    transform:scale(0.9);
+}
+
+.plus-btn{
+    border-radius:50%;
+    position:relative;
+    transition:transform 0.2s ease-out;
+
+}
+.plus-vertical{
+    position:absolute;
+    height:100%;
+    width:2px;
+    border-radius:2px;
+    top:0;
+    /* transform: rotate(45deg); */
+    
+
+}
+.plus-horizontal{
+    position:absolute;
+    height:2px;
+    width:100%;
+    border-radius:2px;
+    top:50%;
+    transform:translateY(-50%)   
+}
+
+.rotateContainer{
+    transform: rotate(45deg);
+
+}
+
+.active-ck{
+    box-shadow:0 0 10px rgba(255, 242, 65, 0.433);
+    border-color:rgb(190, 128, 22) !important;
+}

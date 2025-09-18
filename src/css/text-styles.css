@@ -1,0 +1,31 @@
+.lower-titles{
+    color:var(--static-lower-titles)
+}
+
+.text-45{
+    font-size:45px;
+}
+
+.text-25{
+    font-size:25px;
+}
+.text-20{
+    font-size:20px;
+}
+
+.text-15{
+    font-size:15px;
+}
+.text-12{
+    font-size:12px;
+}
+.text-9{
+    font-size:9px;
+}
+.text-center{
+    text-align:center;
+}
+
+.bold-600{
+    font-weight:600;
+}

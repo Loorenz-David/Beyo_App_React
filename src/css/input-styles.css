@@ -1,0 +1,6 @@
+.main-input{
+    background-color:var(--container-color);
+    padding:10px 10px;
+    border-radius:5px;
+    text-align:start;
+}
