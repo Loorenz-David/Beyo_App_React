@@ -1,7 +1,7 @@
 import {useNavigate} from 'react-router-dom'
 import React from 'react'
-
 import {useRef,useState,useEffect,useContext} from 'react'
+
 import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 
 import AddSquareIcon from '../assets/icons/AddSquareIcon.svg?react'
@@ -13,6 +13,11 @@ import CheckBoxIcon from '../assets/icons/CheckBoxIcon.svg?react'
 import FilterIcon from '../assets/icons/FilterIcon.svg?react'
 import ArrowIcon from '../assets/icons/ArrowIcon.svg?react'
 
+import {ItemTypeMap} from '../maps/mapItemTypeV2.tsx'
+
+import useFetch from '../hooks/useFetch.tsx'
+import {useLongPressAction} from '../hooks/useLongPressActions.tsx'
+import useInfiniteScroll from '../hooks/useInfinityScroll.tsx'
 
 import SecondaryPage from '../components/secondary-page.tsx'
 import ItemScanner from '../components/ItemScanner.tsx'
@@ -21,25 +26,10 @@ import {ItemEdit,ItemPropsComp} from '../componentsV2/ItemEdit.tsx'
 import BatchPrintBtn from '../componentsV2/BatchPrintBtn.tsx'
 import BatchEditBtn from '../componentsV2/BatchEditBtn.tsx'
 import CreateDealer from '../componentsV2/CreateDealer.tsx'
-
-
 import {MemorizedNoteSearchBtn} from '../componentsV2/ItemNoteSearch.tsx'
-
 import OfflineItemsPage from '../componentsV2/OfflineItemsPage.tsx'
 import {ItemsPreviewList,ItemPreviewContainer} from '../componentsV2/ItemsPreviewList.tsx'
-
-
 import SelectionModeComponent from '../componentsV2/SelectionModeComponent.tsx'
-
-
-import {ItemTypeMap} from '../maps/mapItemTypeV2.tsx'
-
-
-
-
-import useFetch from '../hooks/useFetch.tsx'
-import {useLongPressAction} from '../hooks/useLongPressActions.tsx'
-import useInfiniteScroll from '../hooks/useInfinityScroll.tsx'
 
 
 
@@ -493,12 +483,6 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
         </div>
      )
 }
-
-
-
-
-
-
 
 const ItemsPage = () => {
     const {doFetch,data,loading} = useFetch()

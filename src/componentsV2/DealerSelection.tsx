@@ -22,9 +22,9 @@ const filterVals = [
     {'displayName':'Type','column':'dealer_type','operation':'ilike'},
     {'displayName':'Address','column':'raw_address','operation':'ilike'},
     {'displayName':'Gender','column':'gender','operation':'ilike'},
-    {'displayName':'Purchase Count >','column':'puchased_count','operation':'>='},
-    {'displayName':'Purchase Count <','column':'puchased_count','operation':'<='},
-    {'displayName':'Purchase Count =','column':'puchased_count','operation':'=='},
+    {'displayName':'Purchase Count >','column':'purchased_count','operation':'>='},
+    {'displayName':'Purchase Count <','column':'purchased_count','operation':'<='},
+    {'displayName':'Purchase Count =','column':'purchased_count','operation':'=='},
 ]
 
 export const DealerSelection = ({dealerDict,handleClose,holdScrollElement,zIndex}) => {
@@ -66,7 +66,7 @@ export const DealerSelection = ({dealerDict,handleClose,holdScrollElement,zIndex
             return 
         }
 
-        if(filterOn == 'puchased_count'){
+        if(filterOn == 'purchased_count'){
             if(!isNaN(Number(val))){
                 val = Number(val)
             }else{
@@ -81,7 +81,7 @@ export const DealerSelection = ({dealerDict,handleClose,holdScrollElement,zIndex
             model_name:'Dealer',
             per_page: 50,
             query_filters : {[filterOn]:{'operation':operation.current,'value':val}},
-            requested_data:['id','dealer_name','dealer_type','puchased_count']
+            requested_data:['id','dealer_name','dealer_type','purchased_count']
         }
 
         
@@ -106,7 +106,7 @@ export const DealerSelection = ({dealerDict,handleClose,holdScrollElement,zIndex
         
         selectedFilterRef.current = new Set([obj.displayName])
 
-        if(obj.column == 'puchased_count'){
+        if(obj.column == 'purchased_count'){
             
             if(isNaN(Number(input))){
                 
@@ -193,7 +193,7 @@ export const DealerSelection = ({dealerDict,handleClose,holdScrollElement,zIndex
                             >
                                 <span className="text-15">{obj.dealer_name}</span>
                                 <span className="color-lower-titles text-15">{obj.dealer_type}</span>
-                                <span >{obj.puchased_count? obj.puchased_count : 0} kr</span>
+                                <span >{obj.purchased_count? obj.purchased_count : 0} kr</span>
                             </div>
                         )
                     })

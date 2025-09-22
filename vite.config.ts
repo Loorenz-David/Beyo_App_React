@@ -55,11 +55,11 @@ export default defineConfig(async ({command}) => {
       }
 
     }
-      //   const fs = await import('fs')
-      //   config.server.https = {
-      //     key:fs.readFileSync('./localhost+1-key.pem'),
-      //     cert:fs.readFileSync('./localhost+1.pem')
-      //   }
+        const fs = await import('fs')
+        config.server.https = {
+          key:fs.readFileSync('./localhost+1-key.pem'),
+          cert:fs.readFileSync('./localhost+1.pem')
+        }
   }
 
   

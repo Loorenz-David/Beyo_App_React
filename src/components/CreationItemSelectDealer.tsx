@@ -79,7 +79,7 @@ const CreationItemSelectDealer = ({handleClose}) => {
                 const setRules = {'loadData':true}
                 const queryFilters ={
                                     'model_name':'Dealer',
-                                    'requested_data':['id','dealer_name','puchased_count','item_count','dealer_type'],
+                                    'requested_data':['id','dealer_name','purchased_count','item_count','dealer_type'],
                                     'query_filters':{
                                                         [searchColumn]:{'operation':'ilike','value':`%${searchTerm}%`}
                                                     }
@@ -160,7 +160,7 @@ const CreationItemSelectDealer = ({handleClose}) => {
                         <div key={`dealerFound_${i}`} data-id={dealer.id} className="flex-row width100 space-between items-center  padding-20 border-bottom dealer-in-query">
                             <span className="text-15">{dealer.dealer_name}</span>
                             <span className="text-15 color-lower-titles">{dealer.dealer_type} </span>
-                            <span className="text-12 ">{dealer.puchased_count}kr</span>
+                            <span className="text-12 ">{dealer.purchased_count}kr</span>
                         </div>
                     )
                 }) 

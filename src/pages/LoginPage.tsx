@@ -1,15 +1,13 @@
 import '../css/login-page.css'
 import {useEffect,useRef,useContext} from 'react'
 import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
-import {useState} from 'react'
+
 import {useNavigate} from 'react-router-dom'
 
 
 const LoginPage = () => {
-    const [serverMessage, setServerMessage] = useState<MessageDict |null>(null)
-    const dismissMessage = () => setServerMessage(null)
     const navigate = useNavigate()
-    const loginRef = useRef(null)
+    const loginRef = useRef<HTMLDivElement | null>(null)
     
     const {showMessage} = useContext(ServerMessageContext)
 
@@ -28,19 +26,20 @@ const LoginPage = () => {
         }
         if(loginRef.current){
             setTimeout(()=>{
-                loginRef.current.scrollTo({
-                    top: loginRef.current.scrollHeight,
-                    behavior:'smooth'
-                })
+                if(loginRef.current){
+                    loginRef.current.scrollTo({
+                        top: loginRef.current.scrollHeight,
+                        behavior:'smooth'
+                    })
+                }
+                
             },2800)
         }
         
     },[])
     
     const handleSubmit = async (event:React.FormEvent<HTMLFormElement>) =>{
-            if(serverMessage){
-                dismissMessage()
-            }
+          
 
             event.preventDefault()
             const form = event.currentTarget
@@ -91,7 +90,7 @@ const LoginPage = () => {
         }catch(error){
                 showMessage({
                     message:'server error',
-                    complementMessage:error,
+                    complementMessage:String(error),
                     status:500
                 })
                 console.log( error,'server error')
