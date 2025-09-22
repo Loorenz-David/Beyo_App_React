@@ -14,6 +14,7 @@ export default defineConfig(async ({command}) => {
     },
     plugins: [react(),svgr(),
       VitePWA({
+        registerType:'autoUpdate',
         injectRegister:'auto',
         manifest:{
                         "short_name": "Beyo",

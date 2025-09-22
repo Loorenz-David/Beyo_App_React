@@ -22,6 +22,8 @@ import useFetch from './hooks/useFetch.tsx'
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
+import { useRegisterSW } from 'virtual:pwa-register/react';
+
   
 
 
@@ -33,6 +35,27 @@ function App() {
   const {showMessage} = useContext(ServerMessageContext)
   const {apiFetch} = useFetch()
   const firstLoad = useRef(false)
+
+  const {needRefresh,updateServiceWorker} = useRegisterSW({
+    onRegisteredSW(swUrl,registration){
+      console.log('new service worker registered',swUrl)
+     
+    },
+    onNeedRefresh(){
+      console.log('new version available!')
+      showMessage({
+        message:'New version available!',
+        complementMessage:'Fully close the app and open again to see changes.',
+        status:100
+      })
+    },
+    onOfflineReady(){
+       showMessage({
+        message:'New Version installed!',
+        status:200
+      })
+    }
+  })
  
   useEffect(()=>{
     const notifyOffline = ()=>{
@@ -97,7 +120,6 @@ function App() {
         }
     }
     
-    
     if(navigator.onLine){
       checkSession()
     }else{
@@ -125,6 +147,7 @@ function App() {
   return (
     <div className='App'>
       {!shouldHideNav && <NavBar />}
+      
 
       <Routes>
         <Route path="/login" element={<LoginPage/>}></Route>
