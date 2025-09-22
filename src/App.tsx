@@ -39,7 +39,9 @@ function App() {
   const {needRefresh,updateServiceWorker} = useRegisterSW({
     onRegisteredSW(swUrl,registration){
       console.log('new service worker registered',swUrl)
-     
+      setInterval(()=>{
+        registration.update()
+      },60*60*1000)
     },
     onNeedRefresh(){
       console.log('new version available!')
