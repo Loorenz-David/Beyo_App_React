@@ -19,7 +19,8 @@ import {ServerMessageContext} from './contexts/ServerMessageContext.tsx'
 import CreateItemPageV2 from './pages/CreateItemPageV2.tsx'
 import useFetch from './hooks/useFetch.tsx'
 
-
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
   
 
@@ -144,6 +145,8 @@ function App() {
         element={<ProtectedRouter><AccountPage/></ProtectedRouter>} 
         />
       </Routes>
+       <Analytics />
+       <SpeedInsights />
     </div>
   )
 }
