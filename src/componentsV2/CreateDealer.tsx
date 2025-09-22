@@ -126,7 +126,11 @@ const CreateDealer = ({zIndex,dealerDict,handleClose,handleCloseUponSave,holdScr
 
         try{
             const setRules = {'loadServerMessage':true}
-            const response = await doFetch('/api/schemes/create_items','POST',fetchDict,setRules)
+            const response = await doFetch({
+                url:'/api/schemes/create_items',
+                method:'POST',
+                body:fetchDict,
+                setRules:setRules})
             if(response && response.status < 400){
                 const responseData = response.body[0]
                 if(dealerDict && dealerDict.current){
