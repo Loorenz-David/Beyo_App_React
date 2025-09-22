@@ -4,8 +4,9 @@ import BackSpaceIcon from '../assets/icons/BackSpaceIcon.svg?react'
 
 export const CheckBox = ({itemObj,handleClick,inputValue=null,handleClose})=>{
     return (
-        <div className={`flex-column padding-10 gap-05 bg-containers border-blue items-center content-center btn ${inputValue && itemObj.displayName == inputValue? 'active-ck' : ''}`}
+        <div className={`no-select flex-column padding-10 gap-05 bg-containers border-blue items-center content-center btn ${inputValue && itemObj.displayName == inputValue? 'active-ck' : ''}`}
         style={{width:'100px'}}
+        role="button"
         onClick={()=>{
             let buildDict = {}
             let property;

@@ -1,7 +1,7 @@
 import {useRef,useState,useEffect,memo} from 'react'
 
 
-export const CurrencyInputsPurchase =  memo(({setItemData,purchased_price,valuation})=>{
+export const CurrencyInputsPurchase =  memo(({setItemData,purchased_price,valuation,handleFocusScroll})=>{
     
     const [currencySelected,setCurrencySelected] = useState('SEK')
     const purchasedInputRef = useRef(null)
@@ -62,7 +62,7 @@ export const CurrencyInputsPurchase =  memo(({setItemData,purchased_price,valuat
     if(!valuation && valuationRef.current){
         valuationRef.current.value = ''
     }
-    console.log(purchased_price,valuation, 'values after save ...')
+
     const handleCurrencySelection = ()=>{
 
         const nextName = currencyConvertion[currencySelected].next
@@ -108,11 +108,7 @@ export const CurrencyInputsPurchase =  memo(({setItemData,purchased_price,valuat
             }))
         }else{
             setItemData(prev => ({...prev,[targetProp]:val}))
-        }
-
-        
-       
-        
+        }   
     }
 
     return (
@@ -127,6 +123,7 @@ export const CurrencyInputsPurchase =  memo(({setItemData,purchased_price,valuat
                         ref={purchasedInputRef}
                         style={{width:'100%',fontSize:'13px'}}
                         defaultValue={purchased_price ?? ""}
+                        onFocus={(e)=>{handleFocusScroll(e)}}
                         onChange={(e) =>{handleInputChange(e.currentTarget.value,'purchased_price')} }
                     />
                 </div>
@@ -135,11 +132,11 @@ export const CurrencyInputsPurchase =  memo(({setItemData,purchased_price,valuat
                         <span className="text-9" >{purchased_price} SEK</span>
                     }
                     
-                    <div role="button" className="btn bg-containers border-blue "
+                    <button className="btn bg-containers border-blue "
                     onClick={()=>{handleCurrencySelection()}}
                     >
                         <span>{currencySelected}</span>
-                    </div>
+                    </button>
 
                 </div>
             </div>
@@ -147,12 +144,13 @@ export const CurrencyInputsPurchase =  memo(({setItemData,purchased_price,valuat
             <div className="vertical-line"></div>
             <div className="flex-column gap-05 padding-10 width100">
                 <span className="color-lower-titles text-9">
-                    Valuation in {currencySelected}:
+                    Valuation in <span className="color-light-titles" style={{paddingLeft:'5px',fontSize:'10px'}}>{currencySelected}</span> :
                 </span>
                 <input type="number"  
                     style={{width:'100%',fontSize:'13px'}}
                     ref={valuationRef}
                     defaultValue={valuation ?? ""}
+                    onFocus={(e)=>{handleFocusScroll(e)}}
                     onChange={(e) =>{handleInputChange(e.currentTarget.value,'valuation')} }
                 />
             </div>

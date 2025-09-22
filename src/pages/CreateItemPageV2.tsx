@@ -1,15 +1,17 @@
-import {useState,useEffect,useRef,memo} from 'react'
+import {useState,useEffect,useRef,useContext} from 'react'
 import {useNavigate} from 'react-router'
 import {ItemPropsComp} from '../componentsV2/ItemEdit.tsx'
 import ArrowIcon from '../assets/icons/ArrowIcon.svg?react'
-import CheckMarkIcon from '../assets/icons/CheckMarkIcon.svg?react'
+
 import ThreeDotMenu from '../assets/icons/ThreeDotMenu.svg?react'
 import {useSaveItemsV2} from '../hooks/useSaveItemsV2.tsx'
+import {readArticleNumber} from '../hooks/useReadableArticleNumber.tsx'
 import SelectPopupV2 from '../componentsV2/SelectPopupV2.tsx'
 
 import LoaderDots from '../components/LoaderDots.tsx'
 import usePrintLabelWiFi from  '../hooks/usePrintLabelWiFi.tsx'
 import {CurrencyInputsPurchase} from '../componentsV2/CurrencyInputs.tsx'
+import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 
 
 
@@ -45,7 +47,7 @@ const generateArticleNumber = () =>{
 const CreateItemPageV2 = () => {
     const [itemData,setItemData] = useState({})
     const [toggleSettings,setToggleSettings] = useState(false)
-   
+    const {showMessage} = useContext(ServerMessageContext)
     const {uploadItem,itemUploading,setUploading} = useSaveItemsV2()
     const navigate = useNavigate()
     const [afterCompletion,setAfterCompletion] = useState(false)
@@ -189,25 +191,32 @@ const CreateItemPageV2 = () => {
     const handleSettingSelection = (settingObj)=>{
         console.log(settingObj)
         if(settingObj.property == 'toggleFastSlider'){
+            let messageText = "Fast Slider "
             activeSlider.current = !activeSlider.current
             if( activeSlider.current){
                 settingsSelectedOptions.current.add('Fast Slider')
                 localStorage.setItem('activeSlider',JSON.stringify(true))
+                messageText += 'Activated'
             }else{
                 settingsSelectedOptions.current.delete('Fast Slider')
                 localStorage.setItem('activeSlider',JSON.stringify(false))
+                messageText += 'Deactivated'
             }
+            showMessage({
+                message:messageText,
+                status:200
+            })
             
         }
         setToggleSettings(false)
     }
 
-    const handleSaveItem = async () =>{
+    const handleSaveItem = async (actionType) =>{
        
         if(itemUploading)return;
         const upload = await uploadItem({
             itemData,
-            type:'create',
+            type:actionType,
             allowArticleChange:true
         })
         setUploading(false)
@@ -236,13 +245,11 @@ const CreateItemPageV2 = () => {
 
    
     return ( 
-        <div className="flex-column width100" style={{height:'100dvh'}}>
+        <div className="flex-column width100" style={{height:'100dvh',overflow:'hidden'}}>
             
            
-
-
             {/* header */}
-            <div className="flex-row padding-05 " style={{boxShadow:"0 0 10px rgba(0,0,0,0.3)"}}>
+            <div className="flex-row padding-05 width100 bg-primary" style={{boxShadow:"0 0 10px rgba(0,0,0,0.3)",position:'absolute', top:'0',left:'0'}}>
                 <div className="flex-column content-center">
                     <div className="btn svg-18"
                         onClick={()=>{navigate(-1)}}
@@ -252,7 +259,7 @@ const CreateItemPageV2 = () => {
                 </div>
                 <div className="flex-column flex-1 items-center content-center">
                     <span className="text-15">
-                        {'article_number' in itemData && itemData.article_number}
+                        {'article_number' in itemData && readArticleNumber(itemData.article_number)}
                     </span>
                 </div>
                 <div className="flex-column content-center" style={{position:'relative'}}>
@@ -269,63 +276,66 @@ const CreateItemPageV2 = () => {
                             listOfValues={settingsList}
                             onSelect={handleSettingSelection}
                             selectedOption={settingsSelectedOptions.current}
+                            zIndex={3}
                         />
                     }
                 </div>
             </div>
+            <div className="flex-column padding-top-40" style={{height:'100dvh',overflowY:'auto'}}>
+                <ItemPropsComp
+                    itemData={itemData}
+                    setItemData={setItemData}
+                    pageSetUp={new Set(['noHistory'])}
+                    CurrencyInputsComponent={CurrencyInputsPurchase}
+                />
+            
 
-            <ItemPropsComp
-                itemData={itemData}
-                setItemData={setItemData}
-                pageSetUp={new Set(['noHistory'])}
-                CurrencyInputsComponent={CurrencyInputsPurchase}
-            />
-           
-
-            {/* btn interactions container */}
-            <div className="flex-column gap-05  push-bottom  padding-bottom-30">
-                <div className="flex-row padding-10">
-                    <div role="button" className={`btn width100 bg-containers  padding-10 ${isPrinterConnected}`}
-                        id='printLabel'
-                        onClick={ ()=>{try{printLabel()}catch(err){console.log(err)}}}
-                    >
-                        <span className=" text-15">Print Label</span>
-                    </div>
-                </div>
-
-                {afterCompletion ? 
-                    <div className="flex-row padding-10 gap-4">
-                        <div role="button" className="btn width100 flex-column border-blue padding-15"
-                        onClick={()=>{handleSaveItem()}}
+                {/* btn interactions container */}
+                <div className="flex-column gap-05  padding-top-30">
+                    <div className="flex-row padding-10">
+                        <button role="button" className={`btn width100 bg-containers  padding-10 ${isPrinterConnected}`}
+                            id='printLabel'
+                            onClick={ ()=>{try{printLabel()}catch(err){console.log(err)}}}
                         >
-                            <span className="text-15">Update</span>
-                        </div>
-                        <div role="button" className="btn width100 flex-column  padding-15" style={{backgroundColor:'rgb(30, 145, 78)'}}
-                        onClick={()=>{handleResetPage()}}
-                        >
-                            <span className="text-15">Next</span>
-                        </div>
+                            <span className=" text-15">Print Label</span>
+                        </button>
                     </div>
 
-                :
-                    <div className="flex-row   padding-10">
-                        <div role="button" className="btn width100 bg-secondary padding-10"
-                            onClick={()=>{handleSaveItem()}}
-                        >
-                            {itemUploading ? 
-                                <LoaderDots
-                                    dotStyle={{dimensions:'squareWidth-07',bgColor:'bg-primary'}}
-                                    mainBg={'white'}
-                                />
-                        :
-                            <span className="color-primary text-15">Create Item</span>
-                        }
+                    {afterCompletion ? 
+                        <div className="flex-row padding-10 gap-4">
+                            <button className="btn width100 flex-column border-blue padding-15"
+                            onClick={()=>{handleSaveItem('update')}}
+                            >
+                                <span className="text-15">Update</span>
+                            </button>
+                            <button className="btn width100 flex-column  padding-15" style={{backgroundColor:'rgb(30, 145, 78)'}}
+                            onClick={()=>{handleResetPage()}}
+                            >
+                                <span className="text-15">Next</span>
+                            </button>
                         </div>
-                    </div>
-                }
+
+                    :
+                        <div className="flex-row   padding-10">
+                            <button className="btn width100 bg-secondary padding-10"
+                                onClick={()=>{handleSaveItem('create')}}
+                            >
+                                {itemUploading ? 
+                                    <LoaderDots
+                                        dotStyle={{dimensions:'squareWidth-07',bgColor:'bg-primary'}}
+                                        mainBg={'white'}
+                                    />
+                            :
+                                <span className="color-primary text-15">Create Item</span>
+                            }
+                            </button>
+                        </div>
+                    }
+                    
                 
-               
+                </div>
             </div>
+            
         </div>
      );
 }

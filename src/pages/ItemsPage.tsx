@@ -1,7 +1,7 @@
 import {useNavigate} from 'react-router-dom'
 import React from 'react'
 
-import {useRef,useState,useEffect,useCallback,useContext} from 'react'
+import {useRef,useState,useEffect,useContext} from 'react'
 import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 
 import AddSquareIcon from '../assets/icons/AddSquareIcon.svg?react'
@@ -38,7 +38,7 @@ import {ItemTypeMap} from '../maps/mapItemTypeV2.tsx'
 
 
 import useFetch from '../hooks/useFetch.tsx'
-
+import {useLongPressAction} from '../hooks/useLongPressActions.tsx'
 import useInfiniteScroll from '../hooks/useInfinityScroll.tsx'
 
 
@@ -79,18 +79,21 @@ const NavigationBtn = () =>{
     }
 
     return (
-        <div className="flex-row" style={{position:'absolute',bottom:'85px',right:'15px'}}>
-            {toggleCreateDealer && 
+        <>
+         {toggleCreateDealer && 
                 <SecondaryPage BodyComponent={CreateDealer}
                     bodyProps={{}}
-                    zIndex={2}
+                    zIndex={5}
                     handleClose={()=>{setToggleCreateDealer(false)}}
                     closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 content-start',order:0}}
                     header={{'display': 'Create Dealer', class:'flex-1 content-center',order:2}}
                     startAnimation={'slideLeft'}
                     endAnimation ={'slideRight'}
+                    pageId={'createDealerPage'}
                 />
             }
+             <div className="flex-row" style={{position:'fixed',bottom:'85px',right:'15px'}}>
+           
                     <div className="flex-column items-center content-center " style={{position:'relative',}}>
 
                         <div className="flex-row items-center content-center bg-secondary padding-10" style={{borderRadius:'50%',position:'absolute', bottom:'0',transform:'scale(0.5)',transition:'bottom 0.2s ease-out,transform 0.2s ease-out'}}
@@ -122,11 +125,13 @@ const NavigationBtn = () =>{
 
                     </div>
             </div>
+        </>
+       
     )
 }
 
 const operationSymbol = [{'display':'>','val':'>='},{'display':'=','val':'=='},{'display':'<','val':'<='}]
-const CurrencyInputsFilters = ({setItemData,purchased_price,valuation,sold_price})=>{
+const CurrencyInputsFilters = ({setItemData,purchased_price,valuation,sold_price,handleFocusScroll})=>{
 
     const inputValObj = {
         'purchased_price':purchased_price,
@@ -162,9 +167,10 @@ const CurrencyInputsFilters = ({setItemData,purchased_price,valuation,sold_price
                                 {labelName.replace("_"," ")}
                             </span>
                             <div className="flex-row width100">
-                                    <input style={{fontSize:'12px'}} className="width100"  type="number" 
-                                onInput={(e)=>{setItemData(prev => ({...prev, [columName]:{'value':e.target.value? parseInt(e.target.value):null }}) )}}
-                                value={ columValue && 'value' in columValue && columValue.value ? columValue.value : '' }
+                                <input style={{fontSize:'12px'}} className="width100"  type="number" 
+                                    onFocus={(e)=>{handleFocusScroll(e)}}
+                                    onInput={(e)=>{setItemData(prev => ({...prev, [columName]:{'value':e.target.value? parseInt(e.target.value):null }}) )}}
+                                    value={ columValue && 'value' in columValue && columValue.value ? columValue.value : '' }
                                 />
                                 <div className="flex-column bg-containers border-blue btn items-center content-center" style={{padding:'1px 7px'}}
                                 onClick={(e)=>{handleOperationCurrency(e,columName)}}
@@ -261,7 +267,7 @@ const FilterPage = ({setFilters,handleClose,previousFilters,queryInputRef})=>{
             <ItemPropsComp 
                 itemData={itemData}
                 setItemData={setItemData}
-                zIndex={2}
+                zIndex={3}
                 pageSetUp={new Set(['noHistory','noNotes','noImages'])}
                 CurrencyInputsComponent={CurrencyInputsFilters}
 
@@ -276,7 +282,7 @@ const FilterPage = ({setFilters,handleClose,previousFilters,queryInputRef})=>{
                 <MemorizedNoteSearchBtn setItemData ={setItemData}
                     notesList={itemData.notes && itemData.notes !== null ? itemData.notes : []}
                     displayName={'Notes...'}
-                    zIndex={2}
+                    zIndex={3}
                 />
                 
             </div>
@@ -348,7 +354,7 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
     }
 
     const handleInputSearch = (value) =>{
-
+        
         if(timeoutInputRef.current){
             clearTimeout(timeoutInputRef.current)
         }
@@ -362,7 +368,9 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
         },500) 
         
     }
+    
 
+   
 
     useEffect(()=>{
 
@@ -383,18 +391,18 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
         
     }
     return (
-        <div className="flex-row width100 padding-10" style={{boxShadow:'0 0 10px rgba(0,0,0,0.3)'}}>
+        <div className="flex-row width100 padding-10 bg-primary" style={{boxShadow:'0 0 10px rgba(0,0,0,0.3)'}}>
             {toggleScanner &&
-                <SecondaryPage BodyComponent={ItemScanner} bodyProps={{handleDelitionItems,setForceRenderParent}} handleClose={()=>{setToggleScanner(false)}} zIndex={2} pageId={'itemScanner'}/>
+                <SecondaryPage BodyComponent={ItemScanner} bodyProps={{handleDelitionItems,setForceRenderParent}} handleClose={()=>{setToggleScanner(false)}} zIndex={3} pageId={'itemScanner'} addCloseWhenSlide={false}/>
             }
             {toggleFilters &&
-                <SecondaryPage BodyComponent={FilterPage} bodyProps={{setFilters,previousFilters,queryInputRef}} handleClose={()=>{setToggleFilters(false)}} zIndex={2} pageId={'filterPage'}/>
+                <SecondaryPage BodyComponent={FilterPage} bodyProps={{setFilters,previousFilters,queryInputRef}} handleClose={()=>{setToggleFilters(false)}} zIndex={3} pageId={'filterPage'}/>
 
             }
             {toggleOfflineItems && 
                 <SecondaryPage BodyComponent={OfflineItemsPage}
                     bodyProps={{}}
-                    zIndex={2}
+                    zIndex={3}
                     handleClose={()=>{setToggleOfflineItems(false);setForceRenderParent(prev => !prev)}}
                     pageId={'offlineItemsPage'}
                     
@@ -420,6 +428,7 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
                     <input type="text"  className="width100" 
                     ref={queryInputRef}
                     onInput={(e)=>{handleInputSearch(e.currentTarget.value)}}
+                
                     autoFocus/>
                 </div>
 
@@ -466,9 +475,11 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
 
                         {toggleSelectPopup &&
                             <SelectPopupV2  right={'75%'} top={'120%'}
-                             onSelect={(obj)=>{handleMap[obj.property]()}}
-                              setTogglePopup={setToggleSelectPopup}
-                               listOfValues={popupSettingsList.current}  />
+                                onSelect={(obj)=>{handleMap[obj.property]()}}
+                                setTogglePopup={setToggleSelectPopup}
+                                listOfValues={popupSettingsList.current}  
+                                zIndex={2}
+                               />
                             }
                     </div>
                     <div className="flex-column btn content-center svg-18 hidden"
@@ -502,6 +513,18 @@ const ItemsPage = () => {
     const [selectedItems,setSelectedItems] = useState({})
     const lastLoad = useRef(false)
     const imgBlobs = useRef([])
+    const {handlePressStart,handlePressEnd,handleTouchMove} = useLongPressAction({
+        selectionMode:true,
+        skipFirstClick:false,
+        handleActionWhenPress:(e,itemObj)=>{
+            const objKey:string = itemObj['article_number']
+            setSelectedItems(prev => {
+                                        const {[objKey]:_,...current} = prev
+                                        return current
+                                    })
+        },
+
+    })
     
     useEffect(()=>{
         lastLoad.current = false
@@ -520,6 +543,8 @@ const ItemsPage = () => {
     },[filters,forceRender])
     
     const handleDelitionItems = async (itemsIdList,handleClose=null)=>{
+
+       
         const fetchDict = {
             model_name:'Item',
             object_values:{
@@ -528,14 +553,18 @@ const ItemsPage = () => {
             },
             reference:'Item'
         }
-        await doFetch('/api/schemes/delete_items','POST',fetchDict).then(res => showMessage(res))
+        console.log(fetchDict,'the dict for delition')
+        await doFetch({
+            url:'/api/schemes/delete_items',
+            method:'POST',
+            body:fetchDict})
+            .then(res => showMessage(res))
         
         if(handleClose){
             handleClose()
             if(selectionMode){
                 setSelectionMode(false)
                 setSelectedItems({})
-                setToggleSelectedItemList(false)
             }
         }
         setForceRender(prev=> !prev)
@@ -564,7 +593,10 @@ const ItemsPage = () => {
         
 
         
-        const res = await doFetch('/api/schemes/get_items','POST',fetchDict)
+        const res = await doFetch({
+            url:'/api/schemes/get_items',
+            method:'POST',
+            body:fetchDict})
 
         if(!res || !res.body || res.body.length == 0){
             lastLoad.current = true
@@ -604,7 +636,7 @@ const ItemsPage = () => {
     
 
     return ( 
-        <div className="flex-column height100dvh width100" style={{position:'relative'}}>
+        <div className="flex-column  width100" style={{position:'relative',minHeight:'100vh'}}>
             <TopInteractiveMenu currentFilters={filters} setFilters={setFilters} previousFilters={previousFilters} selectionMode={selectionMode} setSelectionMode={setSelectionMode} handleDelitionItems={handleDelitionItems} setForceRenderParent={setForceRender} />
            
             {toggleBatchEdit && 
@@ -616,7 +648,7 @@ const ItemsPage = () => {
                         handleDelitionItems:handleDelitionItems,
                         pageSetUp:new Set(['noHistory','noImages','noType','noCategory','noIssues'])
                     }}
-                    zIndex={2}
+                    zIndex={3}
                     interactiveBtn ={{iconClass:'svg-15 padding-05 position-relative content-end', order:3,icon:<ThreeDotMenu/>}}
                     header={{'display': `Editing ${Object.keys(selectedItems).length} items`, class:'flex-1 content-center',order:2}}
                     closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 content-start',order:0}}
@@ -627,36 +659,40 @@ const ItemsPage = () => {
                     pageId={'itemsPage'}
                 />
             }
+            <div className="width100" style={{zIndex:1}}>
+                { selectionMode && 
+                    
+                        <SelectionModeComponent 
+                            zIndex={2}
+                            props={{
+                                setSelectionMode,
+                                selectedItemsLength:Object.keys(selectedItems).length,
+                                setSelectedItems,
+                                componentsListPreview:Object.keys(selectedItems).map((objKey,i)=>{
 
-            { selectionMode && 
-                <SelectionModeComponent 
-                    props={{
-                        setSelectionMode,
-                        selectedItemsLength:Object.keys(selectedItems).length,
-                        setSelectedItems,
-                        componentsListPreview:Object.keys(selectedItems).map((objKey,i)=>
-                            <ItemPreviewContainer
-                                key={`itemSelection_${i}`}
-                                itemObj={selectedItems[objKey]}
-                                imgBlobs={imgBlobs.current}
-                                handlePressStart={(_,itemObj)=>{ setSelectedItems(prev => {
-                                    const {[objKey]:_,...current} = prev
-                                    return current
-                                })}}
-                                
+                                        return (<ItemPreviewContainer
+                                            key={`itemSelection_${i}`}
+                                            itemObj={selectedItems[objKey]}
+                                            imgBlobs={imgBlobs.current}
+                                            handlePressStart={handlePressStart}
+                                            handlePressEnd={handlePressEnd}
+                                            handleTouchMove={handleTouchMove}
+                                            
+                                        />)
+                                    }
+                                ),
+                                componentOptionsToSelect:[
+                                    <BatchPrintBtn selectedItems={selectedItems} key={'mainPageBatchPrint'}/>,
+                                    <BatchEditBtn setToggleBatchEdit={setToggleBatchEdit} selectedItems={selectedItems} key={'mainPageBatchEdit'}/>
+                                ]
+                            }}
+                        />
+                    
 
-                            />
-                        ),
-                        componentOptionsToSelect:[
-                            <BatchPrintBtn selectedItems={selectedItems} key={'mainPageBatchPrint'}/>,
-                            <BatchEditBtn setToggleBatchEdit={setToggleBatchEdit} selectedItems={selectedItems} key={'mainPageBatchEdit'}/>
-                        ]
-                    }}
-                />
-
-            }
+                }
+            </div>
             
-            <div className="flex-column" style={{overflow:'hidden',paddingBottom:'60px'}}>
+            <div className="flex-column" style={{overflow:'hidden'}}>
                 {dataList && 
                     <ItemsPreviewList data={dataList} 
                         handleDelitionItems={handleDelitionItems} 

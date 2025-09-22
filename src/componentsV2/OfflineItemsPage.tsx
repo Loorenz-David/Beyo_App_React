@@ -5,6 +5,7 @@ import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 
 import ArrowIcon from '../assets/icons/ArrowIcon.svg?react'
 import ThreeDotMenu from '../assets/icons/ThreeDotMenu.svg?react'
+import CheckBoxIcon from '../assets/icons/CheckBoxIcon.svg?react'
 
 
 import {ItemsPreviewList,ItemPreviewContainer} from './ItemsPreviewList.tsx'
@@ -19,11 +20,40 @@ import SecondaryPage from '../components/secondary-page.tsx'
 
 import {getFailedItems,clearFailedItem} from '../hooks/useIndexDB.tsx'
 import {useSaveItemsV2} from '../hooks/useSaveItemsV2.tsx'
+import {useLongPressAction} from '../hooks/useLongPressActions.tsx'
 
 
 
 
+const SelectAllBtn = ({props})=>{
+    const {dataList,setSelectedItems,key} = props
+    const selectingAll = useRef(false)
 
+    const handleSelectAll = ()=>{
+        if(selectingAll.current){
+            setSelectedItems({})
+            selectingAll.current = false
+        }else{
+             setSelectedItems(prev =>{
+                const newDict = {}
+                dataList.forEach(itemObj=>{
+                    newDict[itemObj[key]] = itemObj
+                })
+                return newDict
+            })
+            selectingAll.current = true
+        }
+       
+    }
+
+    return(
+        <div className="flex-column btn svg-18"
+            onClick={()=>{handleSelectAll()}}
+        >
+            <CheckBoxIcon/>
+        </div>
+    )
+}
 
 
 const OfflineItemsPage = ({handleClose, zIndex,holdScrollElement}) => {
@@ -39,18 +69,30 @@ const OfflineItemsPage = ({handleClose, zIndex,holdScrollElement}) => {
     const timeoutRef = useRef(null)
     const [toggleBatchEdit,setToggleBatchEdit] = useState(false)
     const imgBlobs = useRef([])
-
-
+    const {handlePressStart,handlePressEnd,handleTouchMove} = useLongPressAction({
+            selectionMode:true,
+            skipFirstClick:false,
+            handleActionWhenPress:(e,itemObj)=>{
+                const objKey:string = itemObj['offlineIndexKey']
+                setSelectedItems(prev => {
+                                            const {[objKey]:_,...current} = prev
+                                            return current
+                                        })
+            },
+    
+            })
+    
+    
    
     useEffect(()=>{
 
-        const handleItemsFetch = async (setItems)=>{
+        const handleItemsFetch = async ()=>{
             const result = await getFailedItems()
             setItems(result)
 
         }
 
-        handleItemsFetch(setItems)
+        handleItemsFetch()
 
         return()=>{
             if(imgBlobs.current.length > 0){
@@ -190,6 +232,7 @@ const OfflineItemsPage = ({handleClose, zIndex,holdScrollElement}) => {
 
             { selectionMode && 
                 <SelectionModeComponent 
+                    zIndex={zIndex}
                     props={{
                         setSelectionMode,
                         selectedItemsLength:Object.keys(selectedItems).length,
@@ -200,17 +243,15 @@ const OfflineItemsPage = ({handleClose, zIndex,holdScrollElement}) => {
                                 itemObj={selectedItems[objKey]}
                                 imgBlobs={imgBlobs.current}
                                 containerHeight={'110px'}
-                                handlePressStart={(_,itemObj)=>{ setSelectedItems(prev => {
-                                    const {[objKey]:_,...current} = prev
-                                    return current
-                                })}}
-                                
-
+                                handlePressStart={handlePressStart}
+                                handlePressEnd={handlePressEnd}
+                                handleTouchMove={handleTouchMove}
                             />
                         ),
                         componentOptionsToSelect:[
                             <BatchPrintBtn selectedItems={selectedItems} key={'OfflinePageBatchPrint'}/>,
-                            <BatchEditBtn setToggleBatchEdit={setToggleBatchEdit} selectedItems={selectedItems} key={'OfflinePageBatchEdit'}/>
+                            <BatchEditBtn setToggleBatchEdit={setToggleBatchEdit} selectedItems={selectedItems} key={'OfflinePageBatchEdit'}/>,
+                            <SelectAllBtn key={'OfflinePageBatchSelectAll'} props={{dataList:items,setSelectedItems:setSelectedItems,key:'offlineIndexKey'}} />
                         ]
                     }}
                 />
@@ -239,7 +280,7 @@ const OfflineItemsPage = ({handleClose, zIndex,holdScrollElement}) => {
             }
 
             {items.length > 0 ?
-                <div className="flex-column height100 ">
+                <div className="flex-column" style={{height:'100%'}}>
                     <ItemsPreviewList
                         data={items}
                         handleDelitionItems={handleDelitionItems}
@@ -254,7 +295,7 @@ const OfflineItemsPage = ({handleClose, zIndex,holdScrollElement}) => {
                         zIndex={zIndex + 1}
                         holdScrollElement={holdScrollElement}
                     />
-                    <div className="flex-row items-center content-center width100 push-bottom padding-20">
+                    <div className="flex-row items-center content-center width100 padding-20 bg-primary" style={{position:'absolute',bottom:'0',left:'0'}}>
                         <div className="btn bg-secondary padding-10"
                             onClick={()=>{handleUploadAll(items)}}
                         >

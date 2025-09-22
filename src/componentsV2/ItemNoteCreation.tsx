@@ -66,7 +66,10 @@ const handleNoteDeletion = async (noteList,doFetch,showMessage=null)=>{
                 }
 
                 console.log(fetchDict,'notes that will be deleted')
-                const res = await doFetch('/api/schemes/delete_items','POST',fetchDict)
+                const res = await doFetch({
+                    url:'/api/schemes/delete_items',
+                    method:'POST',
+                    body:fetchDict})
                 if(!res.status){
                     throw new Error('Fail to Delete note status from response is not ok')
                 }
@@ -192,7 +195,11 @@ const CreateNote = ({handleClose,setForceRender,itemsId,interactiveRef,note=null
 
             }
             const setRules = {loadData:true}
-            await doFetch('/api/schemes/get_items','POST',fetchDict,setRules)
+            await doFetch({
+                url:'/api/schemes/get_items',
+                method:'POST',
+                body:fetchDict,
+                setRules:setRules})
         },500)
 
         selectedSubjectRef.current = {}
@@ -313,7 +320,10 @@ const CreateNote = ({handleClose,setForceRender,itemsId,interactiveRef,note=null
         }
 
        
-        await doFetch(fetchUrl,'POST',fetchDict)
+        await doFetch({
+            url:fetchUrl,
+            method:'POST',
+            body:fetchDict})
         
         handleClose()
         setForceRender(prev => !prev)
@@ -430,7 +440,11 @@ const ItemNoteDisplay = ({itemsId})=>{
         }
 
         const setRules = {loadData:true}
-        await doFetch('/api/schemes/get_items','POST',fetchDict,setRules)
+        await doFetch({
+            url:'/api/schemes/get_items',
+            method:'POST',
+            body:fetchDict,
+            setRules:setRules})
     }
 
     const handleNoteSelection = (noteObj,index) =>{
@@ -533,7 +547,7 @@ export const ItemNoteDisplayBtn = ({text,itemsId,zIndex=2}) =>{
     const [toggleNoteDisplay,setToggleNoteDisplay] = useState(false)
     
     return (
-            <div className="flex-row padding-10 width100"
+            <button className="flex-row padding-10 width100"
             
             onClick={()=>{setToggleNoteDisplay(true)}}
             >
@@ -543,11 +557,12 @@ export const ItemNoteDisplayBtn = ({text,itemsId,zIndex=2}) =>{
                     zIndex={zIndex}
                     handleClose ={()=>{setToggleNoteDisplay(false)}}
                     pageId={'itemNoteDisplay'}
+                   
                     />
                 }
                 
                 <span className="text-15">{text}</span>
-            </div>
+            </button>
     )
 }
 

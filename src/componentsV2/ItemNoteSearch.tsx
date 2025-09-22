@@ -5,7 +5,7 @@ import CheckMarkIcon from '../assets/icons/CheckMarkIcon.svg?react'
 
 import SecondaryPage from '../components/secondary-page.tsx'
 
-const ItemNoteSearch = ({notesList,handelNoteSelection}) => {
+const ItemNoteSearch = ({notesList,handelNoteSelection,holdScrollElement}) => {
     const {doFetch,data,setData,loading,setLoading} = useFetch()
     const setRules = {'loadData':true}
    
@@ -13,7 +13,7 @@ const ItemNoteSearch = ({notesList,handelNoteSelection}) => {
     const timeOutRef = useRef(null)
 
     useEffect(()=>{
-        
+        handleQuery('')
         return ()=>{
             if(timeOutRef.current){
                 clearTimeout(timeOutRef.current)
@@ -30,16 +30,9 @@ const ItemNoteSearch = ({notesList,handelNoteSelection}) => {
             timeOutRef.current = null
         }
 
-        if(val === ''){
-            setData(null)
-            if(loading){
-                setLoading(false)
-            }
-            return 
-        }
         const fetchDict = {
             model_name:'Item_Notes_Subject',
-            per_page: 50,
+            per_page: 120,
             query_filters : {'subject':{'operation':'ilike','value':`%${val}%`}},
             requested_data:['id','subject','notes_counter']
         }
@@ -48,7 +41,11 @@ const ItemNoteSearch = ({notesList,handelNoteSelection}) => {
         
         timeOutRef.current = setTimeout(async ()=>{
 
-            await doFetch('/api/schemes/get_items','POST',fetchDict,setRules)
+            await doFetch({
+                url:'/api/schemes/get_items',
+                method:'POST',
+                body:fetchDict,
+                setRules:setRules})
             
         },500)
         
@@ -57,8 +54,10 @@ const ItemNoteSearch = ({notesList,handelNoteSelection}) => {
    
 
     return (
-        <div className="" style={{height:'100dvh'}}>
-            <div className="flex-row padding-15 ">
+        <div className="" style={{height:'100dvh',overflowY:'auto'}}
+            ref={holdScrollElement}
+        >
+            <div className="flex-row padding-15 bg-primary width100" style={{position:'fixed'}}>
                 <div className="flex-row bg-containers width100" style={{borderRadius:'5px'}}>
                     <div className="flex-column width100 padding-10"
                     
@@ -71,7 +70,7 @@ const ItemNoteSearch = ({notesList,handelNoteSelection}) => {
                     
                 </div>
             </div>
-            <div className="flex-column ">
+            <div className="flex-column" style={{paddingTop:'100px'}}>
                 {notesList.length > 0 && 
                     <div className="flex-column width100 padding-bottom-20">
                         {notesList.map((obj,i)=>{
@@ -81,7 +80,7 @@ const ItemNoteSearch = ({notesList,handelNoteSelection}) => {
                                 style={{borderColor:'#BCB5FF'}}
                                 onClick={()=>{handelNoteSelection(obj,'selectedNotes')}}
                                 >
-                                    <div className="flex-column gap-05 " >
+                                    <div className="flex-column gap-05 flex-1 " >
                                         <span className="color-lower-titles" >Subject</span>
                                         <span style={{textWrap:'wrap'}}>{obj.subject}</span>
                                     </div>
@@ -118,13 +117,14 @@ const ItemNoteSearch = ({notesList,handelNoteSelection}) => {
                         if(!isSubjectSelected){
                             return(
                                 <div key={`NoteQuery_${i}`} className="flex-row width100 items-center gap-4 padding-20 border-bottom "
+
                                 onClick={()=>{handelNoteSelection(obj,'fetchNotes')}}
                                 >
-                                    <div className="flex-column gap-05 " >
+                                    <div className="flex-column gap-05 flex-1" >
                                         <span className="color-lower-titles" >Subject</span>
                                         <span style={{textWrap:'wrap'}}>{obj.subject}</span>
                                     </div>
-                                    <div className="flex-column gap-05 ">
+                                    <div className="flex-column gap-05  ">
                                         <span className="color-lower-titles">Notes Count</span>
                                         <span>{obj.notes_counter? obj.notes_counter : 0}</span>
                                     </div>
@@ -157,7 +157,7 @@ const ItemNoteSearchBtn = ({setItemData,notesList,displayName,zIndex})=>{
     
 
     return (
-        <div className="flex-row width100 ">
+        <div className="flex-row width100 " >
              { toggleNotesSearch && 
                 <SecondaryPage BodyComponent={ItemNoteSearch} 
                     bodyProps={{

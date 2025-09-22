@@ -7,7 +7,7 @@ const PropertySelection = ({propName,propDisplay,propValue,handleItemProps,objec
     const [toggleDynamicBox,setToggleDynamicBox] = useState('')
 
     return ( 
-        <div role="button" className={`flex-column gap-05 ${addedClassStyle}`}
+        <button className={`flex-column no-select gap-05 ${addedClassStyle}`}
         id={propName}
         onClick={()=>{setToggleDynamicBox(propName)}}
         >   
@@ -22,12 +22,13 @@ const PropertySelection = ({propName,propDisplay,propValue,handleItemProps,objec
                     handleClose={()=>setToggleDynamicBox('')}
                     zIndex={zIndex + 1}
                     pageId={`propertySelection-${propName.replace(' ','-')}`}
+                    header={{order:0,display:`Select ${propName}`,class:'color-light-titles'}}
                 />
             }
             
             <span className="color-lower-titles text-9">{propDisplay}</span>
-            <span>{inputValue ? inputValue : propValue }</span>
-        </div> 
+            <span style={{fontSize:'10px'}}>{inputValue ? inputValue : propValue }</span>
+        </button> 
     );
 }
  

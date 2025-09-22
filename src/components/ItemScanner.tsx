@@ -17,6 +17,7 @@ import {ItemEdit} from '../componentsV2/ItemEdit.tsx'
 import{ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 
 import {useSaveItemsV2} from '../hooks/useSaveItemsV2.tsx'
+import {readArticleNumber} from '../hooks/useReadableArticleNumber.tsx'
 
 
 
@@ -483,7 +484,9 @@ const ItemScanner = ({handleDelitionItems,setForceRenderParent}) =>{
             })
             console.log(upload)
             if(!upload.success){
-                showMessage({status:400,message:'Something went wrong on update'})
+                showMessage({status:400,message:'Something went wrong on update'
+                    ,complementMessage:'It could be that the Article number was not found. Or there was no connection with the database.'
+                })
             }
 
         }
@@ -506,7 +509,7 @@ const ItemScanner = ({handleDelitionItems,setForceRenderParent}) =>{
                     bodyProps={{setListOfOptions,listOfOptions,editActionIndex:editActionIndex}}
 
                     zIndex={5}
-                    handleClose={()=>{setToggleAddScannerAction(false);setForceScannerPause(false)}}
+                    handleClose={()=>{setToggleAddScannerAction(false)}}
                     closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 flex-1 content-start',order:0}}
                     startAnimation={'slideLeft'}
                     endAnimation ={'slideRight'}
@@ -525,7 +528,7 @@ const ItemScanner = ({handleDelitionItems,setForceRenderParent}) =>{
                     handleClose={()=>{setScannedItem('')}}
                     zIndex={5}
                     interactiveBtn ={{iconClass:'svg-15 padding-05 position-relative content-end', order:3,icon:<ThreeDotMenu/>}}
-                    header={{'display': scannedItem, class:'flex-1 content-center',order:2}}
+                    header={{'display': readArticleNumber(scannedItem), class:'flex-1 content-center',order:2}}
                     closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 content-start',order:0}}
                     startAnimation={'slideLeft'}
                     endAnimation ={'slideRight'}
@@ -538,10 +541,10 @@ const ItemScanner = ({handleDelitionItems,setForceRenderParent}) =>{
             <ScannerComponent setScannedItem={setScannedItem} showMessage={showMessage} forceActions={{forceScannerPause,setForceScannerPause}} zIndex={3}/>
 
             <div className="flex-row width100  items-center content-center padding-top-10" style={{overflow:'hidden'}} >
-                <div className="hide-scrollbar"
+                <div className="hide-scrollbar remove-scrollbar-momentum"
                 style={{
-                    display:'grid',gridAutoFlow:'column',gridAutoColumns:'250px',gap:'10px',overflowX:'auto',scrollSnapType:'x mandatory',scrollBehavior:'smooth', paddingLeft:'calc(50% - 125px)',paddingRight:'calc(50% - 125px)',
-                    scrollbarWidth:'none',msOverflowStyle:'none'
+                    display:'grid',gridAutoFlow:'column',gridAutoColumns:'250px',gap:'10px',overflowX:'auto', paddingLeft:'calc(50% - 125px)',paddingRight:'calc(50% - 125px)',
+                    scrollbarWidth:'none',msOverflowStyle:'none',
 
                 }}
                 ref={sliderRef}

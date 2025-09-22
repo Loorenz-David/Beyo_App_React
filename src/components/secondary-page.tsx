@@ -23,13 +23,15 @@ interface SecondaryPageProps{
     BodyComponent:React.FC<any>;
     bodyProps?:Record<string,any>
     handleClose: ()=>void;
-    zIndex:number;
+    zIndex?:number;
     pageId?:string;
-    closeBtn:closeBtnVal
-    startAnimation:string
-    endAnimation:string
-    interactiveBtn:interactiveBtnVal | null
-    header:headerVal | null
+    closeBtn?:closeBtnVal
+    startAnimation?:string
+    endAnimation?:string
+    interactiveBtn?:interactiveBtnVal | null
+    header?:headerVal | null
+    addClickOutside?:boolean
+    addCloseWhenSlide?:boolean 
 }
 const defaultCloseBtn = {'icon':<CloseIcon/>,'class':'flex-1 content-end padding-05','order':1}
 const defaultStartAnimation = 'expandFromZero'
@@ -51,36 +53,47 @@ class PageManager {
     getTop(){
         return this.pageStack[this.pageStack.length - 1]
     }
+    isEmpty(){
+        return this.pageStack.length === 0
+    }
 }
 
 const pageManager = new PageManager()
 
-const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null,closeBtn=defaultCloseBtn,startAnimation=defaultStartAnimation,endAnimation=defaultEndAnimation,interactiveBtn=null,header=null} : SecondaryPageProps) => {
+const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null,closeBtn=defaultCloseBtn,startAnimation=defaultStartAnimation,endAnimation=defaultEndAnimation,interactiveBtn=null,header=null,addClickOutside=true,addCloseWhenSlide=true} : SecondaryPageProps) => {
     const secondaryPageRef = useRef<HTMLDivElement>(null)
     const bodyRef = useRef<HTMLDivElement>(null)
-    const closeTimeoutRef = useRef<number | null>(null)
     const interactiveRef = useRef(null)
     const startYRef = useRef<number |null> (null)
+    const startXRef = useRef<number |null>(null)
     const holdScrollElement = useRef(null)
-   
+    const passThresshold = useRef(false)
     
    
     
     const closeSecondaryPage = ()=>{
+        if(!secondaryPageRef.current) return
+        
         secondaryPageRef.current.classList.remove(startAnimation)
         secondaryPageRef.current?.classList.add(endAnimation)
 
-       closeTimeoutRef.current = setTimeout(()=>{
+        const node = secondaryPageRef.current
+        const handleAnimationEnd = ()=>{
+            node.removeEventListener('animationend',handleAnimationEnd)
+            handleClose()
+        }
         
-         handleClose()
-       },300)
+        node.addEventListener('animationend',handleAnimationEnd)
+   
        
     }
 
    
 
     const handleClickOutside = (e)=>{
+       
         const target = e.target as HTMLElement
+       
         if(secondaryPageRef.current && !secondaryPageRef.current.contains(target)){
             closeSecondaryPage()
         }
@@ -92,23 +105,25 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
         if(!pageManager.isTop(pageId)) return
         if(startYRef.current == null) return
 
+       
+
         const currentMove = e.touches[0].clientY
         const deltaY = currentMove - startYRef.current
 
         const scrollElement = holdScrollElement.current
         const isAtTop = scrollElement && scrollElement.scrollTop === 0
-        if(deltaY > 50 ){
+        if(deltaY > 80 ){
            
-            e.stopPropagation()
-            e.preventDefault()
             if(!scrollElement || isAtTop){
-                
-                closeSecondaryPage()
-                startYRef.current = null
+                passThresshold.current = true
             }
+            
+        }else{
+            passThresshold.current = false
         }
 
         if(deltaY > 0 &&  (!scrollElement || isAtTop)){
+            
            e.preventDefault()
            secondaryPageRef.current.style.transform = `translateY(${deltaY}px)`
         }
@@ -119,40 +134,64 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
     }
 
     const handleTouchEnd = (e)=>{
-        startYRef.current = null
+        if(passThresshold.current){
+            closeSecondaryPage()
+            startYRef.current = null
+        }else{
+            startYRef.current = null
         secondaryPageRef.current.style.transform= `translateY(0)`
+        }
+
+
+        
     }
     
 
     useEffect(()=>{
             
-            const node = secondaryPageRef.current 
-            if(!node ) return;
-            pageManager.open(pageId)
-
-            node.addEventListener('touchmove',handleTouchMove,{passive:false})
            
 
-             document.addEventListener('touchstart',handleClickOutside)
+
+            const node = secondaryPageRef.current 
+            if(!node ) return;
+
+            if(addClickOutside){
+                document.addEventListener('touchstart',handleClickOutside)
+            }
+            
+            
+
+            pageManager.open(pageId)
+
+            if(addCloseWhenSlide){
+                node.addEventListener('touchmove',handleTouchMove,{passive:false})
+            }
+            
+
+
+            
+            
+            
+            
         
        
 
 
 
         return () =>{
-            if(closeTimeoutRef.current){
-                clearTimeout(closeTimeoutRef.current)
-            }
-            if(pageId){
-                document.removeEventListener('touchstart',handleClickOutside)
-            }
+           
+            
             node.removeEventListener('touchmove',handleTouchMove)
             pageManager.close(pageId)
+
+            
+            document.removeEventListener('touchstart',handleClickOutside)
+            
 
             interactiveRef.current = null
             bodyRef.current = null
             secondaryPageRef.current = null
-            closeTimeoutRef.current = null
+            
             
         }
     },[])
@@ -162,7 +201,10 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
     <div id={pageId ?? undefined}  className={`secondary-page bg-primary ${startAnimation} ${pageId}`} ref={secondaryPageRef} style={{zIndex:`${zIndex}`}}
       
        onTouchEnd={(e)=>{handleTouchEnd(e)}}
-       onTouchStart={(e)=>{startYRef.current=e.touches[0].clientY}}
+       onTouchStart={(e)=>{
+        startYRef.current=e.touches[0].clientY,
+        startXRef.current= e.touches[0].clientX
+        }}
     >
        <div className="page-header" style={{zIndex:`${zIndex +1 }`}}>
             
@@ -187,7 +229,7 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
                  <div className={`flex-row ${header.class}`}
                     style={{order:header.order}}
                  >
-                    <span>{header.display}</span>
+                    <span className="countSpace">{header.display}</span>
                 </div>
             }
            

@@ -59,7 +59,7 @@ const ServerMessage = ({messageDict,onDismiss}: ServerMessageProps) => {
     }
 
     const handleTouchStart = (e:React.TouchEvent)=>{
-       
+        e.stopPropagation()
         startYRef.current = e.touches[0].clientY
         if(timeoutRef.current){
             clearTimeout(timeoutRef.current)

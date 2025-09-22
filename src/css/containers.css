@@ -1,4 +1,9 @@
-
+button,button *{
+    user-select:none;
+    -webkit-user-select:none;
+    -ms-user-select:none;
+    -webkit-touch-callout:none;
+}
 .no-select{
     user-select:none;
     -webkit-user-select:none;
@@ -12,6 +17,7 @@
     display:flex;
     flex-direction:column;
     transform:translateX(0%);
+    will-change: transform;
     max-height:0;
     overflow:hidden;
     width:100%;
@@ -249,6 +255,15 @@
     height:5px
 }
 
+.lockScroll{
+    /* overflow:'hidden' !important; */
+    
+    overflow:hidden !important;
+
+    height:100% !important;
+    
+}
+
 
 
 
@@ -304,13 +319,11 @@
     box-shadow:0 0 10px rgba(156, 247, 0, 0.62);
 }
 
-.openArrow{
-    transform:rotate(0) !important;
-}
+
 
 .offline-item{
     background-color:rgb(30, 107, 145);
-    padding:10px 10px !important;
+    padding:5px 5px !important;
     border-radius:5px;
     
 }
@@ -322,10 +335,14 @@
 .hide-scrollbar::-webkit-scrollbar{
     display:none
 }
-.hide-scrollbar{
-    -webkit-overflow-scrolling:auto;
-    -webkit-overflow-scrolling:auto !important;
-    scroll-snap-stop: always;
+
+.remove-scrollbar-momentum{
+   scroll-behavior:smooth;
+   scroll-snap-type:x mandatory;
+    
+}
+.remove-scrollbar-momentum > div{
+    scroll-snap-align:center;
 }
 
 

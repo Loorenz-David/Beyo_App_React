@@ -1,15 +1,26 @@
 import { useRef,useEffect} from 'react'
+interface ItemVals{
+    images:(string | {file:Blob})[] | null | undefined
+    properties:Record<string,any>
+    type:string
+    article_number:string
+}
+interface longPressActionProps{
+    selectionMode:boolean
+    setSelectionMode?:()=>void
+    handleActionWhenPress:(e:React.TouchEvent<HTMLElement>,item:ItemVals)=>void
+    handleDefaultActionWhenClick?: (e:React.TouchEvent<HTMLElement>,item:ItemVals)=>void
+    skipFirstClick:boolean
+}
 
 
-
-
-export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionWhenPress,handleDefaultActionWhenClick})=>{
+export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionWhenPress,handleDefaultActionWhenClick,skipFirstClick=true}:longPressActionProps)=>{
 
     const touchStart = useRef(0)
     const currentSelectedObj = useRef(null)
     const pressTimeoutRef = useRef<Node.JS.Timeout | null>(null)
     const isScrolling = useRef(false)
-    const skipFirst = useRef(false)
+    const skipFirst = useRef(skipFirstClick)
 
     useEffect(()=>{
 
@@ -20,6 +31,12 @@ export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionW
         }
     },[])
 
+    const getClientY = (e:TouchEvent | MouseEvent)=>{
+        if ('touches' in e){
+            return e.touches[0]?.clientY ?? 0
+        }
+        return e.clientY
+    }
 
     const handlePressStart = (e,itemObj)=>{
         
@@ -27,7 +44,7 @@ export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionW
         if(!target)return;
         
 
-        touchStart.current = e.touches[0].clientY
+        touchStart.current = getClientY(e)
         
         if(!selectionMode){
             pressTimeoutRef.current = setTimeout(()=>{
@@ -48,14 +65,23 @@ export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionW
     const handlePressEnd = (e,itemObj)=>{
        
         if(isScrolling.current){
+            if(pressTimeoutRef.current){
+                clearTimeout(pressTimeoutRef.current)
+            }
             isScrolling.current = false
             return
         }
+        
+        if(document.activeElement?.tagName === 'INPUT'){
+            document.activeElement.blur()
+        }
+
         e.stopPropagation()
         if(pressTimeoutRef.current && !selectionMode){
             clearTimeout(pressTimeoutRef.current)
             pressTimeoutRef.current = null
             currentSelectedObj.current = itemObj
+            e.preventDefault()
             handleDefaultActionWhenClick()
         }else{
             if(skipFirst.current){
@@ -78,8 +104,8 @@ export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionW
 
      const handleTouchMove = (e)=>{
        
-        const didMove = Math.abs(e.touches[0].clientY - touchStart.current)
-        console.log(didMove)
+        const didMove = Math.abs(getClientY(e) - touchStart.current)
+        
         if(didMove > 10){
             clearTimeout(pressTimeoutRef.current)
             pressTimeoutRef.current = null

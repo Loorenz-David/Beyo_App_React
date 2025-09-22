@@ -91,7 +91,11 @@ export const DealerSelection = ({dealerDict,handleClose,holdScrollElement,zIndex
         
         timeOutRef.current = setTimeout(async ()=>{
 
-            await doFetch('/api/schemes/get_items','POST',fetchDict,setRules)
+            await doFetch({
+                url:'/api/schemes/get_items',
+                method:'POST',
+                body:fetchDict,
+                setRules:setRules})
             
         },500)
         
@@ -167,17 +171,17 @@ export const DealerSelection = ({dealerDict,handleClose,holdScrollElement,zIndex
                         />
                     }
                         
-                        <div className="svg-15 btn"
+                        <button className="svg-15 btn"
                         onClick={()=>{setToggleFilterQuery(true)}}
                         >
                             <FilterIcon/>
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>
             <div ref={holdScrollElement} className="flex-column " style={{overflowY:'auto'}}>
                 {loading && 
-                    <div className="flex-row content-center items-center">
+                    <div className="no-select flex-row content-center items-center">
                             <LoaderDots />
                     </div>
                 }
@@ -195,7 +199,7 @@ export const DealerSelection = ({dealerDict,handleClose,holdScrollElement,zIndex
                     })
                 :
                    <>
-                    <div className="flex-row width100 items-center space-between  padding-20 border-bottom "
+                    <div className="no-select flex-row width100 items-center space-between  padding-20 border-bottom "
                     onClick={()=>{handleDealerSelection({'dealer_name':'Offline Dealer','id':null})}}
                     >
                         <span className="text-15">Offline Dealer</span>
@@ -203,14 +207,14 @@ export const DealerSelection = ({dealerDict,handleClose,holdScrollElement,zIndex
                     </div>
 
                     <div className="flex-row content-center padding-top-30">
-                        <div className="flex-column gap-1 content-center btn  padding-10 border-blue bg-containers"
+                        <button className="flex-column gap-1 content-center btn  padding-10 border-blue bg-containers"
                             onClick={()=>{setToggleCreateDealer(true)}}
                         >
                                 <div className="svg-25 flex-column items-center content-center">
                                     <DealerIcon />
                                 </div>
                                 <span>Add Dealer</span>
-                        </div>
+                        </button>
                     </div>
                    </>
                     
@@ -257,18 +261,19 @@ const DealerSelectionBtn = ({dealer,setItemData,zIndex}) =>{
                         dealerDict:dealerDict
                     }}
                     handleClose = {handleClose}
+                    header={{order:0,display:'Select Dealer',class:'color-light-titles'}}
                 /> 
             }
 
-            <div className={`flex-column items-center content-center gap-05 btn ${isOffline} `} style={{padding:'0'}}
+            <button className={`flex-column items-center content-center gap-05 btn ${isOffline} `} style={{padding:'0'}}
                 onClick={()=>{setDealerSelection(true)}}
                 id="dealer"
                 >
                 <div className="flex-column items-center content-center  svg-25 ">
                     <DealerIcon/>
                 </div>
-                <span  >{dealer ? dealer.dealer_name : 'Dealer'}</span>
-            </div>
+                <span   className="text-9">{dealer ? dealer.dealer_name : 'Dealer'}</span>
+            </button>
 
         </div>
         

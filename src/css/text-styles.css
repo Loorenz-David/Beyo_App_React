@@ -29,3 +29,7 @@
 .bold-600{
     font-weight:600;
 }
+
+.countSpace{
+    white-space:pre;
+}

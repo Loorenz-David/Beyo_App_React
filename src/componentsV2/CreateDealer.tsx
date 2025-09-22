@@ -20,6 +20,7 @@ import LocationIcon from '../assets/icons/LocationIcon.svg?react'
 
 
 
+
 const getCurrentLocation = async (setAddressObj,setLocationLoading)=>{
     if(!navigator.geolocation){
         console.log('Geolocation is not suported by device')
@@ -60,7 +61,7 @@ const getCurrentLocation = async (setAddressObj,setLocationLoading)=>{
 }
 
 
-const CreateDealer = ({zIndex,dealerDict,handleClose,handleCloseUponSave}) => {
+const CreateDealer = ({zIndex,dealerDict,handleClose,handleCloseUponSave,holdScrollElement}) => {
     const {showMessage} = useContext(ServerMessageContext)
     const [togglePage,setTogglePage] = useState<PageKey | '' >('')
     const [addressObj,setAddressObj] = useState({})
@@ -154,9 +155,9 @@ const CreateDealer = ({zIndex,dealerDict,handleClose,handleCloseUponSave}) => {
         
         
     }
-
+    console.log(holdScrollElement,'scrollelement')
     return (
-    <div className="flex-column height100dvh" style={{zIndex:zIndex,overflow:'hidden'}}>
+    <div className="flex-column " style={{zIndex:zIndex,minHeight:'100dvh'}}>
         {togglePage !== '' && 
             <SecondaryPage BodyComponent={DynamicBoxesV2} 
                 bodyProps={{
@@ -174,7 +175,9 @@ const CreateDealer = ({zIndex,dealerDict,handleClose,handleCloseUponSave}) => {
 
         <form >
         {/* page content */}
-            <div className="flex-column width100 padding-top-40">
+            <div className="flex-column width100 padding-top-40" style={{minHeight:'100vh'}}
+                ref={holdScrollElement}
+            >
                 
                     <div className="flex-column gap-05 width100 padding-10 border-bottom">
                         <span className="color-lower-titles">Dealer name</span>
@@ -193,25 +196,25 @@ const CreateDealer = ({zIndex,dealerDict,handleClose,handleCloseUponSave}) => {
                                 <LoaderDots dotStyle={{dimensions:'squareWidth-05',bgColor:'bg-secondary'}}/>
                             </div>
                             :
-                            <div className="flex-column btn items-center content-center bg-containers border-blue"style={{borderRadius:'50%',width:'37px',height:'35px',padding:'0'}}
+                            <button className="flex-column btn items-center content-center bg-containers border-blue"style={{borderRadius:'50%',width:'37px',height:'35px',padding:'0'}}
                             onClick={()=>{getCurrentLocation(setAddressObj,setLocationLoading);setLocationLoading(true)}}
                             >
                                 <div className=" flex-column items-center content-center svg-15 " >
                                     <LocationIcon/>
                                 </div>
-                            </div>
+                            </button>
                             }
                         
                         </div>
                         
                     </div>
-                    <div className="flex-column gap-05 width100 padding-10 border-bottom"
-                    onClick={()=>{setTogglePage('DealerType')}}
+                    <button className="flex-column gap-05 width100 padding-10 border-bottom"
+                    onClick={(e)=>{e.preventDefault();setTogglePage('DealerType')}}
                     >
                         <span className="color-lower-titles">Dealer Type</span>
 
                         <span className="text-15">{dealerType ? dealerType: 'select ...'}</span>
-                    </div>
+                    </button>
                     
                     
                     
@@ -220,14 +223,18 @@ const CreateDealer = ({zIndex,dealerDict,handleClose,handleCloseUponSave}) => {
                             <span className="lower-titles">
                                 Email
                             </span>
-                            <input  type="text" className="width100"  name="email"/>
+                            <input  type="text" className="width100"  name="email"
+                                
+                            />
                         </div>
                         <div className="vertical-line"></div>
                         <div className="flex-column gap-05 padding-10">
                             <span className="lower-titles">
                                 Phone
                             </span>
-                            <input type="number" className="width100" name="phone"/>
+                            <input type="number" className="width100" name="phone"
+                             
+                            />
                         </div>
                     </div>
                     <div className="flex-row width100 border-bottom">
@@ -235,24 +242,28 @@ const CreateDealer = ({zIndex,dealerDict,handleClose,handleCloseUponSave}) => {
                             <span className="lower-titles">
                                 Gender
                             </span>
-                            <input type="text" name="gender" className="width100" />
+                            <input type="text" name="gender" className="width100" 
+                              
+                            />
                         </div>
                         <div className="vertical-line"></div>
                         <div className="flex-column gap-05 padding-10">
                             <span className="lower-titles">
                                 Age
                             </span>
-                            <input type="number" name="age" className="width100" />
+                            <input type="number" name="age" className="width100" 
+                              
+                            />
                         </div>
                     </div>
                 
             </div>
-            <div className="flex-row padding-10 width100 padding-bottom-20 padding-top-20" style={{position:'absolute',bottom:'0',left:'0'}}>
-                <div role="button" className="flex-row btn bg-containers border-blue width100 items-center content-center padding-10"
+            <div className="flex-row padding-10 width100  " style={{position:'absolute',bottom:'100px',left:'0',zIndex:zIndex}}>
+                <button className="flex-row btn bg-containers border-blue width100 items-center content-center padding-10"
                 onClick={handleSave}
                 >
                         <span className="text-15">Add Delaer</span>
-                </div>
+                </button>
             </div>
         </form>
 

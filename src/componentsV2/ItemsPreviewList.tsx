@@ -12,6 +12,8 @@ import PictureIcon from  '../assets/icons/PictureIcon.svg?react'
 import LoaderDots from '../components/LoaderDots.tsx'
 
 import {useLongPressAction} from '../hooks/useLongPressActions.tsx'
+import {readArticleNumber} from '../hooks/useReadableArticleNumber.tsx'
+
 
 interface ItemVals{
     images:(string | {file:Blob})[] | null | undefined
@@ -46,6 +48,7 @@ interface propsPreviewList{
 
 
 
+
 export  const ItemPreviewContainer: React.FC<propsItemPreview> = ({itemObj,imgBlobs,handlePressStart,handlePressEnd=null,handleTouchMove,isSelected=false,containerHeight='90px'}) => {
     
     let firstImg:string | null = null 
@@ -68,15 +71,17 @@ export  const ItemPreviewContainer: React.FC<propsItemPreview> = ({itemObj,imgBl
     if(itemObj.dealer && itemObj.dealer.dealer_name == 'Offline Dealer'){
         offlineDealer = true
     }
-
+    
     return ( 
         <div observing-obj-for-selection = {itemObj.article_number}
             className="flex-row padding-20 items-center gap-2 border-bottom no-select"
             style={{minHeight:containerHeight,maxHeight:containerHeight}}
             onContextMenu={(e)=>{e.preventDefault()}}
-            onTouchStart={(e)=>{handlePressStart(e,itemObj)}}
+            onTouchStart={(e)=>{handlePressStart && handlePressStart(e,itemObj)}}
             onTouchEnd={(e)=>{handlePressEnd && handlePressEnd(e,itemObj)}}
             onTouchMove={(e)=>{handleTouchMove && handleTouchMove(e)}}
+           
+            
         >
             
             <div className="flex-column height100 items-center content-center"
@@ -104,7 +109,7 @@ export  const ItemPreviewContainer: React.FC<propsItemPreview> = ({itemObj,imgBl
             >
                 <div className="flex-row gap-2 ">
                     <span>{itemObj.type}</span>
-                    <span>{itemObj.article_number}</span>
+                    <span className="countSpace">{readArticleNumber(itemObj.article_number)}</span>
                     
                 </div>
                 <div className="flex-row gap-2 width100" style={{paddingTop:'5px' ,overflow:'hidden'}}>
@@ -159,7 +164,7 @@ export const ItemsPreviewList:React.FC<propsPreviewList> = ({data,handleDelition
         checkMark.classList.toggle('hidden')
 
         const targetId = selectedObj[selectionTargetKey]
-
+        console.log(targetElement)
         if(targetId in selectedItems){
             setSelectedItems(prev =>{
             const {[targetId]:_, ...current} = prev
@@ -187,7 +192,7 @@ export const ItemsPreviewList:React.FC<propsPreviewList> = ({data,handleDelition
     },[])
    
     return (
-        <div className="flex-column padding-bottom-40" style={{overflowY:'auto'}}
+        <div className={`flex-column  width100`} style={{overflowY:'auto', height:'100dvh',paddingBottom:'200px'}}
            ref={holdScrollElement}
         >
             {openItem && 
@@ -201,14 +206,14 @@ export const ItemsPreviewList:React.FC<propsPreviewList> = ({data,handleDelition
                     zIndex={zIndex} 
                     pageId={'ItemEditPage'}
                     interactiveBtn ={{iconClass:'svg-15 padding-05 position-relative content-end', order:3,icon:<ThreeDotMenu/>}}
-                    header={{'display': currentSelectedObj.current ? currentSelectedObj.current.article_number : '', class:'flex-1 content-center',order:2}}
+                    header={{'display': currentSelectedObj.current ? readArticleNumber(currentSelectedObj.current.article_number) : '', class:'flex-1 content-center text-15',order:2}}
                     closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 content-start',order:0}}
                     startAnimation={'slideLeft'}
                     endAnimation ={'slideRight'}
                    
                     />
             }
-            <div className="flex-column width100 items-center " style={{height:'50px'}}>
+            <div className="flex-column width100 items-center " style={{minHeight:'50px'}}>
                 {loaders.ScrollUp_Loading && 
                 <div className="flex-row content-center gap-2">
                     <span className="text-15 ">Loading items</span>    <LoaderDots />

@@ -152,7 +152,11 @@ const CreateSingleNote = ({setItemData,note}) => {
                                 requested_data:['subject'],
                                 query_filters:{'subject':{'operation':'ilike','value':`%${value}%`}}
                                 }
-                 doFetch('/api/schemes/get_items','POST',fetchDict,rules)
+                 doFetch({
+                    url:'/api/schemes/get_items',
+                    method:'POST',
+                    body:fetchDict,
+                    setRules:rules})
                 
 
             }

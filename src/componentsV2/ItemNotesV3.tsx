@@ -166,7 +166,11 @@ const CreateNote = ({handleClose,interactiveRef,note=null,zIndex,handleNoteActio
 
             }
             const setRules = {loadData:true}
-            await doFetch('/api/schemes/get_items','POST',fetchDict,setRules)
+            await doFetch({
+                url:'/api/schemes/get_items',
+                method:'POST',
+                body:fetchDict,
+                setRules:setRules})
         },500)
 
         selectedSubjectRef.current = {}
@@ -232,7 +236,7 @@ const CreateNote = ({handleClose,interactiveRef,note=null,zIndex,handleNoteActio
                     
                 </div>
                 <div className="flex-row padding-10 content-center padding-top-20">
-                        <div role="button" className="flex-row btn bg-secondary padding-10 content-center"
+                        <div role="button" className="flex-row btn bg-secondary padding-10 content-center no-select"
                             onClick={()=>{handleSaveNote()}}
                         >
                             <span className="text-15 color-primary">Save Note</span>
@@ -248,7 +252,7 @@ const NoteContainer = ({props})=>{
     const contentPreview = note.note_content ? note.note_content.slice(0,40) : ''
     const date = note.creation_time instanceof Date ? note.creation_time : new Date(note.creation_time)
     const noteTime = date.getDate() + ' ' + date.toLocaleString('en-US',{month:'short'})
-    console.log(handleTouchMove)
+    
     return(
         <div observing-obj-for-selection = {key}
            
@@ -320,8 +324,8 @@ const NoteListContainer = ({fetchDataList,itemNotesData,handlePressStart,handleP
                     props={{
                         note:fetchDataList[i],
                         key:key,
-                        handleTouchMove:handleTouchMove,
                         handlePressStart:handlePressStart,
+                        handleTouchMove:handleTouchMove,
                         handlePressEnd:handlePressEnd,
                         isSelected:isSelected
                     }}
@@ -374,7 +378,8 @@ const DeleteBatchNotes = ({props})=>{
     const {handleNoteAction,selectedNotes,setSelectedNotes} = props
     
     return(
-        <div className="flex-column item-center content-center btn svg-18"
+        <div className="flex-column item-center content-center btn svg-18 no-select"
+            role="button"
             onClick={()=>{
                 const buildNotesToDelete = []
                 Object.values(selectedNotes).forEach(noteObj=>buildNotesToDelete.push(buildSaveNote({noteObj,action:'delete',batchAction:true})))
@@ -464,9 +469,17 @@ const ItemNoteDisplay = ({itemNotes,itemArticleNumbers,handleNoteAction,zIndex,f
         if(value !== ''){
             fetchDict['query_filters'][filterSelection.current[0]] = {'operation':'ilike','value':`%${value}%`}
         }
+        console.log('the dict that will be sent to query for notes', fetchDict)
         
         const setRules = {loadData:true}
-        await doFetch('/api/schemes/get_items','POST',fetchDict,setRules)
+        await doFetch({
+            url:'/api/schemes/get_items',
+            method:'POST',
+            body:fetchDict,
+            setRules:setRules})
+
+
+
 
     }
    
@@ -487,7 +500,7 @@ const ItemNoteDisplay = ({itemNotes,itemArticleNumbers,handleNoteAction,zIndex,f
 
     }
 
-
+    console.log(data,'the notes obtain from itemNoteDsipilay')
    
     return (
         <div className="flex-column width100" style={{height:'100dvh',overflowY:'hidden'}}>
@@ -535,71 +548,73 @@ const ItemNoteDisplay = ({itemNotes,itemArticleNumbers,handleNoteAction,zIndex,f
                     </div>
                 </div>
             }
+            <div className="flex-column" style={{overflow:'hidden'}}>
+
             
+                {selectionMode && 
+                    <SelectionModeComponent 
+                        zIndex={zIndex + 1}
+                        props={{
+                                setSelectionMode:setSelectionMode,
+                                selectedItemsLength:Object.keys(selectedNotes).length,
+                                setSelectedItems:setSelectedNotes,
+                                componentsListPreview:Object.keys(selectedNotes).map((dictKey,i)=> 
+                                    <NoteContainer key={`batchSelect_${i}`} props={{
+                                        note:selectedNotes[dictKey],
+                                        key:dictKey,
+                                        handlePressStart:handlePressStart,
+                                        handlePressEnd:handlePressEnd,
+                                        handleTouchMove:handleTouchMove
+                                    }}/>
+                                    ),
+                                componentOptionsToSelect:[
+                                    <DeleteBatchNotes key={'deleteBatchNotes'}
+                                        props={{
+                                            selectedNotes,
+                                            handleNoteAction,
+                                            setSelectedNotes
 
-            <div ref={holdScrollElement} className="flex-column padding-top-20" style={{overflowY:'scroll'}}
-             
-            >   
-            {selectionMode && 
-                <SelectionModeComponent 
-                    props={{
-                            setSelectionMode:setSelectionMode,
-                            selectedItemsLength:Object.keys(selectedNotes).length,
-                            setSelectedItems:setSelectedNotes,
-                            componentsListPreview:Object.keys(selectedNotes).map((dictKey,i)=> 
-                                <NoteContainer key={`batchSelect_${i}`} props={{
-                                    note:selectedNotes[dictKey],
-                                    key:dictKey,
-                                    handlePressStart:  ()=>{
-                                        setSelectedNotes(prev => {
-                                        const {[dictKey]:_,...current} = prev
-                                        return current
-                                    }) },
-                                    handlePressEnd:null
-                                }}/>
-                                ),
-                            componentOptionsToSelect:[
-                                 <DeleteBatchNotes key={'deleteBatchNotes'}
-                                    props={{
-                                        selectedNotes,
-                                        handleNoteAction,
-                                        setSelectedNotes
-
-                                    }}
-                                />,
-                                <BatchEditBtn key={'EditBatchNotes'}
-                                    alsoDo={()=>{currentSelectedObj.current = Object.values(selectedNotes)}}
-                                    selectedItems={selectedNotes}
-                                    setToggleBatchEdit={setToggleNoteCreation}
-                                    
-                                />
-                            ]
-                        }}
-                />
-            }
-                
-
-                {loading ? 
-                    <div className="flex-column gap-1 items-center content-center padding-top-20">
-                        <span className="color-secondary text-15">Loading Notes</span>
-                        <LoaderDots/>
-                    </div>
-                : 
-                    <NoteListContainer 
-                        fetchDataList={data} 
-                        itemNotesData={itemNotes}
-                        selectedNotes={selectedNotes}
-                        handleTouchMove={handleTouchMove}
-                        handlePressStart = {handlePressStart}
-                        handlePressEnd = {handlePressEnd}
+                                        }}
+                                    />,
+                                    <BatchEditBtn key={'EditBatchNotes'}
+                                        alsoDo={()=>{currentSelectedObj.current = Object.values(selectedNotes)}}
+                                        selectedItems={selectedNotes}
+                                        setToggleBatchEdit={setToggleNoteCreation}
+                                        
+                                    />
+                                ]
+                            }}
                     />
                 }
 
+                <div ref={holdScrollElement} className="flex-column " style={{overflowY:'scroll',marginTop: '20px' }}
+                
+                >   
+                
+
+                    {loading ? 
+                        <div className="flex-column gap-1 items-center content-center padding-top-20">
+                            <span className="color-secondary text-15">Loading Notes</span>
+                            <LoaderDots/>
+                        </div>
+                    : 
+                        <NoteListContainer 
+                            fetchDataList={data} 
+                            itemNotesData={itemNotes}
+                            selectedNotes={selectedNotes}
+                            handleTouchMove={handleTouchMove}
+                            handlePressStart = {handlePressStart}
+                            handlePressEnd = {handlePressEnd}
+                        />
+                    }
+
+                </div>
             </div>
-            
+
             <div className="flex-row" style={{position:'absolute',bottom:'30px',right:'30px'}}>
-                <div className="flex-row gap-1 bg-containers border-blue  btn"style={{padding:'10px 12px'}} 
+                <div className="flex-row gap-1 bg-containers border-blue no-select  btn"style={{padding:'10px 12px'}} 
                 onClick={()=>{setToggleNoteCreation(true)}}
+                role="button"
                 >
                     <div className="flex-column svg-18 item-center content-center">
                         <EditIcon/>
@@ -679,19 +694,14 @@ export const ItemNoteBtn = memo(({itemNotes,itemArticleNumbers,setItemData, zInd
                 itemNotesCopy = buildNoteDictForSave(noteDict,itemNotesCopy)
             })  
         
-
         setItemData(prev => ({...prev,'notes':itemNotesCopy}))
-
-        
 
     }
 
    
-    
-    
 
     return (
-            <div className="flex-row padding-10 width100"
+            <button className="flex-row padding-10 width100"
             
             onClick={()=>{setToggleNoteDisplay(true)}}
             >
@@ -701,11 +711,12 @@ export const ItemNoteBtn = memo(({itemNotes,itemArticleNumbers,setItemData, zInd
                         zIndex={zIndex + 1}
                         handleClose ={()=>{setToggleNoteDisplay(false)}}
                         pageId={'itemNoteDisplay'}
+                        header={{order:0,display:'Item Notes',class:'color-light-titles'}}
                     />
                 }
                 
                 <span className="text-15">{displayText}</span>
-            </div>
+            </button>
     )
 })
  

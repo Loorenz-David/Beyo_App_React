@@ -12,7 +12,7 @@ import FlashIcon from '../assets/icons/FlashIcon.svg?react'
 
 
 
-const SliderComponent = ({listOfElements,listOfImages,currentImageIndex,setCurrentImageIndex,imagePreviewSlider,parentComp=''})=>{
+const SliderComponent = ({listOfElements,listOfImages,currentImageIndex,setCurrentImageIndex,imagePreviewSlider,parentComp='',holdScrollElement=null})=>{
     const sliderRef = useRef<HTMLElement | null>(null)
     const markersList = useRef(null)
     const interval = useRef(null)
@@ -62,8 +62,10 @@ const SliderComponent = ({listOfElements,listOfImages,currentImageIndex,setCurre
     }
     const handleCheckMoveSlider = (e)=>{
         
-        
+        console.log(e.touches[0].clientX)
         if(Math.abs(e.touches[0].clientX - touchStart.current) > 10){
+          
+           
             hasSlided.current = true
 
             if(timeOut.current){
@@ -148,9 +150,12 @@ const SliderComponent = ({listOfElements,listOfImages,currentImageIndex,setCurre
 
     useEffect(()=>{
         
+        if(holdScrollElement){
+           holdScrollElement.current = sliderRef.current 
+        }
 
         scrollToIndexElement(currentImageIndex)
-
+        
         interval.current = setIntervalSlider(3000)
         
        return()=>{
@@ -168,9 +173,12 @@ const SliderComponent = ({listOfElements,listOfImages,currentImageIndex,setCurre
     
 
     return( 
-            <div className=" flex-column width100 height100 items-center content-center" style={{position:'relative'}}>
-                <div className="hide-scrollbar width100 height100"
-                onTouchStart={(e)=>{touchStart.current = e.touches[0].clientX}}
+            <div  className=" flex-column width100 height100 items-center content-center" style={{position:'relative'}}>
+                <div className="hide-scrollbar remove-scrollbar-momentum width100 height100"
+                onTouchStart={(e)=>{
+                    
+                    touchStart.current = e.touches[0].clientX
+                }}
                 onTouchMove={(e)=>{handleCheckMoveSlider(e)}}
                 ref={sliderRef}
                 style={{
@@ -185,12 +193,12 @@ const SliderComponent = ({listOfElements,listOfImages,currentImageIndex,setCurre
                     
                 :
                     
-                    <div className="flex-column gap-1 items-center content-center width100 height100">
+                    <button className="flex-column gap-1 items-center content-center width100 height100">
                         <div className="flex-column items-center content-center svg-45" style={{opacity:'0.5'}}>
                             <PictureIcon/>
                         </div>
-                        <span className="text-15 color-lower-titles">Take picure</span>
-                    </div>
+                        <span className="text-15 color-lower-titles bold-600">Take picure</span>
+                    </button>
                 }
                 
             </div>
@@ -217,7 +225,7 @@ const SliderComponent = ({listOfElements,listOfImages,currentImageIndex,setCurre
     )
 }
 
-const makeImageUrl = (img,imageBlobs)=>{
+export const makeImageUrl = (img,imageBlobs)=>{
     let imgSrc = ''
      if(typeof img == 'string'){
         imgSrc = img
@@ -229,7 +237,7 @@ const makeImageUrl = (img,imageBlobs)=>{
     return imgSrc
 }
 
-const ImagePreviewSlider = ({props,zIndex})=>{
+export const ImagePreviewSlider = ({props,zIndex,holdScrollElement})=>{
     const {listOfImages,setData,currentImageIndex,setCurrentImageIndex,imagePreviewSlider} = props
     const imageBlobs = useRef([])
     const [openLiveCamera,setOpenLiveCamera] = useState(false)
@@ -245,7 +253,12 @@ const ImagePreviewSlider = ({props,zIndex})=>{
     },[])
 
     const handleImageRemoval = ()=>{
-        const newList = listOfImages.filter((_,i)=> i !== currentImageIndex)
+        let newList =[]
+        if(setCurrentImageIndex){
+            newList = listOfImages.filter((_,i)=> i !== currentImageIndex)
+        }else{
+            newList = []
+        }
         setData(prev => ({...prev,'images':newList}))
     }
     
@@ -265,26 +278,36 @@ const ImagePreviewSlider = ({props,zIndex})=>{
                 />
             }
             <div className="width100 height100 flex-row items-center content-center " style={{overflow:'hidden',borderRadius:'10px'}}>
-                <SliderComponent 
-                    imagePreviewSlider={imagePreviewSlider}
-                    currentImageIndex={currentImageIndex}
-                    setCurrentImageIndex={setCurrentImageIndex}
-                    parentComp={'slider'}
-                    listOfImages={listOfImages}
-                    listOfElements={listOfImages.map((img,i)=>{
-                        const imgSrc = makeImageUrl(img,imageBlobs)
+                {setCurrentImageIndex ? 
+                    <SliderComponent 
+                        imagePreviewSlider={imagePreviewSlider}
+                        currentImageIndex={currentImageIndex}
+                        setCurrentImageIndex={setCurrentImageIndex}
+                        parentComp={'slider'}
+                        holdScrollElement={holdScrollElement}
+                        listOfImages={listOfImages}
+                        listOfElements={listOfImages.map((img,i)=>{
+                            const imgSrc = makeImageUrl(img,imageBlobs)
 
 
-                        return(
-                            <div key={`imageInPreview_${i}`} className="flex-column" data-index={i} style={{overflow:'hidden',scrollSnapAlign:'start',position:'relative'}}>
-                               
-                                <img src={imgSrc} className="width100 height100" style={{objectFit:'cover'}} />
-                               
-                            </div>
-                        )
-                    })}
+                            return(
+                                <div key={`imageInPreview_${i}`} className="flex-column" data-index={i} style={{overflow:'hidden',scrollSnapAlign:'start',position:'relative'}}>
+                                
+                                    <img src={imgSrc} className="width100 height100" style={{objectFit:'cover'}} />
+                                
+                                </div>
+                            )
+                        })}
 
-                />
+                    />
+                :
+                    <div  className="flex-column"  style={{overflow:'hidden',scrollSnapAlign:'start',position:'relative'}}>
+                                
+                        <img src={makeImageUrl(listOfImages[0],imageBlobs)} className="width100 height100" style={{objectFit:'cover'}} />
+                    
+                    </div>
+                }
+                
                <div className="flex-row space-between width100 " style={{position:'absolute',bottom:'30px',padding:'0 20px'}}>
                    
                     <div role={'button'} className="flex-row btn svg-25 svg-bg-container items-center content-center bg-secondary"  
@@ -310,10 +333,10 @@ const ImagePreviewSlider = ({props,zIndex})=>{
     )
 }
 
-const LiveCamera = ({props,handleClose})=>{
+export const LiveCamera = ({props,handleClose})=>{
     const videoRef = useRef<HTMLVideoElement | null>(null)
     const streamRef = useRef<MediaStream | null>(null)
-    const {setData,listOfImages,setCurrentImageIndex} = props
+    const {setData,listOfImages,setCurrentImageIndex,allowOnlyOnePicture=false} = props
     const canvasRef = useRef(null)
     const blobsUrl = useRef([])
     const previewRefBtn = useRef(null)
@@ -339,9 +362,20 @@ const LiveCamera = ({props,handleClose})=>{
                 }
 
                 const constrain = deviceIdC ?
-                {video:{deviceId:{exact:deviceIdC}},audio:false}
+                {video:{
+                    deviceId:{exact:deviceIdC}, 
+                    width:{ideal:1920},height:{ideal:1080},
+                    frameRate:{ideal:60,max:120}
+                },
+                audio:false}
                 :
-                {video:{facingMode:'environment',audio:false} }
+                {video:{
+                    facingMode:'environment', 
+                    width:{ideal:1920},height:{ideal:1080},
+                    frameRate:{ideal:60,max:120}
+                },
+                
+                audio:false }
 
                 const stream = await navigator.mediaDevices.getUserMedia(constrain)
                 streamRef.current  = stream
@@ -443,13 +477,21 @@ const LiveCamera = ({props,handleClose})=>{
                 
                 const imgDict ={file:file,isUpload:false}
 
-                
-                    setCurrentImageIndex(listOfImages.length)
                     
-                    setData(prev =>{
-                        return {...prev, 'images':[...(prev.images && Array.isArray(prev.images) ? prev.images : []), imgDict]}
-                        
-                    } )
+                    if(setCurrentImageIndex){
+                        setCurrentImageIndex(listOfImages.length)
+                        setData(prev =>{
+                            return {...prev, 'images':[...(prev.images && Array.isArray(prev.images) ? prev.images : []), imgDict]}
+                            
+                        } )
+                    }   else{
+                        setData(prev =>{
+                            return{...prev,'images':[imgDict]}
+                        })
+                    }
+                    
+                    
+                    
                    
 
                     if(listOfImages.length == 0){
@@ -512,7 +554,7 @@ const LiveCamera = ({props,handleClose})=>{
                 style={{width:'100%',height:'100%',objectFit:'cover'}}
             >
             </video>
-            <div role='button' className="flex-row svg-18 items-center content-center btn " 
+            <button className="flex-row svg-18 items-center content-center btn " 
                 ref={torchRef}
                 style={{
                     backgroundColor:'rgba(21, 70, 91, 0.37)',
@@ -521,8 +563,8 @@ const LiveCamera = ({props,handleClose})=>{
                 onClick={()=>{handleTorch()}}
             >
                 <FlashIcon/>
-            </div>
-            <div className="flex-row width100 space-between items-end" style={{position:'absolute',bottom:'0',padding:'40px 30px'}}>
+            </button>
+            <div className="flex-row width100 space-between items-end" style={{position:'absolute',bottom:'20px',padding:'40px 30px'}}>
                 <input type="file"
                         accept='image/*'
                         multiple
@@ -530,44 +572,44 @@ const LiveCamera = ({props,handleClose})=>{
                         style={{display:'none'}}
                         onChange={handleFileSelect}
                     />
-                <div className="flex-column btn svg-25"
+                <button className="flex-column  btn svg-25"
                     style={{backgroundColor:'rgba(21, 70, 91, 0.37)',padding:'10px 10px'}}
                     onClick={()=>{fileInputRef.current?.click()}}
                 >
                     <OpenFolderIcon/>
-                </div>
+                </button>
                
                  <div className="flex-column gap-2 items-center">
                     <div className="flex-row gap-1" style={{borderRadius:'5px',padding:'2px 8px',backgroundColor:'rgba(0, 0, 0, 0.52)'}}>
                        {cameraOptions &&
                          cameraOptions.map((deviceId,i)=>{
                             return(
-                                <div key={`cameraLense_${i}`} className="flex-column items-center content-center " style={{width:'18px',height:'18px',borderRadius:'5px',backgroundColor:selectedCamera === deviceId ? 'white':''}}
+                                <button key={`cameraLense_${i}`} className="flex-column items-center content-center " style={{width:'18px',height:'18px',borderRadius:'5px',backgroundColor:selectedCamera === deviceId ? 'white':''}}
                                     onClick={(e)=>{if(selectedCamera == deviceId)return; setSelectedCamera(deviceId); startCamera(deviceId); 
                                                    
                                     }}
                                 >
                                     <span className="text-15" style={{color:selectedCamera === deviceId ? 'black':'white'}}>{i + 1}</span>
-                                </div>
+                                </button>
                             )
                          })
                        }
 
                     </div>
-                    <div className="flex-column btn bg-secondary" style={{borderRadius:'50%',width:'50px',height:'50px'}}
+                    <div className="flex-column btn bg-secondary" style={{borderRadius:'50%',width:'60px',height:'60px'}}
                         onClick={()=>{handleTakePicture(videoRef.current)}}>
 
                     </div>
                 </div>
                  <canvas ref={canvasRef} style={{display:'none'}}/>
                 {imageToPreview.current !== '' ?
-                    <div className="flex-column  border-blue"
+                    <button className="flex-column  border-blue"
                         style={{width:'40px', height:'40px', overflow:'hidden',borderRadius:'5px'}}
                         onClick={()=>{handleClose()}}
                         ref={previewRefBtn}
                     >  
                             <img src={imageToPreview.current} className="width100 height100" style={{objectFit:'cover'}} />
-                    </div>
+                    </button>
                 :
                     <div style={{width:'25px',height:'25px'}}>
 

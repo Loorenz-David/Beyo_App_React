@@ -35,7 +35,7 @@ export const ItemDimensions = ({dimensionsDict, handleClose}) => {
     console.log(toggleNumKey,'in dimensions')
     
     return ( 
-        <div className="flex-column padding-top-20 padding-bottom-20" style={{minHeight:'400px'}}>
+        <button className="flex-column padding-top-20 padding-bottom-20" style={{minHeight:'400px'}}>
             {optionsList.map((option,i)=>{
 
                 return(
@@ -63,7 +63,7 @@ export const ItemDimensions = ({dimensionsDict, handleClose}) => {
                 )
             })}
             
-        </div>
+        </button>
      );
 }
 
@@ -92,10 +92,13 @@ export const ItemDimensionsBtn = ({dimensions,setItemData}) => {
                     dimensionsDict,
                 }}
                 pageId={'itemDimensions'}
-                handleClose={handleClose} />
+                handleClose={handleClose} 
+                header={{order:0,display:'Dimensions',class:'color-light-titles'}}
+                />
             }
-            <div className="flex-column items-center content-center gap-05 btn " style={{padding:'0',position:'relative'}}
+            <button className="flex-column items-center content-center gap-05 btn " style={{padding:'0',position:'relative'}}
                 onClick={()=>{setToggleDimensionsPage(true)}}
+                
                 >  
                 <div className="flex-column items-center content-center  svg-25">
                     <RulerIcon />
@@ -126,9 +129,9 @@ export const ItemDimensionsBtn = ({dimensions,setItemData}) => {
                     })
                 
                 }
-                <span style={{visibility: dimensions && Object.keys(dimensions).length > 0 ? 'hidden' :  'visible'}}>Dimensions</span>
+                <span className="text-9" style={{visibility: dimensions && Object.keys(dimensions).length > 0 ? 'hidden' :  'visible'}}>Dimensions</span>
                 
-            </div>
+            </button>
         </div>
     )
 }

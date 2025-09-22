@@ -1,10 +1,13 @@
-import {useState,useRef,useEffect,useCallback,memo} from 'react'
+import {useState,useRef,useEffect,useCallback,memo,useContext} from 'react'
 import {createPortal} from 'react-dom'
 
 import useFetch from '../hooks/useFetch.tsx'
 import usePrintLabelWiFi from '../hooks/usePrintLabelWiFi.tsx'
 import {useSaveItemsV2} from '../hooks/useSaveItemsV2.tsx'
+import {handleFocus} from '../hooks/scrollWhenFocus.tsx'
 import LoaderDots from '../components/LoaderDots.tsx'
+
+import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 
 
 
@@ -24,7 +27,7 @@ import MinusCircleIcon from '../assets/icons/MinusCircleIcon.svg?react'
 
 
 
-const CurrencyInputsEditItem = memo(({setItemData,purchased_price,valuation,sold_price})=>{
+const CurrencyInputsEditItem = memo(({setItemData,purchased_price,valuation,sold_price,handleFocusScroll})=>{
     
 
     return(
@@ -36,6 +39,7 @@ const CurrencyInputsEditItem = memo(({setItemData,purchased_price,valuation,sold
                 <input type="number" 
                     style={{width:'100%',fontSize:'13px'}}
                     value={purchased_price ?? ""}
+                    onFocus={(e)=>{handleFocusScroll(e)}}
                     onChange={e => setItemData(prev => (
                         { ...prev, 'purchased_price':e.target.value ? parseInt(e.target.value):null}
                     ))}
@@ -49,6 +53,7 @@ const CurrencyInputsEditItem = memo(({setItemData,purchased_price,valuation,sold
                 <input type="number"  
                     style={{width:'100%',fontSize:'13px'}}
                     value={valuation ?? ""}
+                    onFocus={(e)=>{handleFocusScroll(e)}}
                     onChange={e => setItemData(prev => (
                         { ...prev, 'valuation':e.target.value ? parseInt(e.target.value):null}
                     ))}
@@ -62,6 +67,7 @@ const CurrencyInputsEditItem = memo(({setItemData,purchased_price,valuation,sold
                 <input type="number"  
                     style={{width:'100%',fontSize:'13px'}}
                     value={sold_price ?? ""}
+                    onFocus={(e)=>{handleFocusScroll(e)}}
                     onChange={e => setItemData(prev => (
                         { ...prev, 'sold_price':e.target.value ? parseInt(e.target.value):null}
                     ))}
@@ -143,13 +149,11 @@ export const ItemPropsComp = ({setItemData,itemData,CurrencyInputsComponent,page
         
     }
 
-    console.log('-------------------------------') 
-    console.log(itemData,'data in imte data ')
-    console.log('-------------------------------') 
+    
     return (
         <div className="flex-column width100  ">
             {!pageSetUp.has('noImages') && 
-                <div className="flex-row content-center  padding-10">
+                <div className="flex-row content-center  " style={{padding:'2px 10px'}}>
                    
                     <CameraBtn props={{
                         listOfImages: 'images' in itemData && itemData.images ? itemData.images : [],
@@ -161,7 +165,7 @@ export const ItemPropsComp = ({setItemData,itemData,CurrencyInputsComponent,page
             }
              
 
-            <div className="flex-row space-around border-bottom  padding-top-20"
+            <div className="flex-row space-around border-bottom  "
             
             >
 
@@ -223,7 +227,7 @@ export const ItemPropsComp = ({setItemData,itemData,CurrencyInputsComponent,page
                 
             </div>
 
-            <div className="flex-row space-around padding-top-30 padding-bottom-30  border-bottom">
+            <div className="flex-row space-around   border-bottom" style={{padding:'20px 0'}}>
 
                     {!pageSetUp.has('noHistory') && 
                         <MemorizedItemHistoryBtn
@@ -263,13 +267,16 @@ export const ItemPropsComp = ({setItemData,itemData,CurrencyInputsComponent,page
                         purchased_price={itemData?.purchased_price ?? null}
                         valuation={itemData?.valuation ?? null}
                         sold_price={itemData?.sold_price ?? null}
+                        handleFocusScroll={handleFocus}
                     />
             </div>
             <div className="flex-row border-bottom width100 padding-10">
-                    <div className="flex-column gap-05">
+                    <div className="flex-column gap-05 width100">
                         <span className="text-9 color-lower-titles">Reference_number</span>
                         <input type="text" 
+                            className="width100"
                             value={itemData.reference_number ?? ""}
+                            onFocus={(e)=>{handleFocus(e)}}
                             onChange={(e)=>{
                                 const val = e.target.value; 
                                 setItemData(prev =>({...prev,'reference_number':val}) )
@@ -315,6 +322,7 @@ export const ItemEdit = ({preRenderInfo={},interactiveRef=null,handleDelitionIte
     const [toggleEditSettings,setToggleEditSettings] = useState(false)
     const {uploadItem,itemUploading,setUploading} = useSaveItemsV2()
 
+    const {showMessage} = useContext(ServerMessageContext)
  
     
     useEffect(()=>{
@@ -328,7 +336,27 @@ export const ItemEdit = ({preRenderInfo={},interactiveRef=null,handleDelitionIte
             per_page:1,
         }
         const handleFirstFetch = async() =>{
-            const fetch = await doFetch('/api/schemes/get_items','POST',fetchDict,setRules,setItemData)    
+            
+            const fetch = await doFetch({
+                url:'/api/schemes/get_items',
+                method:'POST',
+                body:fetchDict,
+                setRules:setRules,
+                setAssignData:setItemData 
+            })
+                    .then(
+                        response => {
+                            if(response.body.length == 0){
+                                showMessage({
+                                    message:'Article number not found.',
+                                    complementMessage:'No article number was found in data base, thus, no infromation will be loaded, and save button will be disabled.',
+                                    status:400
+                                })
+                                setTimeout(()=>{handleClose()},2000)
+                                
+                            }
+                        }
+                    )  
         }
 
         if(fetchWhenOpen){
@@ -386,6 +414,15 @@ export const ItemEdit = ({preRenderInfo={},interactiveRef=null,handleDelitionIte
         if(itemUploading){
             return
         }
+        
+        if(fetchWhenOpen && data.length == 0){
+            showMessage({
+                            message:'Article number not found.',
+                            complementMessage:'No article number was found in data base, thus, no infromation will be loaded and, save button will be disabled.',
+                            status:400
+                        })
+            return
+        }
 
         let baseLineDict = null
 
@@ -408,7 +445,7 @@ export const ItemEdit = ({preRenderInfo={},interactiveRef=null,handleDelitionIte
             type = itemData.fetchType
         }
         const upload = await uploadItem({
-            itemData,type,baseLineDict
+            itemData,type,baseLineDict,allowArticleChange:true
         })
         setUploading(false)
         if(upload.success || 'fetchType' in preRenderInfo){
@@ -421,7 +458,7 @@ export const ItemEdit = ({preRenderInfo={},interactiveRef=null,handleDelitionIte
 
 
     return ( 
-        <div ref={holdScrollElement} className="flex-column" style={{height:'100dvh',overflowY:'auto'}}>
+        <div ref={holdScrollElement} className="flex-column" style={{height:'100vh',overflowY:'auto'}}>
             {toggleEditSettings && interactiveRef && interactiveRef.current && 
                 createPortal(
                     <SelectPopupV2  setTogglePopup={setToggleEditSettings}
@@ -442,15 +479,16 @@ export const ItemEdit = ({preRenderInfo={},interactiveRef=null,handleDelitionIte
             />
            
 
-            <div className="flex-column width100 gap-2 padding-15 push-bottom padding-bottom-20">
-                <div role='button' className={`btn bg-containers ${isPrinterConnected} flex-row content-center padding-10 items-center`}
+            <div className="flex-column width100 gap-2 padding-15 padding-top-30">
+                <button className={`btn bg-containers ${isPrinterConnected} flex-row content-center padding-10 items-center`}
                     id='printLabel'
                     onClick={ ()=>{try{printLabel()}catch(err){console.log(err)}} }
                 >
                         <span className=" text-15">Print label</span>
-                </div>
+                </button>
                 
-                <div role='button' className="btn bg-secondary flex-row content-center padding-10 items-center"
+                
+                <button className="btn bg-secondary flex-row content-center padding-10 items-center"
                     onClick={()=>{handleSaveItem()}}
 
                 >       
@@ -464,7 +502,7 @@ export const ItemEdit = ({preRenderInfo={},interactiveRef=null,handleDelitionIte
                             <span className="color-primary text-15">Save Changes</span>
                         }
                         
-                </div>
+                </button>
             </div>
            
         </div>

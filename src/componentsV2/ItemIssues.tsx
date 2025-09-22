@@ -91,6 +91,7 @@ export const ItemIssues = ({setItemData,type,issues,zIndex}) => {
                 pageId={'itemIssues'}
                 handleClose={()=>{setToggleItemIssue(false)}}
                 zIndex={zIndex + 1}
+                header={{order:0,display:'Select Issues',class:'color-light-titles'}}
                 />
             }
 
@@ -110,9 +111,9 @@ export const ItemIssues = ({setItemData,type,issues,zIndex}) => {
                                  <div className=" push-right"
                                  onClick={()=>{handleDelitionIssue(i)}}
                                  >
-                                    <div className="flex-column items-center content-center svg-20">
+                                    <button className="flex-column items-center content-center svg-20">
                                         <MinusCircleIcon />
-                                    </div>
+                                    </button>
                                 </div>  
                             </div>
                         )
@@ -121,14 +122,14 @@ export const ItemIssues = ({setItemData,type,issues,zIndex}) => {
             </div>
             {isMap.current ? 
                 <div className="flex-row  padding-top-40 padding-bottom-40 ">
-                    <div role="button" className="flex-column gap-05 items-center content-center btn bg-containers border-blue padding-10"
+                    <button role="button" className="flex-column gap-05 items-center content-center btn bg-containers border-blue padding-10"
                     onClick={()=>{setToggleItemIssue(true)}}
                     >
                         <div className="svg-25">
                             <BrokenItemIcon />
                         </div>
                         <span>Add issue</span>
-                    </div>
+                    </button>
                 </div>
             :
                 <div className="flex-row items-center content-center">
@@ -158,10 +159,11 @@ export const ItemIssueBtn = ({issues=[],type,setItemData,zIndex}) =>{
                     zIndex={zIndex + 1}
                     pageId={'itemIssues'}
                     handleClose={()=>{setToggleItemIssuePage(false)}} 
+                    header={{order:0,display:'Manage Issues',class:'color-light-titles'}}
                 />
             }
 
-             <div role='button' className="flex-column items-center content-center gap-05 btn " style={{padding:'0',position:'relative'}}
+            <button  className="flex-column items-center content-center gap-05 btn " style={{padding:'0',position:'relative'}}
                 onClick={()=>{ setToggleItemIssuePage(true)}}>
 
                 {issues && issues.length > 0 &&
@@ -174,8 +176,8 @@ export const ItemIssueBtn = ({issues=[],type,setItemData,zIndex}) =>{
                 <div className="flex-column items-center content-center  svg-25">
                     <BrokenItemIcon />
                 </div>
-                    <span>Issues</span>
-                </div>
+                    <span className="text-9">Issues</span>
+            </button>
         </div>
     )
 }

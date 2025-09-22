@@ -86,7 +86,11 @@ const CreationItemSelectDealer = ({handleClose}) => {
                                     }
                
                 
-                doFetch('/api/schemes/get_items','POST',queryFilters,setRules)
+                doFetch({
+                    url:'/api/schemes/get_items',
+                    method:'POST',
+                    body:queryFilters,
+                    setRules:setRules})
                     .then((e)=>{
                         if(e && 'body' in e){
                             let body = e.body

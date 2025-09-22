@@ -1,6 +1,6 @@
 import {useState,useContext} from 'react'
 
-import {deleteImageS3,UploadImage} from '../hooks/useUploadImage.tsx'
+import {useUploadImage} from '../hooks/useUploadImage.tsx'
 import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 import {saveFailedItem,clearFailedItem,updateFailedItem} from './useIndexDB.tsx'
 
@@ -51,6 +51,7 @@ export const useSaveItemsV2= ()=>{
     const {showMessage} = useContext(ServerMessageContext)
     const [itemUploading,setUploading] = useState(false)
     const requiredFields = ['article_number','category','type','purchased_price','valuation','dealer']
+    const {deleteImageS3,UploadImage} = useUploadImage()
     
     const fetchNotes = async(fetchNoteDict,serverMessage)=>{
         const promises = []
@@ -78,7 +79,11 @@ export const useSaveItemsV2= ()=>{
                 .then(response => {
                     if(response.status >= 400){
                         console.log(response,'response inside if of .then')
-                        showMessage(response)
+                        showMessage({
+                            message:'Error Creating Note.',
+                            complementMessage:response.server_message,
+                            status:400
+                        })
                     }else if(serverMessage){
                         showMessage(response)
                     }
@@ -113,9 +118,16 @@ export const useSaveItemsV2= ()=>{
                 }}
 
             }else{
-                tempDict['action'] = 'create'
-                tempDict['sub_model_name'] = 'Item_Notes_Subject'
-                tempDict['values'] = {'subject':subjectDict.subject}
+                tempDict['action'] = 'link'
+                tempDict['values'] = {'Item_Notes_Subject':{
+                    'query_filters':{'subject':{'operation':'ilike','value':`%${subjectDict.subject}%`}},
+                    'link_type':'first_link',
+                    'action_if_none':'create_entry',
+                    'values_for_none_action':{'subject':subjectDict.subject}
+
+                }}
+
+               
 
             }
 

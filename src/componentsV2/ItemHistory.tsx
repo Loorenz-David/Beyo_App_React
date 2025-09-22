@@ -53,7 +53,11 @@ const ItemHistoryPage = ({itemId,creationTime,creationUser,holdScrollElement})=>
             loadData:true
         }
 
-        doFetch('/api/schemes/get_items','POST',fetchDict,setRules)
+        doFetch({
+            url:'/api/schemes/get_items',
+            method:'POST',
+            body:fetchDict,
+            setRules:setRules})
 
     },[])
 
@@ -251,20 +255,21 @@ const ItemHistoryBtn = ({itemId,creationTime,creationUser=null,zIndex=2})=>{
                     handleClose={()=>{setToggleItemHistory(false)}}
                     zIndex={zIndex + 1}
                     pageId={'itemHistoryPage'}
+                    header={{order:0,display:'Item History',class:'color-light-titles'}}
 
                     
                 />
             }
 
 
-            <div className="flex-column gap-05 btn"
+            <button className="flex-column gap-05 btn"
                 onClick={()=>{setToggleItemHistory(true)}}
             >
                 <div className="svg-25 flex-column items-center content-center">
                     <HistoryIcon/>
                 </div>
                 <span className="text-9">History</span>
-            </div>
+            </button>
         </div>
     )
 }

@@ -1,6 +1,24 @@
 import {useState,useContext} from 'react'
 import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 
+interface fetchDictProps{
+    method: "GET" | "POST" | "PUT" | "DELETE"
+    headers: HeadersInit
+    credentials?: "include" | "omit" | "same-origin"
+    body:any
+}
+
+interface apiFetchProps extends fetchDictProps{
+    endpoint:  string
+}
+
+interface doFetchProps {
+    url:string
+    method:"GET" | "POST" | "PUT" | "DELETE"
+    body:any
+    setRules?:any
+    setAssignData?: React.Dispatch<React.SetStateAction<any>> | null
+}
 
 function useFetch() {
     const {showMessage} = useContext(ServerMessageContext)
@@ -8,18 +26,26 @@ function useFetch() {
     const [loading,setLoading] = useState(false)
     const [error,setError] = useState(null)
     const [serverMessageDict,setServerMessageDict] = useState(null)
-    
+    const API_URL = import.meta.env.VITE_API_URL ?? ''
 
-    const doFetch = async (url='/api',method='POST',body={},setRules={},setAssignData=null) =>{
+    const apiFetch = async ({endpoint,method,headers,body,credentials}:apiFetchProps)=>{
+        const fetchDict:fetchDictProps = {
+            method:method,
+            headers:headers,
+            body:body
+        }
+        if(credentials){
+            fetchDict['credentials'] = credentials
+        }
+        const result = await fetch(`${API_URL}${endpoint}`,fetchDict)
 
-        let fetchDict = {
-                            method:method,
-                            headers:{'Content-Type':'application/json'},
-                            credentials:'include'
-        }
-        if(Object.keys(body).length > 0){
-                fetchDict['body'] = JSON.stringify(body)
-        }
+        return result
+    }
+
+    const doFetch = async ({url='/api',method='POST',body={},setRules={},setAssignData}:doFetchProps) =>{
+
+       
+        
         let response = null
 
         if(!loading){
@@ -28,7 +54,14 @@ function useFetch() {
         
 
         try{
-            const res = await fetch(url,fetchDict)
+            const res = await apiFetch({
+                method:method,
+                endpoint:url,
+                body:JSON.stringify(body),
+                headers:{'Content-Type':'application/json'},
+                credentials:'include'
+
+            })
             
             
 
@@ -43,8 +76,7 @@ function useFetch() {
                             complementMessage:result.server_message,
                             status:result.status,
                             })
-                                
-                            
+                                          
             }
             
             
@@ -64,20 +96,21 @@ function useFetch() {
             setError(error)
             setData([])
 
+
             console.log(error)
         } finally{
             setLoading(false)
-            
-            
+           
         }
         return response
         
     } // func end
 
 
+
     
     return {serverMessageDict,data,loading,error,doFetch,setLoading,setData,
-            setServerMessageDict
+            setServerMessageDict, apiFetch
     };
 }
  
