@@ -9,8 +9,8 @@ declare const require: any;
 export default defineConfig(async ({command}) => {
   const config: any = {
     build:{
-      sourcemap:false,
-      minify:'esbuild'
+      sourcemap:true,
+      // minify:'esbuild'
     },
     plugins: [react(),svgr(),
       VitePWA({

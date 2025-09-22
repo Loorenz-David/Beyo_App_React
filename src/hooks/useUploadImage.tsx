@@ -31,8 +31,8 @@ export function useUploadImage(){
                 continue
             }
 
-            const upload = await apiFetch({
-                endpoint:targetDict.url,
+            const upload = await fetch(targetDict.url,{
+                
                 method:'PUT',
                 headers:{'Content-Type':'image/webp'},
                 body:targetDict.file
