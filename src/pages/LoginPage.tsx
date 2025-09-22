@@ -4,12 +4,14 @@ import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 
 import {useNavigate} from 'react-router-dom'
 
+import useFetch from '../hooks/useFetch.tsx'
 
 const LoginPage = () => {
     const navigate = useNavigate()
     const loginRef = useRef<HTMLDivElement | null>(null)
     
     const {showMessage} = useContext(ServerMessageContext)
+    const {apiFetch} = useFetch()
 
     useEffect(()=>{
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
@@ -61,10 +63,11 @@ const LoginPage = () => {
             }
             
             try{
-                const response = await fetch ('/api/login',{
+                const response = await apiFetch ({
+                    endpoint:'/api/login',
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({email,password}),
+                    body:JSON.stringify(fetchDict),
                     credentials:'include'
                 })
                 
