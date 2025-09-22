@@ -203,7 +203,7 @@ const FilterPage = ({setFilters,handleClose,previousFilters,queryInputRef})=>{
                 buildFilterDict[tempKey] = value.id
             }
             else if(key === 'notes'){
-                if(!value || value.length == 0) continue
+                
                 tempKey = key + '.subject' + '.id'
                 buildFilterDict[tempKey] = {'operation':'in','value':value.map(obj => obj.id)}
             }
@@ -639,7 +639,7 @@ const ItemsPage = () => {
                     
                     startAnimation={'slideLeft'}
                     endAnimation ={'slideRight'}
-                    handleClose={()=>{setToggleBatchEdit(false);setSelectionMode(false);setSelectedItems({})}}    
+                    handleClose={()=>{setToggleBatchEdit(false);}}    
                     pageId={'itemsPage'}
                 />
             }

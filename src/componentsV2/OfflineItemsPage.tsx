@@ -226,7 +226,7 @@ const OfflineItemsPage = ({handleClose, zIndex,holdScrollElement}) => {
                     
                     startAnimation={'slideLeft'}
                     endAnimation ={'slideRight'}
-                    handleClose={()=>{setToggleBatchEdit(false);setSelectionMode(false);setSelectedItems({})}}    
+                    handleClose={()=>{setToggleBatchEdit(false);}}    
                 />
             }
 
