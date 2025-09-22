@@ -3,7 +3,7 @@ import {useState,useContext} from 'react'
 import {useUploadImage} from '../hooks/useUploadImage.tsx'
 import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 import {saveFailedItem,clearFailedItem,updateFailedItem} from './useIndexDB.tsx'
-
+import useFetch from './useFetch.tsx'
 
 const compareListOfImages = (curVal,baseVal=null)=>{
     
@@ -52,7 +52,8 @@ export const useSaveItemsV2= ()=>{
     const [itemUploading,setUploading] = useState(false)
     const requiredFields = ['article_number','category','type','purchased_price','valuation','dealer']
     const {deleteImageS3,UploadImage} = useUploadImage()
-    
+    const {apiFetch} = useFetch()
+
     const fetchNotes = async(fetchNoteDict,serverMessage)=>{
         const promises = []
         for(let key in fetchNoteDict){
@@ -70,11 +71,13 @@ export const useSaveItemsV2= ()=>{
             }
             
             
-            const promise = fetch(api,{
+            const promise = apiFetch({
+                endpoint:api,
                 method:'POST',
                 headers:{'Content-Type':'application/json'},
-                body:JSON.stringify(fetchNoteDict[key])
-                })
+                body:JSON.stringify(fetchNoteDict[key]),
+                credentials:'include'
+            })
                 .then(res => res.json())
                 .then(response => {
                     if(response.status >= 400){
@@ -530,7 +533,8 @@ export const useSaveItemsV2= ()=>{
                 let fetchNotesServerMessage= false
                 if(Object.keys(fetchDictData).length > 0){
                     
-                     const response = await fetch(api,{
+                     const response = await apiFetch({
+                        endpoint:api,
                         method:'POST',
                         headers:{'Content-Type':'application/json'},
                         body:JSON.stringify(fetchDict),
