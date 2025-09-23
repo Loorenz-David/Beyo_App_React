@@ -91,23 +91,22 @@ function App() {
     const checkSession = async ()=>{
       
       try{
-          const res = await apiFetch({
+          await apiFetch({
               endpoint:'/api',
               method:'POST',
               headers:{'Content-Type':'application/json'},
               body:JSON.stringify({}),
               credentials:'include'
           })
-          
-          if(res.status !== 200){
-            
-            throw('auth response return status 400')
-            
-          }
+          .then(res => {
+            if(!res.ok){
+              throw(res.status)
+            }
+          })
           
         } catch(error){
-          console.log(error)
-          if(!user.username){
+          
+          if(!user.username || error == 401){
             localStorage.removeItem('user')
             navigate('/login')
             showMessage({
