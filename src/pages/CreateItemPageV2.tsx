@@ -1,29 +1,41 @@
 import {useState,useEffect,useRef,useContext} from 'react'
 import {useNavigate} from 'react-router'
-import {ItemPropsComp} from '../componentsV2/ItemEdit.tsx'
-import ArrowIcon from '../assets/icons/ArrowIcon.svg?react'
 
+import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
+
+import ArrowIcon from '../assets/icons/ArrowIcon.svg?react'
 import ThreeDotMenu from '../assets/icons/ThreeDotMenu.svg?react'
+
+import {CurrencyInputsPurchase} from '../componentsV2/CurrencyInputs.tsx'
+import {ItemPropsComp} from '../componentsV2/ItemEdit.tsx'
+import LoaderDots from '../components/LoaderDots.tsx'
+
 import {useSaveItemsV2} from '../hooks/useSaveItemsV2.tsx'
 import {readArticleNumber} from '../hooks/useReadableArticleNumber.tsx'
 import SelectPopupV2 from '../componentsV2/SelectPopupV2.tsx'
-
-import LoaderDots from '../components/LoaderDots.tsx'
 import usePrintLabelWiFi from  '../hooks/usePrintLabelWiFi.tsx'
-import {CurrencyInputsPurchase} from '../componentsV2/CurrencyInputs.tsx'
-import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
+
+import type {ItemDict} from '../types/ItemDict.ts'
 
 
+interface SettingsDict{
+    displayName:string
+    property:string
+    icon?:any
+}
 
-let settingsList =[
+let settingsList:SettingsDict[] =[
     {'displayName':'Fast Slider', 'property':'toggleFastSlider','icon':''},
     {'displayName':'some setting', 'property':'some property'}
 ]
 
+interface SliderOrder{
+        id:string
+        action:(element:HTMLElement)=>void
+    }
 
 
-
-
+// useHook - CreateItemPageV2.CreateItemPageV2 - 
 const generateArticleNumber = () =>{
     const now = new Date()
     const year =  now.getFullYear().toString().slice(-2)
@@ -37,31 +49,41 @@ const generateArticleNumber = () =>{
     const articleNumber = year + month + date + hour + minute + second
    return articleNumber
 }
+// --------------------------------------------------------------------------------------------------------------
 
-
-// on creation item should :
-//  not be able to place sold_cost
-//  double check that the required keys for item creation are getting check 
-// 
 
 const CreateItemPageV2 = () => {
-    const [itemData,setItemData] = useState({})
-    const [toggleSettings,setToggleSettings] = useState(false)
+
+    // useContext - CreateItemPageV2.CreateItemPageV2 - 
     const {showMessage} = useContext(ServerMessageContext)
-    const {uploadItem,itemUploading,setUploading} = useSaveItemsV2()
     const navigate = useNavigate()
+    // --------------------------------------------------------------------------------------------------------------
+
+    // useState - CreateItemPageV2.CreateItemPageV2 - 
+    const [itemData,setItemData] = useState<Partial<ItemDict>>({})
+    const [toggleSettings,setToggleSettings] = useState(false)
     const [afterCompletion,setAfterCompletion] = useState(false)
+    // --------------------------------------------------------------------------------------------------------------
+    
+    // useHooks - CreateItemPageV2.CreateItemPageV2 - 
+    const {uploadItem,itemUploading,setUploading} = useSaveItemsV2()
     const {printLabel,isPrinterConnected} = usePrintLabelWiFi({
         itemData:itemData
     })
-    const firstPageLoad = useRef(false)
+    // --------------------------------------------------------------------------------------------------------------
+
+    // useRef - CreateItemPageV2.CreateItemPageV2 - 
+    const timeoutRef = useRef<number>(null)
     const activeSlider = useRef(JSON.parse(localStorage.getItem('activeSlider') || 'false'))
+    const settingsSelectedOptions = useRef<Set<string>>(activeSlider.current ? new Set(['Fast Slider']) : new Set())
+    const firstPageLoad = useRef(false)
     const sliderStep = useRef(0)
     const subPropCount = useRef(0)
-    const settingsSelectedOptions = useRef<Set<string>>(new Set([activeSlider.current ? 'Fast Slider': '']))
-    const timeoutRef = useRef(null)
+    // --------------------------------------------------------------------------------------------------------------
 
-    const activateCamera = (imageBtn)=>{
+
+    // helperFunctions - CreateItemPageV2.CreateItemPageV2 - 
+    const activateCamera = (imageBtn:HTMLElement)=>{
         const touchObj = new Touch({
                     identifier:Date.now(),
                     target:imageBtn,
@@ -78,14 +100,13 @@ const CreateItemPageV2 = () => {
 
         imageBtn.dispatchEvent(touchEndEvent)
     }
-    const activateProp = (targetElement)=>{
+    const activateProp = (targetElement:HTMLElement)=>{
         targetElement.click()
     }
-    const focusProp = (targetElement)=>{
+    const focusProp = (targetElement:HTMLElement)=>{
         targetElement.focus()
     }
-    
-    const sliderOrder = [
+    const sliderOrder:SliderOrder[] = [
         {'id':'dealer','action':activateProp},
         {'id':'images','action':activateCamera},
         {'id':'category','action':activateProp},
@@ -95,24 +116,26 @@ const CreateItemPageV2 = () => {
         {'id':'purchased_price','action':focusProp},
     ]
     
-    const updateSliderStep = (counterToUpdate)=>{
+    const updateSliderStep = (
+        counterToUpdate:React.RefObject<number>
+    )=>{
+
         counterToUpdate.current ++
         
         const currentDict = sliderOrder[sliderStep.current]
 
-       
+        
         activeSlideShow(currentDict)
+
     }
-
-
-    const activeSlideShow  = (currentDict)=>{
+    const activeSlideShow  = (currentDict:SliderOrder)=>{
         if(!currentDict){
             activeSlider.current = false
             return
         }
 
         if(currentDict.id == 'printLabel'){
-            const target = document.getElementById('printLabel')
+            const target = document.getElementById('printLabel') as HTMLDivElement
             if(target){
                 currentDict.action(target)
             }
@@ -128,9 +151,10 @@ const CreateItemPageV2 = () => {
                
                 if(children.length > 0 && subPropCount.current < children.length){
                     const subPropName = children[subPropCount.current].getAttribute('id')
-             
-                    if(!('properties' in itemData)  || !(subPropName in itemData.properties)){
-                        
+
+                    if(!subPropName) return;
+
+                    if(!itemData.properties  || !(subPropName in itemData.properties)){
                         currentDict.action(children[subPropCount.current])
                     }else{
             
@@ -151,14 +175,13 @@ const CreateItemPageV2 = () => {
               currentDict.action(targetElement)
             }
         }else{
-            const threshold = updateSliderStep(sliderStep)
-            if(threshold){
-                activeSlider.current = false
-                return
-            }
+            updateSliderStep(sliderStep)
+            return
         }
     }
+    // --------------------------------------------------------------------------------------------------------------
 
+    // useEffect - CreateItemPageV2.CreateItemPageV2 - 
     useEffect(()=>{
 
         if(!firstPageLoad.current){
@@ -184,12 +207,12 @@ const CreateItemPageV2 = () => {
         }
 
     },[itemData])
+    // --------------------------------------------------------------------------------------------------------------
+    
 
-   
-
-
-    const handleSettingSelection = (settingObj)=>{
-        console.log(settingObj)
+    // handleFunctions - CreateItemPageV2.CreateItemPageV2 - 
+    const handleSettingSelection = (settingObj:SettingsDict)=>{
+        
         if(settingObj.property == 'toggleFastSlider'){
             let messageText = "Fast Slider "
             activeSlider.current = !activeSlider.current
@@ -211,7 +234,7 @@ const CreateItemPageV2 = () => {
         setToggleSettings(false)
     }
 
-    const handleSaveItem = async (actionType) =>{
+    const handleSaveItem = async (actionType:'update' | 'create' ) =>{
        
         if(itemUploading)return;
         const upload = await uploadItem({
@@ -240,10 +263,8 @@ const CreateItemPageV2 = () => {
         setAfterCompletion(false)
 
     }
-
- 
-
-   
+    // --------------------------------------------------------------------------------------------------------------
+    
     return ( 
         <div className="flex-column width100" style={{height:'100dvh',overflow:'hidden'}}>
             
@@ -259,7 +280,7 @@ const CreateItemPageV2 = () => {
                 </div>
                 <div className="flex-column flex-1 items-center content-center">
                     <span className="text-15">
-                        {'article_number' in itemData && readArticleNumber(itemData.article_number)}
+                        {itemData.article_number && readArticleNumber(itemData.article_number)}
                     </span>
                 </div>
                 <div className="flex-column content-center" style={{position:'relative'}}>

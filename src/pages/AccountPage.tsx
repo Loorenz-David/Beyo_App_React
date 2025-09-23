@@ -1,33 +1,55 @@
-import ThreeDotMenu from '../assets/icons/ThreeDotMenu.svg?react'
-import '../css/containers.css'
+import {useState,useEffect,useContext,useRef} from 'react'
+import {useNavigate} from 'react-router-dom'
+
+import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
+
 import useFetch from '../hooks/useFetch.tsx'
 
 import UserIcon from '../assets/icons/UserIcon.svg?react'
-import {useState,useEffect,useContext,useRef} from 'react'
+import ThreeDotMenu from '../assets/icons/ThreeDotMenu.svg?react'
 
+import {LiveCamera,ImagePreviewSlider,makeImageUrl} from '../componentsV2/CameraBtn.tsx'
 import SecondaryPage from '../components/secondary-page.tsx'
 import LoaderDots from '../components/LoaderDots.tsx'
-
 import UserSettingsSlide from '../components/user-settings.tsx'
-import {useNavigate} from 'react-router-dom'
-import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
-import {LiveCamera,ImagePreviewSlider,makeImageUrl} from '../componentsV2/CameraBtn.tsx'
+
 import {useUploadImage} from '../hooks/useUploadImage.tsx'
 
+
+interface ImagesDict{
+            file:File
+            url?:string
+            isUpload:boolean
+        }
+
+interface RolesDict{
+    role:string
+}
+interface UserDict{
+    id:number
+    email:string
+    phone:string
+    images:string[]
+    roles: RolesDict[]
+    username:string
+}
+
 const AccountPage = () => {
+
+    const {showMessage} = useContext(ServerMessageContext)
     const navigate = useNavigate()
-    const {doFetch} = useFetch()
-    const [formData, setFormData] = useState({})
-   
+    
     const [imagePage,setImagePage] = useState(false)
     const [settingsPage,setSettingsPage] = useState(false)
-    const [user,setUserData] = useState({})
-   
-    const {showMessage} = useContext(ServerMessageContext)
-    const imageBlobs = useRef([])
-    const userHadImageUpload = useRef([])
+    const [user,setUserData] = useState<Partial<UserDict>>({})
     const [loadingUserPage,setLoadingUserPage] = useState(false)
+
+    const imageBlobs = useRef<string[]>([])
+    const userHadImageUpload = useRef<string[]>([])
+
     const {deleteImageS3,UploadImage} = useUploadImage()
+    const {doFetch} = useFetch()
+    const [formData, setFormData] = useState<Partial<UserDict>>({})
     
 
     
@@ -45,7 +67,7 @@ const AccountPage = () => {
             if(res && res.status < 400 && res.body.length > 0){
                 
                 setUserData(res.body[0])
-                let addingFetchImage = []
+                let addingFetchImage:string[] = []
                 if(res.body[0].profile_picture && res.body[0].profile_picture !== '' ){
                     addingFetchImage = [res.body[0].profile_picture]
                     userHadImageUpload.current = addingFetchImage
@@ -63,37 +85,47 @@ const AccountPage = () => {
         })
         
         return ()=>{
-            if(imageBlobs.current.lenght > 0){
-                imageBlobs.forEach(blob => URL.revokeObjectURL(blob))
+            if(imageBlobs.current.length > 0){
+                imageBlobs.current.forEach((blob) => URL.revokeObjectURL(blob))
             }
         }
     },[])
 
-    const handleChange = (e) =>{
+
+    const handleChange = (e:React.ChangeEvent<HTMLInputElement>) =>{
         const {name,value} = e.target
-        
         
         setFormData(prev => ({...prev, [name]:value}))
         
     }
 
-    const handleFormSubmition = async (e) =>{
+    const handleFormSubmition = async () =>{
+        
         setLoadingUserPage(true)
-        const dataToBeUpload = {...formData}
-        if(formData.images.length > 0 && typeof formData.images[0] == 'object'){
+
+        const dataToBeUpload:{
+            images?:ImagesDict[] | string[]
+            profile_picture?:string
+
+        } = {...formData}
+
+        if( dataToBeUpload.images && dataToBeUpload.images.length > 0 && typeof dataToBeUpload.images[0] == 'object'){
             
             console.log(formData,'in if')
             if(userHadImageUpload.current.length > 0){
                 
                 await deleteImageS3(userHadImageUpload.current)
             }
-            const imagesToUpload = formData.images
+            const imagesToUpload:ImagesDict[] | string[] = dataToBeUpload.images
             await UploadImage(imagesToUpload,'profiles_pictures')
             console.log(imagesToUpload)
-            if(imagesToUpload[0].isUpload){
-                dataToBeUpload['profile_picture'] = imagesToUpload[0].url
-                
+            if(!(typeof imagesToUpload[0] == 'string')){
+                 if(imagesToUpload[0].isUpload){
+                    dataToBeUpload['profile_picture'] = imagesToUpload[0].url
+                    
+                }
             }
+           
 
         }
         
@@ -134,11 +166,13 @@ const AccountPage = () => {
             url:'/api/logout',
             method:'POST',
             body:{},
-            setRules:setRules}).then(res => {
-           
-            localStorage.removeItem('user')
-            navigate('/login')
-            
+            setRules:setRules
+        })
+        .then((res:Response) => {
+            if(res.ok){
+                localStorage.removeItem('user')
+                navigate('/login')
+            }
         })
         
         

@@ -8,13 +8,13 @@ interface InfiniteScrollProps{
     lastLoad:React.RefObject<boolean>
     handleFetch:(scrolling:'up' | 'down' | '',fetchPerPage:number,itemsListId?:number[]) => Promise<any[]|false>
     dataList:{id:number}[]
-    setDataList: React.Dispatch<React.SetStateAction<{id:number}[]>>
+    setDataList: React.Dispatch<React.SetStateAction<any[]>>
 }
 
 const useInfiniteScroll = ({itemHeight,thressholdItems,nextBatchItems,lastLoad,handleFetch,dataList,setDataList}:InfiniteScrollProps) => {
-    const [ScrollDown_Loading,setScrollDown_Loading] = useState(false)
-    const [ScrollUp_Loading,setScrollUp_Loading] = useState(false)
-    const lastScroll = useRef(0)
+    const [ScrollDown_Loading,setScrollDown_Loading] = useState<boolean>(false)
+    const [ScrollUp_Loading,setScrollUp_Loading] = useState<boolean>(false)
+    const lastScroll = useRef<number>(0)
     const removedItems = useRef<number[]>([])
 
 
@@ -44,7 +44,7 @@ const useInfiniteScroll = ({itemHeight,thressholdItems,nextBatchItems,lastLoad,h
         return (items * itemHeight) -clientHeight
     }
     
-    const handleScroll = async(e)=>{
+    const handleScroll = async(e:React.TouchEvent<HTMLDivElement>)=>{
 
        
         

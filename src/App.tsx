@@ -36,11 +36,14 @@ function App() {
   const {apiFetch} = useFetch()
   const firstLoad = useRef(false)
 
-  const {needRefresh,updateServiceWorker} = useRegisterSW({
+  useRegisterSW({
     onRegisteredSW(swUrl,registration){
       console.log('new service worker registered',swUrl)
       setInterval(()=>{
-        registration.update()
+        if(registration){
+          registration.update()
+        }
+        
       },60*60*1000)
     },
     onNeedRefresh(){
@@ -96,11 +99,12 @@ function App() {
               credentials:'include'
           })
           
-        
           if(res.status !== 200){
+            
             throw('auth response return status 400')
             
           }
+          
         } catch(error){
           console.log(error)
           if(!user.username){
@@ -120,6 +124,7 @@ function App() {
             })
           }
         }
+        
     }
     
     if(navigator.onLine){
@@ -145,7 +150,7 @@ function App() {
       
 
     },[navigate])
-
+    
   return (
     <div className='App'>
       {!shouldHideNav && <NavBar />}

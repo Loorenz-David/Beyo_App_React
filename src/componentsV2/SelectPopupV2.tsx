@@ -2,7 +2,7 @@ import {useEffect,useRef} from 'react'
 import CheckMarkIcon from '../assets/icons/CheckMarkIcon.svg?react'
 import LoaderDots from '../components/LoaderDots.tsx'
 
-const SelectPopupV2 = ({top='100%',right='0',setTogglePopup,listOfValues,onSelect,zIndex=1,selectedOption=new Set([]),loading=false,parentWidth=null}) => {
+const SelectPopupV2 = ({top='100%',right='0',setTogglePopup,listOfValues,onSelect,zIndex=1,selectedOption=new Set<string>(),loading=false,parentWidth=null}) => {
     const insideRef = useRef(null)
     const ignoreFirstClick = useRef(true)
 

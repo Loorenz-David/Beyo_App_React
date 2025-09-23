@@ -10,6 +10,7 @@ import './css/buttons-styles.css'
 import './css/server-error.css'
 import './css/svg-styles.css'
 import './css/loaders.css'
+import './css/containers.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

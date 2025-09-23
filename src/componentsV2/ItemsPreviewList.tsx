@@ -34,7 +34,6 @@ interface propsItemPreview {
 }
 interface propsPreviewList{
     data: ItemVals[]
-   
     setForceRenderParent: React.Dispatch<React.SetStateAction<boolean>>
     fetchWhenOpen:boolean
     setSelectionMode:React.Dispatch<React.SetStateAction<boolean>>
@@ -42,7 +41,12 @@ interface propsPreviewList{
     selectedItems:any
     setSelectedItems:any
     containerHeight?:string
-    handleDelitionItems:()=>void |null
+    handleDelitionItems:(()=>void )| null
+    selectionTargetKey:string | number
+    handleScroll:(e:React.TouchEvent<HTMLDivElement>)=>void
+    loaders?:{[key:string]:boolean}
+    zIndex?:number
+    holdScrollElement?: React.RefObject<HTMLDivElement>
 }
 
 
@@ -153,43 +157,59 @@ export  const ItemPreviewContainer: React.FC<propsItemPreview> = ({itemObj,imgBl
 
 
 
-export const ItemsPreviewList:React.FC<propsPreviewList> = ({data,handleDelitionItems,selectionMode,setSelectionMode,selectedItems={},setSelectedItems=null,setForceRenderParent,fetchWhenOpen,selectionTargetKey,handleScroll,loaders={},containerHeight,zIndex=2,holdScrollElement=null}) => {
-    const[openItem,setOpenItem] = useState(false)
-    const imgBlobs = useRef([])
-   
+export const ItemsPreviewList= ({
+    data,
+    handleDelitionItems,
+    selectionMode,
+    setSelectionMode,
+    selectedItems={},
+    setSelectedItems=null,
+    setForceRenderParent,
+    fetchWhenOpen,
+    selectionTargetKey,
+    handleScroll,
+    loaders={},
+    containerHeight,
+    zIndex=2,
+    holdScrollElement=null 
+}:propsPreviewList) => {
+            
+        const[openItem,setOpenItem] = useState(false)
+        const imgBlobs = useRef([])
+    
 
 
-    const handleActionWhenPress = (targetElement,selectedObj)=>{
-        const checkMark = targetElement.querySelector('.selectedItem')
-        checkMark.classList.toggle('hidden')
+        const handleActionWhenPress = (targetElement,selectedObj)=>{
+            const checkMark = targetElement.querySelector('.selectedItem')
+            checkMark.classList.toggle('hidden')
 
-        const targetId = selectedObj[selectionTargetKey]
-        console.log(targetElement)
-        if(targetId in selectedItems){
-            setSelectedItems(prev =>{
-            const {[targetId]:_, ...current} = prev
+            const targetId = selectedObj[selectionTargetKey]
+            console.log(targetElement)
+            if(targetId in selectedItems){
+                setSelectedItems(prev =>{
+                const {[targetId]:_, ...current} = prev
 
-            return current
-        })
-        }else{
-            setSelectedItems(prev =>({...prev,[targetId]:selectedObj}))
-        }
-
-    }
-    const handleDefaultActionWhenClick = ()=>{
-        setOpenItem(true)
-    }
-    const {handlePressStart,handlePressEnd,handleTouchMove,currentSelectedObj} = useLongPressAction({selectionMode,setSelectionMode,handleActionWhenPress,handleDefaultActionWhenClick})
-   
-
-    useEffect(()=>{
-
-        return ()=>{
-            if(imgBlobs.current.length > 0){
-                imgBlobs.current.forEach(url => URL.revokeObjectURL(url))
+                return current
+            })
+            }else{
+                setSelectedItems(prev =>({...prev,[targetId]:selectedObj}))
             }
+
         }
-    },[])
+        const handleDefaultActionWhenClick = ()=>{
+            setOpenItem(true)
+        }
+        const {handlePressStart,handlePressEnd,handleTouchMove,currentSelectedObj} = useLongPressAction({selectionMode,setSelectionMode,handleActionWhenPress,handleDefaultActionWhenClick})
+    
+
+        useEffect(()=>{
+
+            return ()=>{
+                if(imgBlobs.current.length > 0){
+                    imgBlobs.current.forEach(url => URL.revokeObjectURL(url))
+                }
+            }
+        },[])
    
     return (
         <div className={`flex-column  width100`} style={{overflowY:'auto', height:'100dvh',paddingBottom:'200px'}}

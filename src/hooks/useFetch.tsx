@@ -37,8 +37,9 @@ function useFetch() {
         if(credentials){
             fetchDict['credentials'] = credentials
         }
+        
         const result = await fetch(`${API_URL}${endpoint}`,fetchDict)
-
+        
         return result
     }
 

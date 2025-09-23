@@ -13,7 +13,7 @@ import CheckBoxIcon from '../assets/icons/CheckBoxIcon.svg?react'
 import FilterIcon from '../assets/icons/FilterIcon.svg?react'
 import ArrowIcon from '../assets/icons/ArrowIcon.svg?react'
 
-import {ItemTypeMap} from '../maps/mapItemTypeV2.tsx'
+import {ItemTypeMap, type ItemType} from '../maps/mapItemTypeV2.tsx'
 
 import useFetch from '../hooks/useFetch.tsx'
 import {useLongPressAction} from '../hooks/useLongPressActions.tsx'
@@ -32,19 +32,31 @@ import {ItemsPreviewList,ItemPreviewContainer} from '../componentsV2/ItemsPrevie
 import SelectionModeComponent from '../componentsV2/SelectionModeComponent.tsx'
 
 
+import type {GetFetchDictProps} from '../types/fetchTypes.ts'
+import type {ItemDict, ItemPriceFields} from '../types/ItemDict.ts'
+
+
+
+
+
+
+
 
 const NavigationBtn = () =>{
-    const dealerPageRef = useRef(null)
-    const itemPageRef = useRef(null)
-    const isActiveRef = useRef(false)
+    const dealerPageRef = useRef<HTMLDivElement>(null)
+    const itemPageRef = useRef<HTMLDivElement>(null)
+    const isActiveRef = useRef<boolean>(false)
     const [toggleCreateDealer,setToggleCreateDealer] = useState(false)
     const navigate = useNavigate()
 
-    const handleFirstInteraction = (e,isActiveRef)=>{
+    const handleFirstInteraction = (
+        e:React.MouseEvent<HTMLDivElement>,
+        isActiveRef:React.RefObject<boolean>
+    )=>{
         const current = e.currentTarget
         const target = current.querySelector('.plus-btn')
         
-        if(target){
+        if(target && dealerPageRef.current && itemPageRef.current){
             target.classList.toggle('rotateContainer')
             if(isActiveRef.current){
                 dealerPageRef.current.style.bottom = '0'
@@ -86,16 +98,20 @@ const NavigationBtn = () =>{
            
                     <div className="flex-column items-center content-center " style={{position:'relative',}}>
 
-                        <div className="flex-row items-center content-center bg-secondary padding-10" style={{borderRadius:'50%',position:'absolute', bottom:'0',transform:'scale(0.5)',transition:'bottom 0.2s ease-out,transform 0.2s ease-out'}}
-                        ref={dealerPageRef}
-                        onClick={()=>{setToggleCreateDealer(true)}}
+                        <div className="flex-row items-center content-center bg-secondary padding-10" 
+                            style={{borderRadius:'50%',position:'absolute', bottom:'0',transform:'scale(0.5)',transition:'bottom 0.2s ease-out,transform 0.2s ease-out'}}
+                            ref={dealerPageRef}
+                            onClick={()=>{setToggleCreateDealer(true)}}
                         >
-                            <div className=" flex-row content-center  items-center svg-25 svg-bg-container" style={{width:'20px',height:'20px',}}>
+                            <div className=" flex-row content-center  items-center svg-25 svg-bg-container" 
+                                style={{width:'20px',height:'20px',}}
+                            >
                                <DealerIcon/>
                             </div>
                         </div>
 
-                        <div className="flex-row items-center content-center bg-secondary padding-10" style={{borderRadius:'50%',position:'absolute',transform:'scale(0.5)', right:'0',transition:'right 0.2s ease-out,transform 0.2s ease-out'}}
+                        <div className="flex-row items-center content-center bg-secondary padding-10" 
+                        style={{borderRadius:'50%',position:'absolute',transform:'scale(0.5)', right:'0',transition:'right 0.2s ease-out,transform 0.2s ease-out'}}
                         ref={itemPageRef}
                         onClick={()=>{navigate('/items/create_item')}}
                         >
@@ -104,8 +120,9 @@ const NavigationBtn = () =>{
                             </div>
                         </div>
 
-                         <div className="flex-row items-center content-center bg-secondary padding-10 " style={{borderRadius:'50%',zIndex:'1',transition:'transform 0.2s ease-out'}}
-                         onClick={(e)=>{handleFirstInteraction(e,isActiveRef)}}
+                         <div className="flex-row items-center content-center bg-secondary padding-10 " 
+                            style={{borderRadius:'50%',zIndex:'1',transition:'transform 0.2s ease-out'}}
+                            onClick={(e)=>{handleFirstInteraction(e,isActiveRef)}}
                          >
                             <div className=" flex-row content-center  plus-btn " style={{width:'20px',height:'20px',}}>
                                 <div className="plus-vertical bg-primary" ></div>
@@ -120,17 +137,50 @@ const NavigationBtn = () =>{
     )
 }
 
-const operationSymbol = [{'display':'>','val':'>='},{'display':'=','val':'=='},{'display':'<','val':'<='}]
-const CurrencyInputsFilters = ({setItemData,purchased_price,valuation,sold_price,handleFocusScroll})=>{
 
-    const inputValObj = {
-        'purchased_price':purchased_price,
-        'valuation':valuation,
-        'sold_price':sold_price
-    }
+
+interface operationSymbol{
+    display:'<' | '>' | '='
+    val:'>=' | '<=' | '=='
+}
+
+interface PriceFilterValue{
+    value: number | null
+    operation:operationSymbol
+}
+
+type ItemPriceFilterFields = {
+    [key in keyof ItemPriceFields]:PriceFilterValue
+}
+
+interface FilterItemDict 
+    extends Omit<ItemDict, keyof ItemPriceFields>, Partial<ItemPriceFilterFields> {}
+
+interface CurrencyInputsFilters extends ItemPriceFilterFields{
+    setItemData:React.Dispatch<React.SetStateAction< FilterItemDict >>
+    handleFocusScroll:(e:React.FocusEvent<HTMLInputElement>) => void
+}
+
+const operationSymbol:operationSymbol[] = [{'display':'>','val':'>='},{'display':'=','val':'=='},{'display':'<','val':'<='}]
+const CurrencyInputsFilters = ({
+    setItemData,
+    purchased_price,
+    valuation,
+    sold_price,
+    handleFocusScroll
+}:CurrencyInputsFilters)=>{
+
+    const inputValObj= {
+        purchased_price,
+        valuation,
+        sold_price
+    } satisfies ItemPriceFilterFields
     
 
-    const handleOperationCurrency = (e,property)=>{
+    const handleOperationCurrency = (
+        e:React.MouseEvent<HTMLDivElement>, 
+        property: keyof ItemPriceFields
+    )=>{
         const target = e.currentTarget
         const val = target.textContent.trim()
         const indx = operationSymbol.findIndex(obj => obj.display == val) 
@@ -141,115 +191,158 @@ const CurrencyInputsFilters = ({setItemData,purchased_price,valuation,sold_price
         const targetSymbol = operationSymbol[nextIndex]
         target.textContent = targetSymbol.display
 
-        setItemData(prev => ({...prev, [property]: {...(prev[property] ?? {'value':null} ),'operation':targetSymbol } }))
+        setItemData((prev) => {
+            const currentValue = prev[property]
+            let newValue:PriceFilterValue 
+            let numericValue: number | null = null
+
+            if(currentValue && typeof currentValue === 'object' && 'value' in currentValue){
+                numericValue = currentValue.value
+            }else if(typeof currentValue === 'number'){
+                numericValue = currentValue
+            }
+            newValue = {'value': numericValue, 'operation':targetSymbol}
+            return {...prev, [property]:newValue}
+        })
         
         
         
     }
     return(
         <div className="flex-row  border-bottom border-top ">
-            {Object.entries(inputValObj).map(([columName,columValue],i)=>{
-                const labelName = columName.charAt(0).toUpperCase() + columName.slice(1).toLowerCase()
-                return(
-                    <React.Fragment key={`currencyInput_${i}`}>
-                        <div className="flex-column gap-1 padding-10" >
-                            <span className="color-lower-titles text-9"> 
-                                {labelName.replace("_"," ")}
-                            </span>
-                            <div className="flex-row width100">
-                                <input style={{fontSize:'12px'}} className="width100"  type="number" 
-                                    onFocus={(e)=>{handleFocusScroll(e)}}
-                                    onInput={(e)=>{setItemData(prev => ({...prev, [columName]:{'value':e.target.value? parseInt(e.target.value):null }}) )}}
-                                    value={ columValue && 'value' in columValue && columValue.value ? columValue.value : '' }
-                                />
-                                <div className="flex-column bg-containers border-blue btn items-center content-center" style={{padding:'1px 7px'}}
-                                onClick={(e)=>{handleOperationCurrency(e,columName)}}
-                                >
-                                        {columValue && 'operation' in columValue ? columValue.operation.display : '='} 
+            { (Object.entries(inputValObj) as [keyof ItemPriceFields, PriceFilterValue][])
+                .map(
+                    ([property,columValue],i)=>{
+                        const labelName = property.charAt(0).toUpperCase() + property.slice(1).toLowerCase()
+                        return(
+                            <React.Fragment key={`currencyInput_${i}`}>
+                                <div className="flex-column gap-1 padding-10" >
+                                    <span className="color-lower-titles text-9"> 
+                                        {labelName.replace("_"," ")}
+                                    </span>
+                                    <div className="flex-row width100">
+                                        <input style={{fontSize:'12px'}} className="width100"  type="number" 
+                                            onFocus={
+                                                (e)=>{handleFocusScroll(e)}
+                                            }
+                                            onInput={
+                                                (e:React.InputEvent<HTMLInputElement>)=>{
+                                                    const input = e.target as HTMLInputElement;
+                                                    setItemData(prev => (
+                                                        {...prev, [property]:{'value':input.value ? parseInt(input.value) : null }}
+                                                    ))
+                                                }
+                                            }
+                                            value={ columValue  && 'value' in columValue && columValue.value ? columValue.value : '' }
+                                        />
+                                        <div className="flex-column bg-containers border-blue btn items-center content-center" style={{padding:'1px 7px'}}
+                                        onClick={(e:React.MouseEvent<HTMLDivElement>)=>{handleOperationCurrency(e,property)}}
+                                        >
+                                                {columValue && 'operation' in columValue ? columValue.operation.display : '='} 
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="vertical-line" ></div>
-                    </React.Fragment>
+                                <div className="vertical-line" ></div>
+                            </React.Fragment>
+                        )
+                    }
                 )
-            })}
+            }
         </div>
     )
 }
 
 
-const FilterPage = ({setFilters,handleClose,previousFilters,queryInputRef})=>{
- 
-    const [itemData,setItemData] = useState({...previousFilters.current})
-    const itemPropTypeDict = useRef([])
-    const propsUpdated = useRef(false)
+interface FilterPage{
+    setFilters:React.Dispatch<React.SetStateAction<{}>>
+    handleClose:()=>void
+    previousFilters: React.RefObject<{}>
+    queryInputRef:React.RefObject<HTMLInputElement>
+}
+const FilterPage = ({
+    setFilters,
+    handleClose,
+    previousFilters,
+    queryInputRef
+}:FilterPage)=>{
 
-    const handleClearFilters = ()=>{
-        if(queryInputRef.current){
-            queryInputRef.current.value = ''
-        }
-        previousFilters.current = {}
-        setFilters({})
-        handleClose(true)
-    }
-    
-    const handleSaveFilters = () =>{
-        const buildFilterDict:any = {}
-        
-        for(const [key,value] of Object.entries(itemData)){
-            let tempKey
-            if(key === 'dealer'){
-                tempKey = key + '.id'
-                buildFilterDict[tempKey] = value.id
+        // useState - ItemPage.FilterPage - 
+        const [itemData,setItemData] = useState<ItemDict | {}>({...previousFilters.current})
+        // --------------------------------------------------------------------------------------------------------------
+
+
+        // useRef - ItemPage.FilterPage - 
+        const itemPropTypeDict = useRef<ItemType[][]>([])
+        const propsUpdated = useRef(false)
+        // --------------------------------------------------------------------------------------------------------------
+
+        // handleFunctions - ItemPage.FilterPage - 
+        const handleClearFilters = ()=>{
+            if(queryInputRef.current){
+                queryInputRef.current.value = ''
             }
-            else if(key === 'notes'){
+            previousFilters.current = {}
+            setFilters({})
+            handleClose()
+        }
+        
+        const handleSaveFilters = () =>{
+            const buildFilterDict:any = {}
+            
+            for(const [key,value] of Object.entries(itemData)){
+                let tempKey
+                if(key === 'dealer'){
+                    tempKey = key + '.id'
+                    buildFilterDict[tempKey] = value.id
+                }
+                else if(key === 'notes'){
+                    
+                    tempKey = key + '.subject' + '.id'
+                    buildFilterDict[tempKey] = {'operation':'in','value':value.map((obj:ItemDict) => obj.id)}
+                }
+                else if(key === 'dimensions' || key === 'issues' || key === 'properties' || key === 'parts'){
+                    if(value == null || value.length == 0) continue
+                    buildFilterDict[key] = {'operation':'contains' ,'value':value}
+                }
+                else if(key === 'purchased_price' || key === 'valuation' || key === 'sold_price'){
+                    if( value.value ){
+                        buildFilterDict[key] = {'operation':value.operation ? value.operation.val : '=='  , 'value':value.value}
+                    } 
+                }else if( key == 'reference_number' && value == ''){
+                    continue
+                }
                 
-                tempKey = key + '.subject' + '.id'
-                buildFilterDict[tempKey] = {'operation':'in','value':value.map(obj => obj.id)}
+                else{
+                    buildFilterDict[key] = value
+                }  
+                
             }
-            else if(key === 'dimensions' || key === 'issues' || key === 'properties' || key === 'parts'){
-                if(value == null || value.length == 0) continue
-                buildFilterDict[key] = {'operation':'contains' ,'value':value}
-            }
-            else if(key === 'purchased_price' || key === 'valuation' || key === 'sold_price'){
-                if( value.value ){
-                    buildFilterDict[key] = {'operation':value.operation ? value.operation.val : '=='  , 'value':value.value}
-                } 
-            }else if( key == 'reference_number' && value == ''){
-                continue
-            }
+            previousFilters.current = {...itemData}
+        
+            setFilters(prev => ({...prev,...buildFilterDict}))
+            handleClose()
             
-            else{
-                buildFilterDict[key] = value
-            }  
             
         }
-        previousFilters.current = {...itemData}
-       
-        setFilters(prev => ({...prev,...buildFilterDict}))
-        handleClose()
-        
-        
-    }
+        // --------------------------------------------------------------------------------------------------------------
 
-    
-    if('type' in itemData && 'category' in itemData && !propsUpdated.current){
-        const targetMapTypeDict = ItemTypeMap[itemData['category']].find(obj => obj.displayName == itemData.type)
-        
-        if( targetMapTypeDict && 'next' in targetMapTypeDict){
-            targetMapTypeDict.next.forEach(dictName =>{
-                const nextDict = ItemTypeMap[dictName]
-                itemPropTypeDict.current.push( nextDict )
-            })
+        // maps - ItemPage.FilterPage - 
+        if('type' in itemData && 'category' in itemData && !propsUpdated.current){
+            const targetMapTypeDict:ItemType | undefined = ItemTypeMap[itemData['category']].find(obj => obj.displayName == itemData.type)
+            
+            if( targetMapTypeDict && 'next' in targetMapTypeDict){
+                targetMapTypeDict.next?.forEach(dictName =>{
+                    const nextDict:ItemType[]= ItemTypeMap[dictName]
+                    
+                    itemPropTypeDict.current.push( nextDict )
+                })
 
-            propsUpdated.current = true
+                propsUpdated.current = true
+            }
+            
         }
-        
-    }
-   
+        // --------------------------------------------------------------------------------------------------------------
 
-    
-    
     
     return (
         <div className="flex-column padding-top-40 padding-bottom-20" style={{height:'100dvh'}}>
@@ -270,7 +363,7 @@ const FilterPage = ({setFilters,handleClose,previousFilters,queryInputRef})=>{
             
             >
                 <MemorizedNoteSearchBtn setItemData ={setItemData}
-                    notesList={itemData.notes && itemData.notes !== null ? itemData.notes : []}
+                    notesList={'notes' in itemData && itemData.notes !== null ? itemData.notes : []}
                     displayName={'Notes...'}
                     zIndex={3}
                 />
@@ -295,55 +388,101 @@ const FilterPage = ({setFilters,handleClose,previousFilters,queryInputRef})=>{
     )
 }
 
+
+interface HandleMapSettings{
+    toggleFilters:()=>void
+    toggleOfflineItems:()=>void
+    toggleSelectionMode:()=>void
+
+}
+interface ItemPageSettings{
+    displayName:string
+    icon:React.ReactNode
+    property: keyof HandleMapSettings
+}
+interface TopInteractiveMenu{
+    currentFilters:any,
+    setFilters:React.Dispatch<React.SetStateAction<{}>>,
+    previousFilters:React.RefObject<{}>,
+    selectionMode:boolean,
+    setSelectionMode:React.Dispatch<React.SetStateAction<boolean>>,
+    handleDelitionItems:()=>void,
+    setForceRenderParent:React.Dispatch<React.SetStateAction<boolean>>
+}
 const ItemPageSettings = [
     {'displayName':'Filters','icon':<FilterIcon/>,'property':'toggleFilters'},
     {'displayName':'Select','icon':<CheckBoxIcon/>,'property':'toggleSelectionMode'},
     {'displayName':'Offline Items','icon':'c','property':'toggleOfflineItems'}
-]
+] satisfies ItemPageSettings[]
 const ItemPageSettingSelectionMode =[
     {'displayName':'Filters','icon':<FilterIcon/>,'property':'toggleFilters'},
     
-]
+]satisfies ItemPageSettings[]
 
-const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selectionMode,setSelectionMode,handleDelitionItems,setForceRenderParent})=>{
-    const topMenuInteractionRef = useRef(null)
-    const timeoutInputRef = useRef(null)
+const TopInteractiveMenu = ({
+    currentFilters,
+    setFilters,
+    previousFilters,
+    selectionMode,
+    setSelectionMode,
+    handleDelitionItems,
+    setForceRenderParent
+}:TopInteractiveMenu)=>{
+
+    // useState - ItemPage.TopInteractiveMenu - 
     const [toggleScanner,setToggleScanner] = useState(false)
     const [toggleSelectPopup,setToggleSelectPopup] = useState(false)
     const [toggleFilters,setToggleFilters] = useState(false)
     const [toggleOfflineItems,setToggleOfflineItems] = useState(false)
+    // --------------------------------------------------------------------------------------------------------------
+
+
+    // useRef- ItemPage.TopInteractiveMenu - 
+    const topMenuInteractionRef = useRef<HTMLDivElement>(null)
+    const timeoutInputRef = useRef<number | null>(null)
     const queryInputRef= useRef(null)
-    
-    const popupSettingsList = useRef([])
+    const popupSettingsList = useRef<ItemPageSettings[]>([])
+    // --------------------------------------------------------------------------------------------------------------
+
+
+    // maps - ItemPage.TopInteractiveMenu - 
     if(selectionMode){
         popupSettingsList.current = ItemPageSettingSelectionMode
     }else{
         popupSettingsList.current = ItemPageSettings
     }
 
+    const handleMap:HandleMapSettings = {
+        'toggleFilters':()=>{setToggleFilters(true)},
+        'toggleOfflineItems':()=>{setToggleOfflineItems(true)},
+        'toggleSelectionMode':()=>{setSelectionMode(true)},
+    }
+    // --------------------------------------------------------------------------------------------------------------
 
+
+    // handleFunctions - ItemPage.TopInteractiveMenu - 
     const handleShowInput= ()=>{
 
         if(!topMenuInteractionRef.current) return;
         const idKey = 'filterSearch'
 
         const majorParent = topMenuInteractionRef.current
+        if(!majorParent) return;
         const queryInput = majorParent.querySelector(`#${idKey}InputContainer`)
+        if(!(queryInput instanceof HTMLElement)) return;
+
         queryInput.classList.toggle('hidden')
         majorParent.classList.toggle('bg-containers')
-        majorParent.querySelector(`#${idKey}Close`).classList.toggle('hidden')
-        majorParent.querySelector(`#${idKey}Status`).classList.toggle('hidden')
-        majorParent.querySelector(`#${idKey}SearchIcon`).classList.toggle('hidden')
-        majorParent.querySelector(`#${idKey}ThreeDotIcon`).classList.toggle('hidden')
-        majorParent.querySelector(`#${idKey}CheckBoxIcon`).classList.toggle('hidden')
 
-        
-        queryInput.querySelector('input').focus()
-       
-
+        majorParent.querySelector(`#${idKey}Close`)?.classList.toggle('hidden')
+        majorParent.querySelector(`#${idKey}Status`)?.classList.toggle('hidden')
+        majorParent.querySelector(`#${idKey}SearchIcon`)?.classList.toggle('hidden')
+        majorParent.querySelector(`#${idKey}ThreeDotIcon`)?.classList.toggle('hidden')
+        majorParent.querySelector(`#${idKey}CheckBoxIcon`)?.classList.toggle('hidden')
+        queryInput.querySelector('input')?.focus()
     }
 
-    const handleInputSearch = (value) =>{
+    const handleInputSearch = (value:string) =>{
         
         if(timeoutInputRef.current){
             clearTimeout(timeoutInputRef.current)
@@ -359,9 +498,10 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
         
     }
     
-
+    // --------------------------------------------------------------------------------------------------------------
    
 
+    // useEffect - ItemPage.TopInteractiveMenu - 
     useEffect(()=>{
 
         return ()=>{
@@ -370,23 +510,28 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
             }
         }
     },[])
+    // --------------------------------------------------------------------------------------------------------------
 
     
-
-    const handleMap = {
-        'toggleFilters':()=>{setToggleFilters(true)},
-        'toggleOfflineItems':()=>{setToggleOfflineItems(true)},
-        'toggleSelectionMode':()=>{setSelectionMode(true)},
-        
-        
-    }
     return (
         <div className="flex-row width100 padding-10 bg-primary" style={{boxShadow:'0 0 10px rgba(0,0,0,0.3)'}}>
             {toggleScanner &&
-                <SecondaryPage BodyComponent={ItemScanner} bodyProps={{handleDelitionItems,setForceRenderParent}} handleClose={()=>{setToggleScanner(false)}} zIndex={3} pageId={'itemScanner'} addCloseWhenSlide={false}/>
+                <SecondaryPage BodyComponent={ItemScanner} 
+                    bodyProps={{handleDelitionItems,setForceRenderParent}} 
+                    handleClose={()=>{setToggleScanner(false)}} 
+                    zIndex={3} 
+                    pageId={'itemScanner'} 
+                    addCloseWhenSlide={false}
+                />
             }
             {toggleFilters &&
-                <SecondaryPage BodyComponent={FilterPage} bodyProps={{setFilters,previousFilters,queryInputRef}} handleClose={()=>{setToggleFilters(false)}} zIndex={3} pageId={'filterPage'}/>
+                <SecondaryPage 
+                    BodyComponent={FilterPage} 
+                    bodyProps={{setFilters,previousFilters,queryInputRef}} 
+                    handleClose={()=>{setToggleFilters(false)}} 
+                    zIndex={3} 
+                    pageId={'filterPage'}
+                />
 
             }
             {toggleOfflineItems && 
@@ -395,7 +540,6 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
                     zIndex={3}
                     handleClose={()=>{setToggleOfflineItems(false);setForceRenderParent(prev => !prev)}}
                     pageId={'offlineItemsPage'}
-                    
                 />
             }
             
@@ -465,7 +609,11 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
 
                         {toggleSelectPopup &&
                             <SelectPopupV2  right={'75%'} top={'120%'}
-                                onSelect={(obj)=>{handleMap[obj.property]()}}
+                                onSelect={
+                                    (obj:ItemPageSettings)=>{
+                                        handleMap[obj.property]()
+                                    }
+                                }
                                 setTogglePopup={setToggleSelectPopup}
                                 listOfValues={popupSettingsList.current}  
                                 zIndex={2}
@@ -485,31 +633,42 @@ const TopInteractiveMenu = ({currentFilters,setFilters,previousFilters,selection
 }
 
 const ItemsPage = () => {
-    const {doFetch,data,loading} = useFetch()
-    const [dataList,setDataList] = useState([])
+
+    // useContext - ItemPage.tsx - Server message across all app
+    const {showMessage} = useContext(ServerMessageContext)
+    // --------------------------------------------------------------------------------------------------------------
+
+    // useState  - ItemPage.tsx - 
+    const [dataList,setDataList] = useState<ItemDict[]>([])
     const [filters,setFilters] = useState({})
     const [forceRender,setForceRender]= useState(false)
     const [toggleBatchEdit,setToggleBatchEdit] = useState(false)
-    
-    const previousFilters = useRef({})
-    const {showMessage} = useContext(ServerMessageContext)
     const [selectionMode,setSelectionMode] = useState(false)
-    const [selectedItems,setSelectedItems] = useState({})
+    const [selectedItems,setSelectedItems] = useState<{[key:string]:ItemDict}>({})
+    // --------------------------------------------------------------------------------------------------------------
+
+    // useRef - ItemPage.tsx - 
+    const previousFilters = useRef({})
     const lastLoad = useRef(false)
     const imgBlobs = useRef([])
+    // --------------------------------------------------------------------------------------------------------------
+   
+    // useHooks - ItemPage.tsx - 
+    const {doFetch,loading} = useFetch()
     const {handlePressStart,handlePressEnd,handleTouchMove} = useLongPressAction({
         selectionMode:true,
         skipFirstClick:false,
-        handleActionWhenPress:(e,itemObj)=>{
+        handleActionWhenPress:(_e:React.TouchEvent<HTMLElement>,itemObj)=>{
             const objKey:string = itemObj['article_number']
             setSelectedItems(prev => {
-                                        const {[objKey]:_,...current} = prev
-                                        return current
-                                    })
+                const {[objKey]:_,...current} = prev; 
+                return current
+            })
         },
-
     })
+    // --------------------------------------------------------------------------------------------------------------
     
+    // useEffect  - ItemPage.tsx - 
     useEffect(()=>{
         lastLoad.current = false
         const pageFetch = async ()=>{
@@ -519,30 +678,36 @@ const ItemsPage = () => {
        pageFetch()
 
        return ()=>{
-        if(imgBlobs.current.length > 0){
-            imgBlobs.current.forEach(blob => URL.revokeObjectURL(blob))
-        }
+            if(imgBlobs.current.length > 0){
+                imgBlobs.current.forEach(blob => URL.revokeObjectURL(blob))
+            }
+
        }
 
     },[filters,forceRender])
+    // --------------------------------------------------------------------------------------------------------------
     
-    const handleDelitionItems = async (itemsIdList,handleClose=null)=>{
+    // handleFunctions - ItemPage.tsx - 
+    const handleDelitionItems = async (
+        articleNumbersList:string[] = [] , 
+        handleClose: (()=>void) | null = null
+    ) => {
 
-       
         const fetchDict = {
             model_name:'Item',
             object_values:{
-                'query_filters':{'article_number':{'operation':'in','value':itemsIdList}},
+                'query_filters':{'article_number':{'operation':'in','value':articleNumbersList}},
                 'delition_type':'delete_all'
             },
             reference:'Item'
         }
-        console.log(fetchDict,'the dict for delition')
+       
         await doFetch({
             url:'/api/schemes/delete_items',
             method:'POST',
-            body:fetchDict})
-            .then(res => showMessage(res))
+            body:fetchDict
+        })
+        .then(res => showMessage(res))
         
         if(handleClose){
             handleClose()
@@ -553,55 +718,52 @@ const ItemsPage = () => {
         }
         setForceRender(prev=> !prev)
 
+    }
+
+    const handleFetch = async (
+        scrolling:string='',
+        fetchPerPage:number=180,
+        itemsListId:number[]=[]
+    ) => {
+
+            const getFetchDict:GetFetchDictProps = {
+                model_name:'Item',
+                requested_data:['id','type','article_number','reference_number','properties','images'],
+                query_filters:filters,
+                per_page:fetchPerPage,
+            }
+
+            if( scrolling == 'down' && dataList.length > 0){
+                const lastItem:ItemDict= dataList[dataList.length - 1]
+                getFetchDict['cursor'] = lastItem.id
+            }else if( scrolling == 'up' && itemsListId.length > 0){
+                const newFilters = {...getFetchDict['query_filters'], 'id': {'operation':'in','value':itemsListId}}
+                getFetchDict.query_filters = newFilters
+            }
+            
+            const res = await doFetch({
+                url:'/api/schemes/get_items',
+                method:'POST',
+                body:getFetchDict
+            })
+
+            if(!res || !res.body || res.body.length == 0){
+                lastLoad.current = true
+                return false
+            }
+
+            if(dataList.length == 0 ){
+                setDataList(res.body)
+            }
+            
+            if(lastLoad.current){
+                lastLoad.current = false
+            }
+
+            return res.body
         
     }
 
-    const handleFetch = async (scrolling='',fetchPerPage=180,itemsListId=[])=>{
-
-
-        const fetchDict = {
-            model_name:'Item',
-            requested_data:['id','type','article_number','reference_number','properties','images'],
-            query_filters:filters,
-            per_page:fetchPerPage,
-            
-        }
-
-        if( scrolling == 'down' && dataList.length > 0){
-            const lastItem = dataList[dataList.length - 1]
-            fetchDict['cursor'] = lastItem.id
-        }else if( scrolling == 'up' && itemsListId.length > 0){
-            const newFilters = {...fetchDict['query_filters'], 'id': {'operation':'in','value':itemsListId}}
-            fetchDict.query_filters = newFilters
-        }
-        
-
-        
-        const res = await doFetch({
-            url:'/api/schemes/get_items',
-            method:'POST',
-            body:fetchDict})
-
-        if(!res || !res.body || res.body.length == 0){
-            lastLoad.current = true
-            return false
-        }
-
-        if(dataList.length == 0 ){
-            setDataList(res.body)
-            
-        }
-        
-
-        if(lastLoad.current){
-            lastLoad.current = false
-        }
-
-        return res.body
-        
-    }
-
-    
     const {handleScroll,ScrollDown_Loading,ScrollUp_Loading} = useInfiniteScroll(
         {
             itemHeight:90,
@@ -611,20 +773,28 @@ const ItemsPage = () => {
             handleFetch:handleFetch,
             dataList:dataList,
             setDataList:setDataList
-
-
         }
     )
+    // --------------------------------------------------------------------------------------------------------------
     
-
-    
-
     return ( 
         <div className="flex-column  width100" style={{position:'relative',minHeight:'100vh'}}>
-            <TopInteractiveMenu currentFilters={filters} setFilters={setFilters} previousFilters={previousFilters} selectionMode={selectionMode} setSelectionMode={setSelectionMode} handleDelitionItems={handleDelitionItems} setForceRenderParent={setForceRender} />
+            <TopInteractiveMenu currentFilters={filters} 
+                setFilters={setFilters} 
+                previousFilters={previousFilters} 
+                selectionMode={selectionMode} 
+                setSelectionMode={setSelectionMode} 
+                handleDelitionItems={handleDelitionItems} 
+                setForceRenderParent={setForceRender} 
+            />
            
             {toggleBatchEdit && 
                 <SecondaryPage BodyComponent={ItemEdit}
+                    zIndex={3}
+                    startAnimation={'slideLeft'}
+                    endAnimation ={'slideRight'}
+                    handleClose={()=>{setToggleBatchEdit(false);}}    
+                    pageId={'itemsPage'}
                     bodyProps={{
                         preRenderInfo:{'article_number':Object.keys(selectedItems)},
                         fetchWhenOpen:false,
@@ -632,47 +802,49 @@ const ItemsPage = () => {
                         handleDelitionItems:handleDelitionItems,
                         pageSetUp:new Set(['noHistory','noImages','noType','noCategory','noIssues'])
                     }}
-                    zIndex={3}
-                    interactiveBtn ={{iconClass:'svg-15 padding-05 position-relative content-end', order:3,icon:<ThreeDotMenu/>}}
-                    header={{'display': `Editing ${Object.keys(selectedItems).length} items`, class:'flex-1 content-center',order:2}}
-                    closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 content-start',order:0}}
+                    interactiveBtn ={{
+                        iconClass:'svg-15 padding-05 position-relative content-end', 
+                        order:3,
+                        icon:<ThreeDotMenu/>
+                    }}
+                    header={{
+                        'display': `Editing ${Object.keys(selectedItems).length} items`, 
+                        class:'flex-1 content-center',
+                        order:2
+                    }}
+                    closeBtn = {{
+                        'icon':<ArrowIcon/>,
+                        class:'padding-05 content-start',
+                        order:0
+                    }}
                     
-                    startAnimation={'slideLeft'}
-                    endAnimation ={'slideRight'}
-                    handleClose={()=>{setToggleBatchEdit(false);}}    
-                    pageId={'itemsPage'}
                 />
             }
             <div className="width100" style={{zIndex:1}}>
                 { selectionMode && 
-                    
-                        <SelectionModeComponent 
-                            zIndex={2}
-                            props={{
-                                setSelectionMode,
-                                selectedItemsLength:Object.keys(selectedItems).length,
-                                setSelectedItems,
-                                componentsListPreview:Object.keys(selectedItems).map((objKey,i)=>{
-
-                                        return (<ItemPreviewContainer
-                                            key={`itemSelection_${i}`}
-                                            itemObj={selectedItems[objKey]}
-                                            imgBlobs={imgBlobs.current}
-                                            handlePressStart={handlePressStart}
-                                            handlePressEnd={handlePressEnd}
-                                            handleTouchMove={handleTouchMove}
-                                            
-                                        />)
-                                    }
-                                ),
-                                componentOptionsToSelect:[
-                                    <BatchPrintBtn selectedItems={selectedItems} key={'mainPageBatchPrint'}/>,
-                                    <BatchEditBtn setToggleBatchEdit={setToggleBatchEdit} selectedItems={selectedItems} key={'mainPageBatchEdit'}/>
-                                ]
-                            }}
-                        />
-                    
-
+                    <SelectionModeComponent 
+                        zIndex={2}
+                        props={{
+                            setSelectionMode,
+                            selectedItemsLength:Object.keys(selectedItems).length,
+                            setSelectedItems,
+                            componentsListPreview:Object.keys(selectedItems).map((objKey,i)=>{
+                                return (<ItemPreviewContainer
+                                    key={`itemSelection_${i}`}
+                                    itemObj={selectedItems[objKey]}
+                                    imgBlobs={imgBlobs.current}
+                                    handlePressStart={handlePressStart}
+                                    handlePressEnd={handlePressEnd}
+                                    handleTouchMove={handleTouchMove}
+                                    
+                                />)
+                            }),
+                            componentOptionsToSelect:[
+                                <BatchPrintBtn selectedItems={selectedItems} key={'mainPageBatchPrint'}/>,
+                                <BatchEditBtn setToggleBatchEdit={setToggleBatchEdit} selectedItems={selectedItems} key={'mainPageBatchEdit'}/>
+                            ]
+                        }}
+                    />
                 }
             </div>
             
@@ -688,17 +860,15 @@ const ItemsPage = () => {
                         setSelectedItems ={setSelectedItems}
                         selectionTargetKey = {'article_number'}
                         handleScroll={handleScroll}
-                        
-                        loaders ={{ScrollDown_Loading,ScrollUp_Loading,loading}}
                         containerHeight ={'90px'}   
+                        loaders ={{
+                            ScrollDown_Loading,
+                            ScrollUp_Loading,
+                            loading
+                        }}
                     />
                 }
-
-                
-                
             </div>
-
-            
 
             <NavigationBtn/>
         </div>

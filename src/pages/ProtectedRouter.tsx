@@ -1,12 +1,13 @@
 import {Navigate} from 'react-router-dom'
+import React from 'react'
 
 interface Props{
-    children:JSX.Element;
+    children:React.ReactNode;
 }
 
 const ProtectedRouter = ({children}:Props) => {
-    const user = JSON.parse(localStorage.getItem('user') || null)
-    if(!user){
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    if(!('username' in user)){
         return <Navigate to='/login' replace />
     }
 

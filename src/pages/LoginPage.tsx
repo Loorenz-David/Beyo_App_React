@@ -84,6 +84,7 @@ const LoginPage = () => {
                 
                 if(data.body.length > 0 && 'username' in data.body[0]){
                     localStorage.setItem('user',JSON.stringify(data.body[0]))
+                    
                     navigate('/')
                 }
 
