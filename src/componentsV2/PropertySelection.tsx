@@ -26,8 +26,8 @@ const PropertySelection = ({propName,propDisplay,propValue,handleItemProps,objec
                 />
             }
             
-            <span className="color-lower-titles text-9">{propDisplay}</span>
-            <span style={{fontSize:'10px'}}>{inputValue ? inputValue : propValue }</span>
+            <span className="color-lower-titles text-9" style={{textWrap:'nowrap'}}>{propDisplay}</span>
+            <span style={{fontSize:'10px',textWrap:'nowrap'}}>{inputValue ? inputValue : propValue }</span>
         </button> 
     );
 }

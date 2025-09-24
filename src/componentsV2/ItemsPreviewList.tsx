@@ -78,8 +78,8 @@ export  const ItemPreviewContainer: React.FC<propsItemPreview> = ({itemObj,imgBl
     
     return ( 
         <div observing-obj-for-selection = {itemObj.article_number}
-            className="flex-row padding-20 items-center gap-2 border-bottom no-select"
-            style={{minHeight:containerHeight,maxHeight:containerHeight}}
+            className="flex-row  items-center gap-2 border-bottom no-select"
+            style={{minHeight:containerHeight,maxHeight:containerHeight, padding:'15px 20px'}}
             onContextMenu={(e)=>{e.preventDefault()}}
             onTouchStart={(e)=>{handlePressStart && handlePressStart(e,itemObj)}}
             onTouchEnd={(e)=>{handlePressEnd && handlePressEnd(e,itemObj)}}
@@ -108,7 +108,7 @@ export  const ItemPreviewContainer: React.FC<propsItemPreview> = ({itemObj,imgBl
                 }
                 
             </div>
-            <div className="flex-column height100 content-center"
+            <div className="flex-column height100 gap-05 content-center"
                 
             >
                 <div className="flex-row gap-2 ">
@@ -118,15 +118,23 @@ export  const ItemPreviewContainer: React.FC<propsItemPreview> = ({itemObj,imgBl
                 </div>
                 <div className="flex-row gap-2 width100" style={{paddingTop:'5px' ,overflow:'hidden'}}>
                     {itemObj['properties']? 
-                    Object.keys(itemObj['properties']).map((key,j)=>{
-                        return (
-                            <div key={`property_${j}`} className="flex-column gap-05">
-                                <span className="color-lower-titles text-9">{key}</span>
-                                <span className="text-9">{itemObj['properties'][key]}</span>
-                            </div>
-                        )
-                    
-                    })
+                        Object.keys(itemObj['properties']).slice(0,2).map((key,j)=>{
+                            return (
+                                <div key={`property_${j}`} className="flex-column gap-05">
+                                    <span className="color-lower-titles text-9" 
+                                        style={{textWrap:'nowrap'}}
+                                    >
+                                        {key}
+                                    </span>
+                                    <span className="text-9"
+                                        style={{textWrap:'nowrap'}}
+                                    >
+                                        {itemObj['properties'][key]}
+                                    </span>
+                                </div>
+                            )
+                        
+                        })
                     :
                     <div className="color-lower-titles ">
                         No properties

@@ -80,8 +80,12 @@ export const NumKeyBoard = ({itemObj,handleClick,inputValue=0,handleClose,label=
             property= itemObj.property
         }
         let next = itemObj.next ? itemObj.next : null
+
+        const returnDict = {result:buildDict,next:next,property:property}
+
+       
         
-        handleClick({result:buildDict,next:next,property:property},handleClose)
+        handleClick(returnDict,handleClose)
         
     }
 

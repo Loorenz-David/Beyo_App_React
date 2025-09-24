@@ -13,8 +13,12 @@ const usePrintLableWiFi = ({itemData}) => {
     const zebraPrinter = useRef(null)
 
   
-    const propertiesAllowedToPrint = {'Set Of':'Set Of','Chair Structure':'Structure'}
-    const numberOfCopiesMap = {'Dining Chair':{'propInfluence':['Set Of']}}
+    const propertiesAllowedToPrint = {
+        'Set Of':'Set Of','Chair Structure':'Structure',
+        'Legs Type':'Legs','Extentions Type':'Extentions', 'Extentions Set':'Set Of',
+        
+    }
+    const numberOfCopiesMap = {'Dining Chair':{'propInfluence':['Set Of'],'Dining Table':['Extentions Set',1]}}
 
     const generateLabel = (selectedItemData)=>{
 
@@ -59,6 +63,8 @@ const usePrintLableWiFi = ({itemData}) => {
                         numOfCopies *= itemDataDict.properties[influence]
                     }
                     
+                }else if( typeof influence == 'number'){
+                    numOfCopies += influence
                 }
             })
             

@@ -165,12 +165,12 @@ export const ItemPropsComp = ({setItemData,itemData,CurrencyInputsComponent,page
             }
              
 
-            <div className="flex-row space-around border-bottom  "
-            
+            <div className="flex-row space-around border-bottom  X-thin-scrollbar bg-scroll-bar"
+                style={{overflowX:'auto'}}
             >
 
                 <PropertySelection propName={'state'}
-                    propDisplay={'state'}
+                    propDisplay={'state '}
                     propValue={'select...'}
                     handleItemProps={handleItemProps}
                     objectMap={ItemsStatesMap['state']}
@@ -208,8 +208,10 @@ export const ItemPropsComp = ({setItemData,itemData,CurrencyInputsComponent,page
                 
                 >
                     
-                    <div className="flex-row space-around "
+                    <div className="flex-row space-around X-thin-scrollbar bg-scroll-bar"
                         id='ItemProperties'
+                        style={{overflowX:'auto'}}
+                       
                     >
                         {itemPropTypeDict.current.map((nextListDict,i) =>{
                             const propName = nextListDict[0].property
