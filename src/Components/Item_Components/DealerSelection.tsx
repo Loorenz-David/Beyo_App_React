@@ -4,7 +4,7 @@ import {useState,useRef,useEffect,memo} from 'react'
 import useFetch from '../../hooks/useFetch.tsx'
 import {useSlidePage} from '../../contexts/SlidePageContext.tsx'
 import {useData} from '../../contexts/DataContext.tsx'
-import {SlidePage} from '../Page_components/SwapToSlidePage.tsx'
+import {SlidePage} from '../Page_Components/SwapToSlidePage.tsx'
 
 import LoaderDots from '../Loader_Components/LoaderDots.tsx'
 import CreateDealer from './CreateDealer.tsx'
