@@ -523,13 +523,12 @@ export const useSaveItemsV2= ()=>{
                 fetchDict['requested_data'] = []
             }
             
-            console.log('the dict that will be send to the back end')
-            console.log(fetchDict)
+            
 
             
             
             try{
-                setUploading(true)
+                
                 let fetchNotesServerMessage= false
                 if(Object.keys(fetchDictData).length > 0){
                     

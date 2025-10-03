@@ -1,35 +1,42 @@
-import {useNavigate} from 'react-router-dom'
+
 import React from 'react'
 import {useRef,useState,useEffect,useContext} from 'react'
 
 import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
+import {useSetNextPage,SetNextPageContext} from '../contexts/SlidePageContext.tsx'
+import {useSlidePage} from '../contexts/SlidePageContext.tsx'
+import {DataContext} from '../contexts/DataContext.tsx'
 
-import AddSquareIcon from '../assets/icons/AddSquareIcon.svg?react'
-import DealerIcon from '../assets/icons/DealerIcon.svg?react'
-import SearchIcon from '../assets/icons/SearchIcon.svg?react'
-import ScanIcon from '../assets/icons/ScanIcon.svg?react'
-import ThreeDotMenu from '../assets/icons/ThreeDotMenu.svg?react'
-import CheckBoxIcon from '../assets/icons/CheckBoxIcon.svg?react'
-import FilterIcon from '../assets/icons/FilterIcon.svg?react'
-import ArrowIcon from '../assets/icons/ArrowIcon.svg?react'
+import AddSquareIcon from '../assets/icons/General_Icons/AddSquareIcon.svg?react'
+import DealerIcon from '../assets/icons/General_Icons/DealerIcon.svg?react'
+import SearchIcon from '../assets/icons/General_Icons/SearchIcon.svg?react'
+import ScanIcon from '../assets/icons/General_Icons/ScanIcon.svg?react'
+import ThreeDotMenu from '../assets/icons/General_Icons/ThreeDotMenu.svg?react'
+import CheckBoxIcon from '../assets/icons/General_Icons/CheckBoxIcon.svg?react'
+import FilterIcon from '../assets/icons/General_Icons/FilterIcon.svg?react'
 
-import {ItemTypeMap, type ItemType} from '../maps/mapItemTypeV2.tsx'
+import {ItemTypeMap, type ItemType} from '../maps/Item_Maps/mapItemTypeV2.tsx'
 
 import useFetch from '../hooks/useFetch.tsx'
 import {useLongPressAction} from '../hooks/useLongPressActions.tsx'
 import useInfiniteScroll from '../hooks/useInfinityScroll.tsx'
 
-import SecondaryPage from '../components/secondary-page.tsx'
-import ItemScanner from '../components/ItemScanner.tsx'
-import SelectPopupV2 from '../componentsV2/SelectPopupV2.tsx'
-import {ItemEdit,ItemPropsComp} from '../componentsV2/ItemEdit.tsx'
-import BatchPrintBtn from '../componentsV2/BatchPrintBtn.tsx'
-import BatchEditBtn from '../componentsV2/BatchEditBtn.tsx'
-import CreateDealer from '../componentsV2/CreateDealer.tsx'
-import {MemorizedNoteSearchBtn} from '../componentsV2/ItemNoteSearch.tsx'
-import OfflineItemsPage from '../componentsV2/OfflineItemsPage.tsx'
-import {ItemsPreviewList,ItemPreviewContainer} from '../componentsV2/ItemsPreviewList.tsx'
-import SelectionModeComponent from '../componentsV2/SelectionModeComponent.tsx'
+
+
+
+import ItemScanner from '../Components/Item_Components/ItemScanner.tsx'
+import SelectPopupV2 from '../Components/Item_Components/SelectPopupV2.tsx'
+import {ItemEdit,ItemPropsComp} from '../Components/Item_Components/ItemEdit.tsx'
+import BatchPrintBtn from '../Components/Item_Components/BatchPrintBtn.tsx'
+import BatchEditBtn from '../Components/Item_Components/BatchEditBtn.tsx'
+import CreateDealer from '../Components/Item_Components/CreateDealer.tsx'
+import {MemorizedNoteSearchBtn} from '../Components/Item_Components/ItemNoteSearch.tsx'
+import OfflineItemsPage from '../Components/Item_Components/OfflineItemsPage.tsx'
+import {ItemsPreviewList,ItemPreviewContainer} from '../Components/Item_Components/ItemsPreviewList.tsx'
+import SelectionModeComponent from '../Components/Item_Components/SelectionModeComponent.tsx'
+import CreateItemPageV2 from '../Components/Item_Components/CreateItemPageV2.tsx'
+
+import {SlidePage} from '../Components/Page_Components/SwapToSlidePage.tsx'
 
 
 import type {GetFetchDictProps} from '../types/fetchTypes.ts'
@@ -39,15 +46,19 @@ import type {ItemDict, ItemPriceFields} from '../types/ItemDict.ts'
 
 
 
+interface NavigationBtnProps {
+    forceRenderParent?:React.Dispatch<React.SetStateAction<boolean>> | null
+}
 
 
-
-const NavigationBtn = () =>{
+const NavigationBtn = ({
+    forceRenderParent = null
+}:NavigationBtnProps) =>{
     const dealerPageRef = useRef<HTMLDivElement>(null)
     const itemPageRef = useRef<HTMLDivElement>(null)
     const isActiveRef = useRef<boolean>(false)
-    const [toggleCreateDealer,setToggleCreateDealer] = useState(false)
-    const navigate = useNavigate()
+    const {setNextPage} = useSetNextPage()
+    const {slidePageTo} = useSlidePage()
 
     const handleFirstInteraction = (
         e:React.MouseEvent<HTMLDivElement>,
@@ -81,58 +92,64 @@ const NavigationBtn = () =>{
     }
 
     return (
-        <>
-         {toggleCreateDealer && 
-                <SecondaryPage BodyComponent={CreateDealer}
-                    bodyProps={{}}
-                    zIndex={5}
-                    handleClose={()=>{setToggleCreateDealer(false)}}
-                    closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 content-start',order:0}}
-                    header={{'display': 'Create Dealer', class:'flex-1 content-center',order:2}}
-                    startAnimation={'slideLeft'}
-                    endAnimation ={'slideRight'}
-                    pageId={'createDealerPage'}
-                />
-            }
-             <div className="flex-row" style={{position:'fixed',bottom:'85px',right:'15px'}}>
-           
-                    <div className="flex-column items-center content-center " style={{position:'relative',}}>
+        
+            
+            <>
+                
 
-                        <div className="flex-row items-center content-center bg-secondary padding-10" 
-                            style={{borderRadius:'50%',position:'absolute', bottom:'0',transform:'scale(0.5)',transition:'bottom 0.2s ease-out,transform 0.2s ease-out'}}
-                            ref={dealerPageRef}
-                            onClick={()=>{setToggleCreateDealer(true)}}
-                        >
-                            <div className=" flex-row content-center  items-center svg-25 svg-bg-container" 
-                                style={{width:'20px',height:'20px',}}
+                <div className="flex-row" style={{position:'fixed',bottom:'85px',right:'15px'}}>
+            
+                        <div className="flex-column items-center content-center " style={{position:'relative',}}>
+
+                            <div className="flex-row items-center content-center bg-secondary padding-10" 
+                                style={{borderRadius:'50%',position:'absolute', bottom:'0',transform:'scale(0.5)',transition:'bottom 0.2s ease-out,transform 0.2s ease-out'}}
+                                ref={dealerPageRef}
+                                onClick={()=>{
+                                    slidePageTo({addNumber:1})
+                                    setNextPage(
+                                        <CreateDealer />
+                                    )
+                                }}
                             >
-                               <DealerIcon/>
+                                <div className=" flex-row content-center  items-center svg-25 svg-bg-container" 
+                                    style={{width:'20px',height:'20px',}}
+                                >
+                                <DealerIcon/>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="flex-row items-center content-center bg-secondary padding-10" 
-                        style={{borderRadius:'50%',position:'absolute',transform:'scale(0.5)', right:'0',transition:'right 0.2s ease-out,transform 0.2s ease-out'}}
-                        ref={itemPageRef}
-                        onClick={()=>{navigate('/items/create_item')}}
-                        >
-                            <div className=" flex-row content-center items-center  svg-25 svg-bg-container" style={{width:'20px',height:'20px',}}>
-                                <AddSquareIcon/>
+                            <div className="flex-row items-center content-center bg-secondary padding-10" 
+                            style={{borderRadius:'50%',position:'absolute',transform:'scale(0.5)', right:'0',transition:'right 0.2s ease-out,transform 0.2s ease-out'}}
+                            ref={itemPageRef}
+                            onClick={()=>{
+                                slidePageTo({addNumber:1})
+                                setNextPage(
+                                    <CreateItemPageV2
+                                        forceRenderParent={forceRenderParent}
+                                    />
+                                )
+                            }}
+                            >
+                                <div className=" flex-row content-center items-center  svg-25 svg-bg-container" style={{width:'20px',height:'20px',}}>
+                                    <AddSquareIcon/>
+                                </div>
                             </div>
-                        </div>
 
-                         <div className="flex-row items-center content-center bg-secondary padding-10 " 
-                            style={{borderRadius:'50%',zIndex:'1',transition:'transform 0.2s ease-out'}}
-                            onClick={(e)=>{handleFirstInteraction(e,isActiveRef)}}
-                         >
-                            <div className=" flex-row content-center  plus-btn " style={{width:'20px',height:'20px',}}>
-                                <div className="plus-vertical bg-primary" ></div>
-                                <div className="plus-horizontal bg-primary"></div>
+                            <div className="flex-row items-center content-center bg-secondary padding-10 " 
+                                style={{borderRadius:'50%',zIndex:'1',transition:'transform 0.2s ease-out'}}
+                                onClick={(e)=>{handleFirstInteraction(e,isActiveRef)}}
+                            >
+                                <div className=" flex-row content-center  plus-btn " style={{width:'20px',height:'20px',}}>
+                                    <div className="plus-vertical bg-primary" ></div>
+                                    <div className="plus-horizontal bg-primary"></div>
+                                </div>
                             </div>
-                        </div>
 
-                    </div>
-            </div>
-        </>
+                        </div>
+                </div>
+            </>
+           
+        
        
     )
 }
@@ -255,19 +272,23 @@ const CurrencyInputsFilters = ({
 
 interface FilterPage{
     setFilters:React.Dispatch<React.SetStateAction<{}>>
-    handleClose:()=>void
     previousFilters: React.RefObject<{}>
     queryInputRef:React.RefObject<HTMLInputElement>
 }
 const FilterPage = ({
     setFilters,
-    handleClose,
     previousFilters,
     queryInputRef
 }:FilterPage)=>{
 
+        // useHooks - ItemPage.FilterPage - 
+        
+        const {slidePageTo} = useSlidePage()
+        // --------------------------------------------------------------------------------------------------------------
+
         // useState - ItemPage.FilterPage - 
         const [itemData,setItemData] = useState<ItemDict | {}>({...previousFilters.current})
+        const [NextPage,setNextPage] = useState<React.ReactNode>(null)
         // --------------------------------------------------------------------------------------------------------------
 
 
@@ -283,7 +304,8 @@ const FilterPage = ({
             }
             previousFilters.current = {}
             setFilters({})
-            handleClose()
+            slidePageTo({addNumber:-1})
+            
         }
         
         const handleSaveFilters = () =>{
@@ -320,7 +342,7 @@ const FilterPage = ({
             previousFilters.current = {...itemData}
         
             setFilters(prev => ({...prev,...buildFilterDict}))
-            handleClose()
+            slidePageTo({addNumber:-1})
             
             
         }
@@ -343,48 +365,51 @@ const FilterPage = ({
         }
         // --------------------------------------------------------------------------------------------------------------
 
+        
     
     return (
-        <div className="flex-column padding-top-40 padding-bottom-20" style={{height:'100dvh'}}>
-        
-            <ItemPropsComp 
-                itemData={itemData}
-                setItemData={setItemData}
-                zIndex={3}
-                pageSetUp={new Set(['noHistory','noNotes','noImages'])}
-                CurrencyInputsComponent={CurrencyInputsFilters}
+        <DataContext.Provider value={{data:itemData,setData:setItemData,setNextPage:setNextPage}}>
+            <div className="flex-column padding-top-40 padding-bottom-20" style={{height:'100dvh'}}>
 
-            />
+                {NextPage && 
+                    <SlidePage BodyComponent={NextPage}/>
+                }
 
-            
-
-            {/* Notes Search Btn */}
-            <div className="flex-row border-bottom "
-            
-            >
-                <MemorizedNoteSearchBtn setItemData ={setItemData}
-                    notesList={'notes' in itemData && itemData.notes !== null ? itemData.notes : []}
-                    displayName={'Notes...'}
-                    zIndex={3}
+                <ItemPropsComp 
+                    pageSetUp={new Set(['noHistory','noNotes','noImages'])}
+                    CurrencyInputsComponent={CurrencyInputsFilters}
                 />
-                
-            </div>
-            
-            {/* Btn Actions */}
-            <div className="flex-column width100 padding-10 gap-2 push-bottom">
-                <button className="btn border-blue bg-containers padding-10"
-                onClick={()=>{handleClearFilters()}}
-                >
-                    <span className="text-15">Clear Filters</span>
-                </button>
-                <button className="btn bg-secondary padding-10"
-                onClick={()=>{handleSaveFilters()}}
-                >
-                    <span className="text-15 color-primary">Save Filters</span>
-                </button>
-            </div>
 
-        </div>
+                
+
+                {/* Notes Search Btn */}
+                <div className="flex-row border-bottom "
+                
+                >
+                    <MemorizedNoteSearchBtn setItemData ={setItemData}
+                        notesList={'notes' in itemData && itemData.notes !== null ? itemData.notes : []}
+                        displayName={'Notes...'}
+                        zIndex={3}
+                    />
+                    
+                </div>
+                
+                {/* Btn Actions */}
+                <div className="flex-column width100 padding-10 gap-2 push-bottom">
+                    <button className="btn border-blue bg-containers padding-10"
+                    onClick={()=>{handleClearFilters()}}
+                    >
+                        <span className="text-15">Clear Filters</span>
+                    </button>
+                    <button className="btn bg-secondary padding-10"
+                    onClick={()=>{handleSaveFilters()}}
+                    >
+                        <span className="text-15 color-primary">Save Filters</span>
+                    </button>
+                </div>
+
+            </div>
+        </DataContext.Provider>
     )
 }
 
@@ -429,10 +454,15 @@ const TopInteractiveMenu = ({
     setForceRenderParent
 }:TopInteractiveMenu)=>{
 
+    // useHooks - ItemPage.TopInteractiveMenu - 
+    const {setNextPage} = useSetNextPage() 
+    const {slidePageTo} = useSlidePage()
+
+    // --------------------------------------------------------------------------------------------------------------
+
     // useState - ItemPage.TopInteractiveMenu - 
     const [toggleScanner,setToggleScanner] = useState(false)
     const [toggleSelectPopup,setToggleSelectPopup] = useState(false)
-    const [toggleFilters,setToggleFilters] = useState(false)
     const [toggleOfflineItems,setToggleOfflineItems] = useState(false)
     // --------------------------------------------------------------------------------------------------------------
 
@@ -440,7 +470,7 @@ const TopInteractiveMenu = ({
     // useRef- ItemPage.TopInteractiveMenu - 
     const topMenuInteractionRef = useRef<HTMLDivElement>(null)
     const timeoutInputRef = useRef<number | null>(null)
-    const queryInputRef= useRef(null)
+    const queryInputRef= useRef<HTMLInputElement>(null!)
     const popupSettingsList = useRef<ItemPageSettings[]>([])
     // --------------------------------------------------------------------------------------------------------------
 
@@ -453,8 +483,18 @@ const TopInteractiveMenu = ({
     }
 
     const handleMap:HandleMapSettings = {
-        'toggleFilters':()=>{setToggleFilters(true)},
-        'toggleOfflineItems':()=>{setToggleOfflineItems(true)},
+        'toggleFilters':()=>{
+            slidePageTo({addNumber:1});
+            setNextPage(
+                <FilterPage setFilters={setFilters} previousFilters={previousFilters} queryInputRef={queryInputRef}/>
+            )
+        },
+        'toggleOfflineItems':()=>{
+            slidePageTo({addNumber:1})
+            setNextPage(
+                <OfflineItemsPage/>
+            )
+        },
         'toggleSelectionMode':()=>{setSelectionMode(true)},
     }
     // --------------------------------------------------------------------------------------------------------------
@@ -515,35 +555,8 @@ const TopInteractiveMenu = ({
     
     return (
         <div className="flex-row width100 padding-10 bg-primary" style={{boxShadow:'0 0 10px rgba(0,0,0,0.3)'}}>
-            {toggleScanner &&
-                <SecondaryPage BodyComponent={ItemScanner} 
-                    bodyProps={{handleDelitionItems,setForceRenderParent}} 
-                    handleClose={()=>{setToggleScanner(false)}} 
-                    zIndex={3} 
-                    pageId={'itemScanner'} 
-                    addCloseWhenSlide={false}
-                />
-            }
-            {toggleFilters &&
-                <SecondaryPage 
-                    BodyComponent={FilterPage} 
-                    bodyProps={{setFilters,previousFilters,queryInputRef}} 
-                    handleClose={()=>{setToggleFilters(false)}} 
-                    zIndex={3} 
-                    pageId={'filterPage'}
-                />
-
-            }
-            {toggleOfflineItems && 
-                <SecondaryPage BodyComponent={OfflineItemsPage}
-                    bodyProps={{}}
-                    zIndex={3}
-                    handleClose={()=>{setToggleOfflineItems(false);setForceRenderParent(prev => !prev)}}
-                    pageId={'offlineItemsPage'}
-                />
-            }
-            
-
+           
+           
             <div className="flex-row width100 " style={{borderRadius:'5px'}}
             ref={topMenuInteractionRef}
             >
@@ -593,7 +606,15 @@ const TopInteractiveMenu = ({
 
                     <div className="flex-column btn content-center svg-20"
                     id="filterSearchScanIcon"
-                    onClick={()=>{setToggleScanner(true)}}
+                    onClick={()=>{
+                        slidePageTo({addNumber:1})
+                        setNextPage(
+                            <ItemScanner 
+                                handleDelitionItems={handleDelitionItems}
+                                setForceRenderParent={setForceRenderParent}
+                            />
+                        )
+                    }}
                     >
                         <ScanIcon/>
                     </div>
@@ -636,6 +657,7 @@ const ItemsPage = () => {
 
     // useContext - ItemPage.tsx - Server message across all app
     const {showMessage} = useContext(ServerMessageContext)
+    
     // --------------------------------------------------------------------------------------------------------------
 
     // useState  - ItemPage.tsx - 
@@ -645,6 +667,7 @@ const ItemsPage = () => {
     const [toggleBatchEdit,setToggleBatchEdit] = useState(false)
     const [selectionMode,setSelectionMode] = useState(false)
     const [selectedItems,setSelectedItems] = useState<{[key:string]:ItemDict}>({})
+    const [NextPage,setNextPage] = useState<React.ReactNode>(null)
     // --------------------------------------------------------------------------------------------------------------
 
     // useRef - ItemPage.tsx - 
@@ -654,6 +677,7 @@ const ItemsPage = () => {
     // --------------------------------------------------------------------------------------------------------------
    
     // useHooks - ItemPage.tsx - 
+    const {slidePageTo} = useSlidePage()
     const {doFetch,loading} = useFetch()
     const {handlePressStart,handlePressEnd,handleTouchMove} = useLongPressAction({
         selectionMode:true,
@@ -689,8 +713,7 @@ const ItemsPage = () => {
     
     // handleFunctions - ItemPage.tsx - 
     const handleDelitionItems = async (
-        articleNumbersList:string[] = [] , 
-        handleClose: (()=>void) | null = null
+        articleNumbersList:string[] = [] 
     ) => {
 
         const fetchDict = {
@@ -709,12 +732,11 @@ const ItemsPage = () => {
         })
         .then(res => showMessage(res))
         
-        if(handleClose){
-            handleClose()
-            if(selectionMode){
-                setSelectionMode(false)
-                setSelectedItems({})
-            }
+       slidePageTo({addNumber:-1})
+
+        if(selectionMode){
+            setSelectionMode(false)
+            setSelectedItems({})
         }
         setForceRender(prev=> !prev)
 
@@ -777,101 +799,94 @@ const ItemsPage = () => {
     )
     // --------------------------------------------------------------------------------------------------------------
     
-    return ( 
-        <div className="flex-column  width100" style={{position:'relative',minHeight:'100vh'}}>
-            <TopInteractiveMenu currentFilters={filters} 
-                setFilters={setFilters} 
-                previousFilters={previousFilters} 
-                selectionMode={selectionMode} 
-                setSelectionMode={setSelectionMode} 
-                handleDelitionItems={handleDelitionItems} 
-                setForceRenderParent={setForceRender} 
-            />
-           
-            {toggleBatchEdit && 
-                <SecondaryPage BodyComponent={ItemEdit}
-                    zIndex={3}
-                    startAnimation={'slideLeft'}
-                    endAnimation ={'slideRight'}
-                    handleClose={()=>{setToggleBatchEdit(false);}}    
-                    pageId={'itemsPage'}
-                    bodyProps={{
-                        preRenderInfo:{'article_number':Object.keys(selectedItems)},
-                        fetchWhenOpen:false,
-                        setForceRenderParent:setForceRender,
-                        handleDelitionItems:handleDelitionItems,
-                        pageSetUp:new Set(['noHistory','noImages','noType','noCategory','noIssues'])
-                    }}
-                    interactiveBtn ={{
-                        iconClass:'svg-15 padding-05 position-relative content-end', 
-                        order:3,
-                        icon:<ThreeDotMenu/>
-                    }}
-                    header={{
-                        'display': `Editing ${Object.keys(selectedItems).length} items`, 
-                        class:'flex-1 content-center',
-                        order:2
-                    }}
-                    closeBtn = {{
-                        'icon':<ArrowIcon/>,
-                        class:'padding-05 content-start',
-                        order:0
-                    }}
-                    
-                />
-            }
-            <div className="width100" style={{zIndex:1}}>
-                { selectionMode && 
-                    <SelectionModeComponent 
-                        zIndex={2}
-                        props={{
-                            setSelectionMode,
-                            selectedItemsLength:Object.keys(selectedItems).length,
-                            setSelectedItems,
-                            componentsListPreview:Object.keys(selectedItems).map((objKey,i)=>{
-                                return (<ItemPreviewContainer
-                                    key={`itemSelection_${i}`}
-                                    itemObj={selectedItems[objKey]}
-                                    imgBlobs={imgBlobs.current}
-                                    handlePressStart={handlePressStart}
-                                    handlePressEnd={handlePressEnd}
-                                    handleTouchMove={handleTouchMove}
-                                    
-                                />)
-                            }),
-                            componentOptionsToSelect:[
-                                <BatchPrintBtn selectedItems={selectedItems} key={'mainPageBatchPrint'}/>,
-                                <BatchEditBtn setToggleBatchEdit={setToggleBatchEdit} selectedItems={selectedItems} key={'mainPageBatchEdit'}/>
-                            ]
-                        }}
-                    />
-                }
-            </div>
-            
-            <div className="flex-column" style={{overflow:'hidden'}}>
-                {dataList && 
-                    <ItemsPreviewList data={dataList} 
-                        handleDelitionItems={handleDelitionItems} 
-                        setForceRenderParent={setForceRender}
-                        fetchWhenOpen={true}
-                        selectionMode={selectionMode}
-                        setSelectionMode={setSelectionMode}
-                        selectedItems={selectedItems}
-                        setSelectedItems ={setSelectedItems}
-                        selectionTargetKey = {'article_number'}
-                        handleScroll={handleScroll}
-                        containerHeight ={'90px'}   
-                        loaders ={{
-                            ScrollDown_Loading,
-                            ScrollUp_Loading,
-                            loading
-                        }}
-                    />
-                }
-            </div>
 
-            <NavigationBtn/>
-        </div>
+    
+    return ( 
+        <SetNextPageContext.Provider value={{setNextPage}}>
+            <div className="flex-column  width100" style={{height:'100vh'}}>
+                {NextPage && 
+                    <SlidePage BodyComponent={NextPage} />
+                }
+
+                <TopInteractiveMenu currentFilters={filters} 
+                    setFilters={setFilters} 
+                    previousFilters={previousFilters} 
+                    selectionMode={selectionMode} 
+                    setSelectionMode={setSelectionMode} 
+                    handleDelitionItems={handleDelitionItems} 
+                    setForceRenderParent={setForceRender} 
+                />
+                <div className="width100" style={{zIndex:1}}>
+                    { selectionMode && 
+                        <SelectionModeComponent 
+                            zIndex={2}
+                            props={{
+                                setSelectionMode,
+                                selectedItemsLength:Object.keys(selectedItems).length,
+                                setSelectedItems,
+                                componentsListPreview:Object.keys(selectedItems).map((objKey,i)=>{
+                                    return (<ItemPreviewContainer
+                                        key={`itemSelection_${i}`}
+                                        itemObj={selectedItems[objKey]}
+                                        imgBlobs={imgBlobs.current}
+                                        handlePressStart={handlePressStart}
+                                        handlePressEnd={handlePressEnd}
+                                        handleTouchMove={handleTouchMove}
+                                        
+                                    />)
+                                }),
+                                componentOptionsToSelect:[
+                                    <BatchPrintBtn selectedItems={selectedItems} key={'mainPageBatchPrint'}/>,
+                                    <BatchEditBtn setToggleBatchEdit={setToggleBatchEdit} selectedItems={selectedItems} key={'mainPageBatchEdit'}
+                                        setNextPage={()=>{
+                                            slidePageTo({addNumber:1})
+                                            setNextPage(
+                                                <ItemEdit 
+                                                    preRenderInfo={{'article_number':Object.keys(selectedItems)}}
+                                                    fetchWhenOpen={false}
+                                                    setForceRenderParent={setForceRender}
+                                                    handleDelitionItems={handleDelitionItems}
+                                                    pageSetUp={new Set(['noHistory','noImages','noType','noCategory','noIssues'])}
+                                                />
+                                            )
+                                        }}
+                                    />
+                                ]
+                            }}
+                        />
+                    }
+                   
+                </div>
+                
+                
+                    {dataList && 
+                        <ItemsPreviewList 
+                            data={dataList} 
+                            handleDelitionItems={handleDelitionItems} 
+                            setForceRenderParent={setForceRender}
+                            fetchWhenOpen={true}
+                            selectionMode={selectionMode}
+                            setSelectionMode={setSelectionMode}
+                            selectedItems={selectedItems}
+                            setSelectedItems ={setSelectedItems}
+                            selectionTargetKey = {'article_number'}
+                            handleScroll={handleScroll}
+                            containerHeight ={'70px'}   
+                            loaders ={{
+                                ScrollDown_Loading,
+                                ScrollUp_Loading,
+                                loading
+                            }}
+                        />
+                    }
+                   
+                
+
+                <NavigationBtn 
+                    forceRenderParent={setForceRender}
+                />
+            </div>
+        </SetNextPageContext.Provider>
      );
 }
  

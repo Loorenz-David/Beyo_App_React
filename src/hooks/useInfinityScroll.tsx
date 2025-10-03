@@ -24,7 +24,7 @@ const useInfiniteScroll = ({itemHeight,thressholdItems,nextBatchItems,lastLoad,h
         let newList:{id:number}[] = []
         if(scrollType == 'down'){
             
-            removedItems.current = [...removedItems.current,...dataList.slice(0,newCount).map(obj=>obj.id)]
+            removedItems.current = [...removedItems.current, ...dataList.slice(0,newCount).map(obj=>obj.id)]
             newList = [...dataList.slice(newCount),...res]
         }else if(scrollType == 'up'){
             newList = [...res,...dataList.slice(0,-newCount)]
@@ -45,23 +45,14 @@ const useInfiniteScroll = ({itemHeight,thressholdItems,nextBatchItems,lastLoad,h
     }
     
     const handleScroll = async(e:React.TouchEvent<HTMLDivElement>)=>{
-
-       
-        
-
-        
+  
         const target = e.currentTarget
         const {scrollTop,clientHeight} = target
-
+        
         const thressholdHeight = (thressholdItems * itemHeight) -clientHeight
-
-       
-        
-       
-        
-        
-        
+  
         if(scrollTop > lastScroll.current ){ // scrolling down 
+            console.log('scrolling DOWN')
             if(lastLoad.current){
                 return
             }
@@ -82,7 +73,7 @@ const useInfiniteScroll = ({itemHeight,thressholdItems,nextBatchItems,lastLoad,h
 
         }else{ // scrolling up
            
-            
+            console.log('SCROLLING UP')
             if(removedItems.current.length == 0)return;
 
             const upThresshHold = calculateThresshold(nextBatchItems,itemHeight,clientHeight)

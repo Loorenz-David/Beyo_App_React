@@ -1,20 +1,20 @@
-<svg width="155" height="240" viewBox="0 0 155 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M51 37.6654L104 37.6654L155 153H0L51 37.6654Z" fill="white"/>
-<ellipse cx="77.5" cy="152.5" rx="77.5" ry="13.5" fill="#CDCDCD"/>
-<path d="M78 145C82.9706 145 87 149.029 87 154V158.276C90.0568 160.845 92 164.695 92 169C92 176.732 85.732 183 78 183C70.268 183 64 176.732 64 169C64 164.695 65.9432 160.845 69 158.276V154C69 149.029 73.0294 145 78 145Z" fill="white"/>
-<rect x="77" y="139" width="2" height="6" fill="#949494"/>
-<path d="M76.5 38C76.5 35 87.9 33.8 89.5 25C91.1 16.2 77.8333 5.33333 71 1" stroke="#878686" stroke-width="2"/>
+<svg width="200" height="293" viewBox="0 0 200 293" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M65.9958 48.5565L134.286 48.5566L200 197.165H0.282227L65.9958 48.5565Z" fill="white"/>
+<ellipse cx="100.141" cy="196.521" rx="99.8589" ry="17.3948" fill="#CDCDCD"/>
+<path d="M100.785 186.857C107.19 186.857 112.382 192.049 112.382 198.454V203.964C116.32 207.273 118.824 212.234 118.824 217.781C118.824 227.744 110.748 235.82 100.785 235.82C90.8225 235.82 82.7461 227.744 82.7461 217.781C82.7462 212.235 85.2502 207.274 89.1885 203.965V198.454C89.1885 192.05 94.3806 186.857 100.785 186.857Z" fill="white"/>
+<rect x="99.4971" y="179.126" width="2.577" height="7.73101" fill="#949494"/>
+<path d="M98.8529 48.9876C98.8529 45.1221 113.542 43.5759 115.603 32.2371C117.665 20.8983 100.571 6.89659 91.7661 1.31308" stroke="#878686" stroke-width="2"/>
 <g filter="url(#filter0_d_138_245)">
-<rect width="1" height="26" rx="0.5" transform="matrix(-0.604851 -0.796339 -0.796339 0.604851 58.3096 183.796)" fill="white"/>
+<rect width="1.2885" height="33.501" rx="0.644251" transform="matrix(-0.604851 -0.796339 -0.796339 0.604851 75.4141 236.846)" fill="white"/>
 </g>
 <g filter="url(#filter1_d_138_245)">
-<rect width="1" height="26" rx="0.5" transform="matrix(-0.999865 0.0164065 0.0164065 0.999865 78.9998 194)" fill="white"/>
+<rect width="1.2885" height="33.501" rx="0.644251" transform="matrix(-0.999865 0.0164065 0.0164065 0.999865 102.074 249.994)" fill="white"/>
 </g>
 <g filter="url(#filter2_d_138_245)">
-<rect width="1" height="26" rx="0.5" transform="matrix(-0.463697 0.885994 0.885994 0.463697 98.4636 183)" fill="white"/>
+<rect width="1.2885" height="33.501" rx="0.644251" transform="matrix(-0.463697 0.885994 0.885994 0.463697 127.153 235.82)" fill="white"/>
 </g>
 <defs>
-<filter id="filter0_d_138_245" x="17.2004" y="163.201" width="60.9084" height="56.1213" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<filter id="filter0_d_138_245" x="28.2148" y="216.079" width="66.9409" height="60.7723" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
 <feMorphology radius="5" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_138_245"/>
@@ -25,7 +25,7 @@
 <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_138_245"/>
 <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_138_245" result="shape"/>
 </filter>
-<filter id="filter1_d_138_245" x="58.0081" y="174.008" width="41.4102" height="65.9966" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<filter id="filter1_d_138_245" x="80.7959" y="230.004" width="41.8169" height="73.4967" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
 <feMorphology radius="5" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_138_245"/>
@@ -36,7 +36,7 @@
 <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_138_245"/>
 <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_138_245" result="shape"/>
 </filter>
-<filter id="filter2_d_138_245" x="78.1746" y="163.175" width="63.1501" height="52.5927" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<filter id="filter2_d_138_245" x="106.781" y="216.046" width="69.8291" height="56.2256" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
 <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
 <feMorphology radius="5" operator="dilate" in="SourceAlpha" result="effect1_dropShadow_138_245"/>

@@ -1,5 +1,5 @@
 import {createContext, useState,useCallback,ReactNode} from 'react'
-import ServerMessage from '../components/server-message.tsx'
+import ServerMessage from '../Components/Message_Components/server-message.tsx'
 
 type MessageDict ={
     message:string;

@@ -49,3 +49,9 @@
     fill: var(--container-color);
     stroke:var(--container-color);
 }
+
+.svg-bg-blue svg{
+    fill: rgb(32, 181, 255);
+    stroke:rgb(32, 181, 255);
+    
+}

@@ -10,8 +10,8 @@ export interface QueryFiltersDictProps{
 }
 export interface GetFetchDictProps{
     model_name:string
-    requested_data:string[]
-    query_filters: QueryFiltersDictProps
+    requested_data:string[] | {}
+    query_filters: QueryFiltersDictProps 
     per_page?:number
     cursor?:number | string
 }

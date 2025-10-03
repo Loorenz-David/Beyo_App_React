@@ -37,13 +37,13 @@ export interface ItemDict
         extends ItemPriceFields, Dealer
 {
     id:number
-    article_number:string
+    article_number:string | string[]
     category:string
     type:string
     length:ItemDimensions
     notes: ItemNotes[]
-    images:string[]
-    properties:{}
+    images:(string | {file:Blob})[] | null | undefined
+    properties:Record<string,any>
     state:string
     location:string
     

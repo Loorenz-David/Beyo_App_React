@@ -1,4 +1,4 @@
-import { useEffect,useContext,useRef } from 'react'
+import { useEffect,useContext,useRef,useState } from 'react'
 import {
   Routes,
   Route,
@@ -7,20 +7,26 @@ import {
   
 } from 'react-router-dom'
 
-import NavBar from './components/nav-bar.tsx'
+import NavBar from './Components/Navigation_Components/NavBarMobile.tsx'
 import HomePage from './pages/HomePage.tsx'
 import ItemsPage from './pages/ItemsPage.tsx'
 import SchedulePage from './pages/SchedulePage.tsx'
-import AccountPage from './pages/AccountPage.tsx'
-import LoginPage from './pages/LoginPage.tsx'
-import ProtectedRouter from './pages/ProtectedRouter.tsx'
-import {ServerMessageContext} from './contexts/ServerMessageContext.tsx'
 
-import CreateItemPageV2 from './pages/CreateItemPageV2.tsx'
+import LoginPage from './pages/LoginPage.tsx'
+import MenuPage from './pages/MenuPage.tsx'
+import ProtectedRouter from './pages/ProtectedRouter.tsx'
+
+import {ServerMessageContext} from './contexts/ServerMessageContext.tsx'
+import {SlidePageProvider} from './contexts/SlidePageContext.tsx'
+
+import CreateItemPageV2 from './Components/Item_Components/CreateItemPageV2.tsx'
+
 import useFetch from './hooks/useFetch.tsx'
+import {useSlidePageTouch} from './hooks/useSlidePageTouch.tsx'
 
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+
 
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
@@ -35,7 +41,9 @@ function App() {
   const {showMessage} = useContext(ServerMessageContext)
   const {apiFetch} = useFetch()
   const firstLoad = useRef(false)
-
+  const appRef = useRef<HTMLDivElement>(null)
+  const [currentPageIndex,setCurrentPageIndex] = useState(0)
+ 
   useRegisterSW({
     onRegisteredSW(swUrl,registration){
       console.log('new service worker registered',swUrl)
@@ -107,6 +115,7 @@ function App() {
         } catch(error){
           
           if(!user.username || error == 401){
+            
             localStorage.removeItem('user')
             navigate('/login')
             showMessage({
@@ -126,8 +135,12 @@ function App() {
         
     }
     
-    if(navigator.onLine){
-      checkSession()
+    if(navigator.onLine ){
+
+      if(location.pathname !== '/login'){
+        checkSession()
+      }
+      
     }else{
       
       if(!user.username){
@@ -149,33 +162,46 @@ function App() {
       
 
     },[navigate])
+
+  const {handleTouchStart,handleTouchMove,handleTouchEnd,slidePageTo}= useSlidePageTouch({
+          parentRef:appRef,
+          currentPageIndex:currentPageIndex,
+          setCurrentPageIndex:setCurrentPageIndex
+        
+        })
     
   return (
-    <div className='App'>
+    <div className='App smooth-slide' 
+      ref={appRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+    >
       {!shouldHideNav && <NavBar />}
       
-
-      <Routes>
-        <Route path="/login" element={<LoginPage/>}></Route>
-        
-        <Route path="/" 
-        element={<ProtectedRouter><HomePage/></ProtectedRouter>} 
-        />
-        <Route path="/items/create_item"
-        element={<ProtectedRouter><CreateItemPageV2 /></ProtectedRouter>}
-        />
-        <Route path="/items" 
-        element={<ProtectedRouter><ItemsPage/></ProtectedRouter>} 
-        />
-        <Route path="/schedule"
-        element={<ProtectedRouter><SchedulePage/></ProtectedRouter>} 
-        />
-        <Route path="/Account" 
-        element={<ProtectedRouter><AccountPage/></ProtectedRouter>} 
-        />
-      </Routes>
-       <Analytics />
-       <SpeedInsights />
+      <SlidePageProvider value={{slidePageTo,currentPageIndex}}>
+        <Routes>
+          <Route path="/login" element={<LoginPage/>}></Route>
+          
+          <Route path="/" 
+          element={<ProtectedRouter><HomePage/></ProtectedRouter>} 
+          />
+          <Route path="/items/create_item"
+          element={<ProtectedRouter><CreateItemPageV2 /></ProtectedRouter>}
+          />
+          <Route path="/items" 
+          element={<ProtectedRouter><ItemsPage/></ProtectedRouter>} 
+          />
+          <Route path="/schedule"
+          element={<ProtectedRouter><SchedulePage/></ProtectedRouter>} 
+          />
+          <Route path="/Menu" 
+          element={<ProtectedRouter><MenuPage/></ProtectedRouter>} 
+          />
+        </Routes>
+      </SlidePageProvider>
+       {/* <Analytics />
+       <SpeedInsights /> */}
     </div>
   )
 }

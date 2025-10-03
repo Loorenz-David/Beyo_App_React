@@ -17,6 +17,7 @@ interface longPressActionProps{
 export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionWhenPress,handleDefaultActionWhenClick,skipFirstClick=true}:longPressActionProps)=>{
 
     const touchStart = useRef(0)
+    const touchStartX = useRef(0)
     const currentSelectedObj = useRef(null)
     const pressTimeoutRef = useRef<Node.JS.Timeout | null>(null)
     const isScrolling = useRef(false)
@@ -37,6 +38,12 @@ export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionW
         }
         return e.clientY
     }
+    const getClientX = (e:TouchEvent | MouseEvent)=>{
+        if('touches' in e){
+            return e.touches[0].clientX ?? 0
+        }
+        return e.clientX
+    }
 
     const handlePressStart = (e,itemObj)=>{
         
@@ -45,7 +52,7 @@ export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionW
         
 
         touchStart.current = getClientY(e)
-        
+        touchStartX.current = getClientX(e)
         if(!selectionMode){
             pressTimeoutRef.current = setTimeout(()=>{
                 if(isScrolling.current){
@@ -104,9 +111,10 @@ export const useLongPressAction = ({selectionMode,setSelectionMode,handleActionW
 
      const handleTouchMove = (e)=>{
        
-        const didMove = Math.abs(getClientY(e) - touchStart.current)
+        const didMoveY = Math.abs(getClientY(e) - touchStart.current)
+        const didMoveX = Math.abs(getClientX(e) - touchStartX.current)
         
-        if(didMove > 10){
+        if(didMoveY > 10 || didMoveX > 10){
             clearTimeout(pressTimeoutRef.current)
             pressTimeoutRef.current = null
             isScrolling.current = true
