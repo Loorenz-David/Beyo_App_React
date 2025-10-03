@@ -225,7 +225,7 @@ export const DealerSelection = () => {
                             slidePageTo({addNumber:1})
                             setNextPageChild(
                                 <CreateDealer 
-                                    setData={setData}
+                                    setData={setItemData}
                                 />
                             )
 

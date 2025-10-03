@@ -211,7 +211,7 @@ const CreateItemPageV2 = ({
 
     },[itemData])
 
-
+    console.log(itemData,'teh datat')
     useEffect(()=>{
         if(typeof recordedItemPage.current == 'number' && typeof currentPageIndex == 'number'){
             if(hasUploadItem.current &&  currentPageIndex < recordedItemPage.current  && forceRenderParent !== null){

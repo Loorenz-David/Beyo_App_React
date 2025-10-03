@@ -562,6 +562,7 @@ export const useSaveItemsV2= ()=>{
                     
                     }
                     if(wasOffline){
+                        console.log('was offiline item',itemData.offlineIndexKey)
                         clearFailedItem(itemData.offlineIndexKey)
                     }
                     }else{

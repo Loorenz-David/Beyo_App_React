@@ -145,13 +145,14 @@ const OfflineItemsPage = ({
 
         let success_count = 0
         let fail_count = 0
-
+        console.log(itemList)
         const worker = async() =>{
             while(index < itemList.length){
                 
                 const currentIndex = index++
 
                 const item = itemList[currentIndex]
+                item['offlineIndexKey'] = itemList[currentIndex]['offlineIndexKey'][currentIndex]
                 try{
                     const res = await uploadItem({
                         itemData:item,

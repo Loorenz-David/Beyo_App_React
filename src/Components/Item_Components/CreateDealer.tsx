@@ -76,7 +76,7 @@ interface CreateDealerProps{
     setData?:React.Dispatch<React.SetStateAction<any>> | null
 }
 
-const CreateDealer = ({setData}:CreateDealerProps) => {
+const CreateDealer = ({setData =null}:CreateDealerProps) => {
     const {showMessage} = useContext(ServerMessageContext)
     const [togglePage,setTogglePage] = useState('')
     const [addressObj,setAddressObj] = useState({})
@@ -159,7 +159,8 @@ const CreateDealer = ({setData}:CreateDealerProps) => {
                 setRules:setRules})
             if(response && response.status < 400){
                 const responseData = response.body[0]
-                if(setData){
+                if(setData !== null){
+                   
                    setData(prev=>({...prev,'dealer':{
                         id:responseData.id,
                         delaer_type:dealerType,
@@ -168,7 +169,7 @@ const CreateDealer = ({setData}:CreateDealerProps) => {
                     }}))
                     
                 }
-                slidePageTo({addNumber:-1})
+                slidePageTo({addNumber:-2})
             }
            
 
