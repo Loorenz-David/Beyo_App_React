@@ -294,6 +294,7 @@ const AddScannerActionOptions = ({listOfOptions,setListOfOptions,currentPageInde
         
         if(currentPageIndexScanner !== null && currentPageIndexScanner < listOfOptions.length){
             setAddingOption(listOfOptions[currentPageIndexScanner])
+            
         }else{
             setAddingOption({})
         }
@@ -400,13 +401,10 @@ const ItemScanner = ({handleDelitionItems,setForceRenderParent}) =>{
             
         }
 
-        if(typeof scannerPage.current === 'number' && typeof currentPageIndex === 'number'){
-            if(scannerPage.current !== currentPageIndex){
-
-            }
+        if(!firstLoad.current){
+            handelFirstLoad()
         }
 
-        console.log(currentPageIndex,'the page log in ItemScanner', scannerPage.current,' and the page recorded')
     },[scannedItem])
 
     useEffect(()=>{
@@ -427,6 +425,8 @@ const ItemScanner = ({handleDelitionItems,setForceRenderParent}) =>{
             }
         }
     },[currentPageIndex])
+
+    
     
 
     

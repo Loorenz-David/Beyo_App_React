@@ -195,7 +195,11 @@ const CreateItemPageV2 = ({
         if(!activeSlider.current) return;
 
         const currentDict = sliderOrder[sliderStep.current]
-        timeoutRef.current = setTimeout(()=>{ activeSlideShow(currentDict)},200)
+        timeoutRef.current = setTimeout(()=>{ 
+            requestAnimationFrame(()=>{
+                activeSlideShow(currentDict)
+            })
+        },200)
        
 
        

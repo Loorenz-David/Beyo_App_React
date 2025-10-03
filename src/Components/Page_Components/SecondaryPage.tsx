@@ -73,18 +73,16 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
     
     const closeSecondaryPage = ()=>{
         if(!secondaryPageRef.current) return
+
+       
         
         secondaryPageRef.current.classList.remove(startAnimation)
-        secondaryPageRef.current?.classList.add(endAnimation)
+        secondaryPageRef.current.style.transform = 'transform:translate3d(0,100%,0);'
 
-        const node = secondaryPageRef.current
-        const handleAnimationEnd = ()=>{
-            node.removeEventListener('animationend',handleAnimationEnd)
+        setTimeout(()=>{
             handleClose()
-        }
-        
-        node.addEventListener('animationend',handleAnimationEnd)
-   
+        },200)
+       
        
     }
 
@@ -125,7 +123,7 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
         if(deltaY > 0 &&  (!scrollElement || isAtTop)){
             
            e.preventDefault()
-           secondaryPageRef.current.style.transform = `translateY(${deltaY}px)`
+           secondaryPageRef.current.style.transform = `transform:translate3d(0,${deltaY}px,0)`
         }
 
         
@@ -139,7 +137,8 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
             startYRef.current = null
         }else{
             startYRef.current = null
-        secondaryPageRef.current.style.transform= `translateY(0)`
+
+            secondaryPageRef.current.style.transform= `transform:translate3d(0,0,0)`
         }
 
 
@@ -148,9 +147,9 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
     
 
     useEffect(()=>{
-            
-           
-
+            requestAnimationFrame(()=>{
+                secondaryPageRef.current.classList.add(startAnimation)
+            })
 
             const node = secondaryPageRef.current 
             if(!node ) return;
@@ -167,20 +166,7 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
                 node.addEventListener('touchmove',handleTouchMove,{passive:false})
             }
             
-
-
-            
-            
-            
-            
-        
-       
-
-
-
         return () =>{
-           
-            
             node.removeEventListener('touchmove',handleTouchMove)
             pageManager.close(pageId)
 
@@ -198,7 +184,7 @@ const SecondaryPage = ({BodyComponent,bodyProps,handleClose,zIndex=1,pageId=null
     
 
     return ( 
-    <div id={pageId ?? undefined}  className={`secondary-page bg-primary ${startAnimation} ${pageId}`} ref={secondaryPageRef} style={{zIndex:`${zIndex}`}}
+    <div id={pageId ?? undefined}  className={`secondary-page bg-primary  ${pageId}`} ref={secondaryPageRef} style={{zIndex:`${zIndex}`}}
       
        onTouchEnd={(e)=>{handleTouchEnd(e)}}
        onTouchStart={(e)=>{

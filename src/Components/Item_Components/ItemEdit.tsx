@@ -416,6 +416,7 @@ export const ItemEdit = ({
     const handleEditItemSetting = async(objSetting)=>{
 
         if(objSetting.property == 'delete'){
+            
             if(deletingItem) {
                 showMessage({
                     message:'On the process of Deliting',
@@ -423,7 +424,8 @@ export const ItemEdit = ({
                 })
                 return
             }
-            let idToDelete; 
+            let idToDelete = null 
+            console.log(preRenderInfo)
             if('offlineIndexKey' in preRenderInfo){
                 
                 idToDelete = Array.isArray(preRenderInfo.offlineIndexKey)? preRenderInfo.offlineIndexKey : [preRenderInfo.offlineIndexKey]
@@ -436,8 +438,9 @@ export const ItemEdit = ({
                 
 
             }
-            if(idToDelete){
-                
+            console.log(idToDelete)
+            if(idToDelete !== null){
+                console.log('after if')
                 try{
                     setDeletingItem(true)
                     setToggleEditSettings(false)

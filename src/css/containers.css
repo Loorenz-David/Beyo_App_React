@@ -16,9 +16,9 @@ button,button *{
     position:fixed;
     display:flex;
     flex-direction:column;
-    transform:translateX(0%);
+    transform:translate3d(0,100%,0);
     will-change: transform;
-    max-height:0;
+    /* max-height:0; */
     overflow:hidden;
     width:100%;
     bottom:0;
@@ -30,6 +30,13 @@ button,button *{
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.433);
     transition:transform 0.2s ease-out;
     /* animation: expandFromZero 0.5s ease forwards; */
+}
+.secondary-page.expandFromZero{
+    transform:translate3d(0,0,0);
+
+}
+.secondary-page.shrinkToZero{
+    transform:translate3d(0,100%,0);
     
 }
 
@@ -269,18 +276,18 @@ button,button *{
 
 
 
-.shrinkToZero{
+/* .shrinkToZero{
     animation:shrinkToZero 0.3s ease forwards;
-}
+} */
 .slideRight{
     animation:slideRight 0.3s ease ;
 }
 .slideLeft{
     animation:slideLeft 0.5s ease forwards;
 }
-.expandFromZero{
+/* .expandFromZero{
     animation:expandFromZero 0.5s ease forwards;
-}
+} */
 
 .expandable-row{
     display:grid;

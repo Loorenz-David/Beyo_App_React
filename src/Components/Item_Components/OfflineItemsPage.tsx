@@ -116,20 +116,15 @@ const OfflineItemsPage = ({
 
     },[forceRenderParent])
 
-    const handleDelitionItems = (itemsIdList)=>{
-        if(Object.keys(selectedItems).length > 0){
-            for( const i in selectedItems){
-                clearFailedItem(selectedItems[i].offlineIndexKey)
-            }
-        }else{  
-            itemsIdList.forEach(art => clearFailedItem(art))
-        }
+    const handleDelitionItems = async(itemsIdList)=>{
+      
+        console.log(itemsIdList,'in. deliting')
+        itemsIdList.forEach(art => clearFailedItem(art))
         
         
-        
-           
-        slidePageTo({addNumber:-1})
+        slidePageTo({addNumber:0})
         setForceRenderParent(prev=>!prev)
+        setSelectionMode(false)
         
     }
 
@@ -275,7 +270,7 @@ const OfflineItemsPage = ({
                                     slidePageTo({addNumber:1})
                                     setNextPage(
                                         <ItemEdit 
-                                            preRenderInfo={{'handleBatchOfflineUpload':handleBatchOfflineUpload}}
+                                            preRenderInfo={{'handleBatchOfflineUpload':handleBatchOfflineUpload,'offlineIndexKey':Object.keys(selectedItems).map(obj=> Number(obj))}}
                                             fetchWhenOpen={false}
                                             setForceRenderParent={setForceRenderParent}
                                             handleDelitionItems={handleDelitionItems}
