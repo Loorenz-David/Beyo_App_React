@@ -237,7 +237,7 @@ const CreateItemPageV2 = ({
        
         if(itemUploading){
             showMessage({
-                message:'Item is uploadin.',
+                message:'Item is uploading.',
                 status:400
             })
             return

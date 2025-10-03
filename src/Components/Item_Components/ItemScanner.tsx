@@ -575,7 +575,7 @@ const ItemScanner = ({handleDelitionItems,setForceRenderParent}) =>{
                 
                 <HeaderSlidePage
                     middleElement={
-                        <div className="flex-1 content-center items-center">
+                        <div className="flex-1 content-center items-center flex-row">
                             <span className="text-15">{scannedItem}</span>
                         </div>
                     }
@@ -721,7 +721,7 @@ const ItemScanner = ({handleDelitionItems,setForceRenderParent}) =>{
 
                 </div>
                 
-                <div className="flex-row width100 padding-20 push-bottom" style={{paddingBottom:'30px'}}>
+                <div className="flex-row width100 " style={{padding:'40px 20px 40px 20px'}}>
 
                     <div className="flex-row items-center content-center padding-10 "
                         style={{borderRadius:'50%',zIndex:'1',

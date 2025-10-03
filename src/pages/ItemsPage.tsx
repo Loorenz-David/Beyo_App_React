@@ -492,7 +492,7 @@ const TopInteractiveMenu = ({
         'toggleOfflineItems':()=>{
             slidePageTo({addNumber:1})
             setNextPage(
-                <OfflineItemsPage/>
+                <OfflineItemsPage forceRenderMain={setForceRenderParent}/>
             )
         },
         'toggleSelectionMode':()=>{setSelectionMode(true)},

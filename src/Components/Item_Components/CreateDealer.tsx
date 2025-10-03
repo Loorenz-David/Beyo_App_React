@@ -164,8 +164,9 @@ const CreateDealer = ({setData}:CreateDealerProps) => {
                     }}))
                     
                 }
+                slidePageTo({addNumber:-1})
             }
-           slidePageTo({addNumber:-1})
+           
 
         }catch(err){
             console.log(err)
@@ -286,7 +287,7 @@ const CreateDealer = ({setData}:CreateDealerProps) => {
                     {loading ? 
                         <LoaderDots
                             dotStyle={{dimensions:'squareWidth-07',bgColor:'bg-primary'}}
-                            mainBg={'white'}
+                           
                         />
                     :
                         <span className="text-15">Add Delaer</span>

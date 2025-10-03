@@ -61,8 +61,12 @@ const SelectAllBtn = ({props})=>{
     )
 }
 
-
-const OfflineItemsPage = () => {
+interface OfflineItemProps {
+    forceRenderMain:React.Dispatch<React.SetStateAction<boolean>>
+}
+const OfflineItemsPage = ({
+    forceRenderMain
+}:OfflineItemProps) => {
     
     const {showMessage} = useContext(ServerMessageContext)
     const [items,setItems] = useState([])
@@ -200,10 +204,12 @@ const OfflineItemsPage = () => {
             clearTimeout(timeoutRef.current)
         }
         setForceRenderParent(prev =>!prev)
+        forceRenderMain(prev => !prev)
+        setSelectionMode(false)
+        setSelectedItems({})
+        
         timeoutRef.current = setTimeout(()=>{
             setUploadingItem(false)
-            
-            
         },400)
 
         
@@ -243,26 +249,6 @@ const OfflineItemsPage = () => {
                     </div>
                 }
             />
-            {/* {toggleBatchEdit && 
-                <SecondaryPage BodyComponent={ItemEdit}
-                    bodyProps={{
-                            preRenderInfo:{'handleBatchOfflineUpload':handleBatchOfflineUpload},
-                            fetchWhenOpen:false,
-                            setForceRenderParent:setForceRenderParent,
-                            handleDelitionItems:handleDelitionItems,
-                            pageSetUp:new Set(['noHistory','noImages','noType','noCategory','noIssues'])
-                    }}
-                    
-                    pageId={'offlineItems'}
-                    interactiveBtn ={{iconClass:'svg-15 padding-05 position-relative content-end', order:3,icon:<ThreeDotMenu/>}}
-                    header={{'display': `Editing ${Object.keys(selectedItems).length} items`, class:'flex-1 content-center',order:2}}
-                    closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 content-start',order:0}}
-                    
-                    startAnimation={'slideLeft'}
-                    endAnimation ={'slideRight'}
-                    handleClose={()=>{setToggleBatchEdit(false);}}    
-                />
-            } */}
 
             { selectionMode && 
                 <SelectionModeComponent 

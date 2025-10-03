@@ -352,6 +352,7 @@ export const ItemEdit = ({
     const {slidePageTo} = useSlidePage()
     
     const [NextPage,setNextPage] = useState<React.ReactNode>(null)
+    const [deletingItem,setDeletingItem] = useState(false)
 
       const setRules = {'loadData':true}
 
@@ -378,6 +379,7 @@ export const ItemEdit = ({
                         complementMessage:'No article number was found in data base, thus, no infromation will be loaded, and save button will be disabled.',
                         status:400
                     })
+                   
                     setTimeout(()=>{slidePageTo({addNumber:0})},2000)
                     
                 }
@@ -412,7 +414,15 @@ export const ItemEdit = ({
     ,[preRenderInfo])
     
     const handleEditItemSetting = async(objSetting)=>{
+
         if(objSetting.property == 'delete'){
+            if(deletingItem) {
+                showMessage({
+                    message:'On the process of Deliting',
+                    status:400
+                })
+                return
+            }
             let idToDelete; 
             if('offlineIndexKey' in preRenderInfo){
                 
@@ -427,7 +437,16 @@ export const ItemEdit = ({
 
             }
             if(idToDelete){
-                await handleDelitionItems(idToDelete)
+                
+                try{
+                    setDeletingItem(true)
+                    setToggleEditSettings(false)
+                    await handleDelitionItems(idToDelete)
+                }
+                finally{
+                    setDeletingItem(false)
+                }
+               
             }
             
         }
@@ -451,6 +470,7 @@ export const ItemEdit = ({
                             complementMessage:'No article number was found in data base, thus, no infromation will be loaded and, save button will be disabled.',
                             status:400
                         })
+            setUploading(false)
             return
         }
 
@@ -461,13 +481,15 @@ export const ItemEdit = ({
             await preRenderInfo['handleBatchOfflineUpload'](rest)
             
             slidePageTo({addNumber:-1})
+            setUploading(false)
             return 
         }
-        
+        let removeArts = false
         if(data.length > 0 ){
             baseLineDict = {...preRenderInfo,...(data.length > 0 && data[0])}
         }else if(preRenderInfo.article_number && Array.isArray(preRenderInfo.article_number)){
             baseLineDict = {...preRenderInfo}
+            removeArts = true
         }
 
         let type = 'update'
@@ -485,6 +507,9 @@ export const ItemEdit = ({
             }
             if(fetchWhenOpen){
                 handleFirstFetch()
+            }
+            if(removeArts){
+                setItemData({})
             }
             slidePageTo({addNumber:-1})
         }
@@ -523,7 +548,12 @@ export const ItemEdit = ({
                                     setToggleEditSettings(true)
                                 }}
                             >
-                                <ThreeDotMenu/>
+                                {deletingItem ?
+                                    <LoaderDots dotStyle={{dimensions:'squareWidth-05',bgColor:'bg-secondary'}}/>
+                                :
+                                    <ThreeDotMenu/>
+                                }
+                                
                             </div>
                             {toggleEditSettings && 
                                 <SelectPopupV2  setTogglePopup={setToggleEditSettings}
