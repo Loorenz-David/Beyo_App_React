@@ -98,14 +98,18 @@ const CreateDealer = ({setData}:CreateDealerProps) => {
     
    const required_keys = ['dealer_name','dealer_type','raw_address']
     const handleSave = async (e)=>{
+        
+        e.preventDefault()
         if(loading){
+            
             showMessage({
                 message:'Dealer is uploading.',
                 status:400
             })
             return
         }
-        e.preventDefault()
+
+        
         const form = e.target.closest('form')
         console.log(form)
         const formData = new FormData(form)
@@ -286,7 +290,8 @@ const CreateDealer = ({setData}:CreateDealerProps) => {
                 >
                     {loading ? 
                         <LoaderDots
-                            dotStyle={{dimensions:'squareWidth-07',bgColor:'bg-primary'}}
+                            dotStyle={{dimensions:'squareWidth-07',bgColor:'bg-secondary'}}
+                            mainBg={'transparent'}
                            
                         />
                     :
