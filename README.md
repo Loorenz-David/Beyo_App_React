@@ -23,26 +23,65 @@ It allows users to manage inventory, deliveries, and warehouse items through a r
 
 ---
 
-## Screenshots
+## Why this crm ?
 
-## LoginPage
-![LoginPage](assets/screenshots/LoginPage.jpg)
+The company I made this application is a growing second hand store, their items have unique properties and are track in different ways, thus it was hard for them to use standar crms, which are mostly made for mass production. 
 
-## Main Inventory Page
-![Main Inventory Page](assets/screenshots/MainInvPage.jpg)
+To modify the Item types, properties, and issues, you can look at the folder src/maps. Check the components that use these maps to build the UI, so that you can make your own items, properties and issues. 
 
-## Add Item Form
-![Add Item Form](assets/screenshots/AddItemPage.jpg)
-## Add Item Popups
-![Add Item Popups](assets/screenshots/AddItemPopup.jpg)
+### PropertySelection
+**Path :** src/Components/Item_Components/PropertySelection.tsx.
 
-## Scann Page
-![Scann Page](assets/screenshots/ScannerPage.jpg)
+**Role :** in charge of rendering the button that triggers the slide popup
 
-## Filter Page
-![Filter Page](assets/screenshots/FilterPage.jpg)
+### DynamicBoxesV2
+**Path :** src/Components/Item_Components/DynamicBoxesV2.tsx
 
-## ⚙️ Setup Instructions
+**Role :** In charge of building the interactive buttons and to label the user selection in to the item dictionary
+
+
+
+
+# Screenshots
+
+### LoginPage
+<div style="display: flex; flex-direction: row; gap: 10px;">
+  <img src="src/assets/screenshots/LoginPage.jpg" alt="LoginPage]" width="250">
+
+</div>
+
+### Main Inventory Page
+<div style="display: flex; flex-direction: row; gap: 10px;">
+  <img src="src/assets/screenshots/MainInvPage.jpg" alt="Main Inventory Page" width="250">
+
+</div>
+
+
+### Add Item Form
+
+<div style="display: flex; flex-direction: row; gap: 10px;">
+  <img src="src/assets/screenshots/AddItemPage.jpg" alt="Add Item Form" width="250">
+  <img src="src/assets/screenshots/AddItemPopup.jpg" alt="Add Item Popups" width="250">
+
+</div>
+
+
+
+### Scann Page
+<div style="display: flex; flex-direction: row; gap: 10px;">
+  <img src="src/assets/screenshots/ScannerPage.jpg" alt="Scann Page" width="250">
+
+</div>
+
+### Filter Page
+<div style="display: flex; flex-direction: row; gap: 10px;">
+  <img src="src/assets/screenshots/FilterPage.jpg" alt="Filter Page" width="250">
+
+</div>
+
+
+
+### ⚙️ Setup Instructions
 
 ```bash
 # Clone the repository
@@ -58,17 +97,18 @@ npm install
 npm run dev
 
 ---
+```
+
 ## Backend Connection
-
-```markdown
 # The frontend communicates with the Flask backend API.
-# Make sure the backend is running and update the API base URL in your environment file:
+Make sure the backend is running and update the API base URL in your environment file:
 
-# Flask API repository:
+Flask API repository:
  https://github.com/Loorenz-David/Beyo_App_Flask
 
-
+## ViteConfig adjusments
  You will need to add the Back end ip to the viteconfig.ts file:  
+ ```ts
  config.server = {
       host:true,
       proxy:{
@@ -79,5 +119,5 @@ npm run dev
       }
 
     }
-
+```
 
