@@ -1,7 +1,8 @@
-import {useState,useRef,useEffect } from 'react'
+import {useState,useRef,useEffect,useContext } from 'react'
 
 import SearchIcon from '../../../assets/icons/General_Icons/SearchIcon.svg?react'
 import FilterIcon from '../../../assets/icons/General_Icons/FilterIcon.svg?react'
+import AddUserIcon from '../../../assets/icons/General_Icons/AddUserIcon.svg?react'
 
 
 import {useSlidePage} from '../../../contexts/SlidePageContext.tsx'
@@ -9,8 +10,12 @@ import {useData,DataContext} from '../../../contexts/DataContext.tsx'
 
 import {SlidePage} from '../../Page_Components/SwapToSlidePage.tsx'
 import {UserProfilePicture} from './UserProfilePicture.tsx'
+import UserProfile from './UserProfile.tsx'
 
 import type {UserDict} from '../../../types/UserDict.ts'
+
+import useFetch from '../../../hooks/useFetch.tsx'
+import { ServerMessageContext } from '../../../contexts/ServerMessageContext.tsx'
 
 const UserFiltersPage = ()=>{
     return(
@@ -20,20 +25,27 @@ const UserFiltersPage = ()=>{
     )
 }
 
-const HeaderSearch = ()=>{
+const HeaderSearch = ({
+    setNextPageMain,
+    setForceRender
+}:{
+    setNextPageMain: React.Dispatch<React.SetStateAction<React.ReactNode>>,
+    setForceRender: React.Dispatch<React.SetStateAction<boolean>>
+})=>{
 
     const [ activeInputSearch, setActiveInputSearch ] = useState(false)
-    const [ NextPage, setNextPage ] = useState<React.ReactNode>(null)
+    
 
     const {slidePageTo} = useSlidePage()
 
+     
+
+
     return(
         <div className="flex-row width100 bg-primary" 
-            style={{padding:'5px 10px',position:'fixed',top:'0',left:'0', boxShadow:'0 0 10px rgba(0,0,0,0.2)'}} 
+            style={{padding:'5px 10px',position:'fixed',top:'0',left:'0', boxShadow:'0 0 10px rgba(0,0,0,0.2)',zIndex:2}} 
         >
-            {NextPage && 
-                <SlidePage BodyComponent={NextPage}/>
-            }
+           
             
 
             <div className={`flex-row width100 bg-primary ${activeInputSearch && 'bg-containers'}`}
@@ -51,13 +63,39 @@ const HeaderSearch = ()=>{
                     >
                         <SearchIcon/>
                     </div>
-                    <div className="flex-column svg-18 btn" style={{padding:'10px'}}
+                    <div className="flex-column svg-15 btn" style={{padding:'10px'}}
                         onClick={()=>{
-                            setNextPage(<UserFiltersPage/>)
+                            setNextPageMain(<UserFiltersPage/>)
                             slidePageTo({addNumber:1})
                         }}
                     >
                         <FilterIcon/>
+                    </div>
+
+                     <div className="flex-column svg-18 btn"
+                        onClick={()=>{
+
+                                const emptyUser:UserDict = {   
+                                    username: '',
+                                    email: '',
+                                    phone: '',
+                                    roles: [],
+                                    profile_picture: '',
+                                    password: ''
+                                };
+                            setNextPageMain( 
+                            <UserProfile key={new Date().getTime()}
+                                            userDict={emptyUser}
+                                            isCreateMode={'create-new'}
+                                            setForceRender={setForceRender}
+                                            setNextPageMain={setNextPageMain}
+                                        />
+                            )
+                            slidePageTo({addNumber:1})
+                        }}
+                    >
+                        
+                        <AddUserIcon/>
                     </div>
                 </div>
                 
@@ -68,12 +106,15 @@ const HeaderSearch = ()=>{
 
 
 const UserPill = ({
-    user,setNextPage}
-    :{
+    user,
+    setNextPage
+}:{
         user:UserDict, 
         setNextPage:(user:UserDict) => void
     }
 ) =>{
+    
+
     return(
         <div className="flex-row width100 items-center gap-2 border-bottom" style={{padding:'15px '}}
             onClick={()=>{setNextPage(user)}}
@@ -95,7 +136,7 @@ const UserPill = ({
 }
 
 const ManageRoles = ({selectedRoles})=>{
-    console.log(selectedRoles)
+    
     return(
         <div className="flex-column widht100" style={{height:'100vh'}}>
             in roles
@@ -181,9 +222,9 @@ const EditUsers = ({user}:{user:UserDict}) =>{
                     <div className="width100"
                         style={{display:'grid',gap:'40px', gridTemplateColumns:'repeat(4,1fr)',justifyContent:'space-between'}}
                     >
-                        {user.roles.map((role)=>{
+                        {user.roles.map((role,i)=>{
                             return(
-                                <div className="flex-row bg-containers  content-center"
+                                <div key={`${role.id}_${i}`} className="flex-row bg-containers  content-center"
                                     style={{borderRadius:'10px',padding:'10px 15px'}}
                                 >
                                     <span className="text-15">{role.role}</span>
@@ -209,51 +250,91 @@ const EditUsers = ({user}:{user:UserDict}) =>{
     )
 }
 
-const UsersList = ()=>{
+
+
+
+
+const UsersList = ({
+    setNextPageMain,
+    setForceRender
+}:{
+    setNextPageMain: React.Dispatch<React.SetStateAction<React.ReactNode>>,
+    setForceRender: React.Dispatch<React.SetStateAction<boolean>>
+}
+)=>{
     const {data} = useData()
     const {slidePageTo} = useSlidePage()
-    const usersRoleCluster = useRef<Record<string,React.JSX.Element[]>>({})
-    const [NextPage,setNextPage] = useState<React.ReactNode>(null)
+    const [usersRoleCluster,setUsersRoleCluster] = useState<Record<string,React.JSX.Element[]>>({})
+    
+    // useEffect(()=>{
+    //     if(user){
+
+    //     }
+    // },[])
     
     const handleUserSelection = (user:UserDict)=>{
-        setNextPage(<EditUsers user={user}/>)
+        
+        setNextPageMain(
+        <UserProfile 
+            key={new Date().getTime()}
+            userDict={user}
+            setForceRender={setForceRender}
+            isCreateMode={'update-existing'}
+            setNextPageMain={setNextPageMain}
+        />
+
+        )
         slidePageTo({addNumber:1})
     }
 
     const handleListConstructor = ()=>{
-        usersRoleCluster.current = {} 
+        const usersRoleClusterBuild: Record<string, React.JSX.Element[]> = {} 
         
         for(let i = 0; i < data.length ; i++ ){
             const user:UserDict = data[i]
-            user.roles?.forEach((role,i)=>{
-                const roleName = role.role
-                if(!(roleName in usersRoleCluster.current)){
-                    usersRoleCluster.current[roleName] = []
+            if(!user.roles || user.roles.length === 0){
+                if(!('No Role' in usersRoleClusterBuild)){
+                    usersRoleClusterBuild['No Role'] = []
                 }
-                usersRoleCluster.current[roleName].push(<UserPill key={`${user.id}_${roleName}_${i}`} user={user} setNextPage={handleUserSelection} />)
+                usersRoleClusterBuild['No Role'].push(<UserPill key={`${user.id}_NoRole_${i}`} user={user} setNextPage={handleUserSelection} />)
+                continue
+            }
+            user.roles?.forEach((role,j)=>{
+                const roleName = role.role
+                if(!(roleName in usersRoleClusterBuild)){
+                    usersRoleClusterBuild[roleName] = []
+                }
+                usersRoleClusterBuild[roleName].push(<UserPill key={`${user.id}_${roleName}_${j}_${i}`} user={user} setNextPage={handleUserSelection} />)
             })
         }
+        setUsersRoleCluster(usersRoleClusterBuild)
         
     }
 
-    handleListConstructor()
+    useEffect(()=>{
+        
+        handleListConstructor()
+    },[data])
 
     return(
-        <div className="flex-column gap-2 width100 Y-thin-scrollbar bg-scroll-bar" style={{overflowY:'auto',paddingTop:'70px'}}>
-            {NextPage && 
-                <SlidePage BodyComponent={NextPage}/>
-            }
+        <div className="flex-column gap-2 width100 Y-thin-scrollbar bg-scroll-bar" style={{overflowY:'auto',paddingTop:'70px',position:'relative'}}>
+            
 
-            {Object.keys(usersRoleCluster.current).map((roleName,i)=>{
+            {Object.keys(usersRoleCluster).map((roleName,i)=>{
                 return(
                     <div key={`clusterRoles_${roleName}_${i}`} className="flex-column gap-1 padding-20">
                         <span className="text-15">{roleName}</span>
                         <div className="flex-column bg-containers " style={{borderRadius:'10px'}} >
-                            {usersRoleCluster.current[roleName]}
+                            {usersRoleCluster[roleName]}
                         </div>
                     </div>
                 )
             })}
+
+            <div className="flex-column items-center content-center " style={{position:'fixed',bottom:'20px',left:'20px'}}>
+                
+            </div>
+
         </div>
     )
 }
@@ -276,14 +357,46 @@ for(let i = 0; i<= 10 ; i++ ){
 
 
 export const ManageUsers = ()=>{
-    const [usersData,setUsersData] = useState<UserDict[]>(testData)
+    const [usersData,setUsersData] = useState<UserDict[]>([])
+    const {doFetch} = useFetch()
+    const {showMessage} = useContext(ServerMessageContext)
+    const [NextPage,setNextPageMain] = useState<React.ReactNode>(null)
+    const [forceRender,setForceRender] = useState(false)
+    useEffect(()=>{
+       handleFetchUsers()
+    },[forceRender])
+
+    const handleFetchUsers = async () =>{
+         doFetch({
+            url:'/api/schemes/get_items',
+            method:'POST',
+            body:{
+                'model_name':'User',
+                'requested_data':['id','username','email','phone',{'roles':['role']},'profile_picture'],
+                'query_filters':{}
+            }
+        }).then(res =>{
+            if(res && res.status < 400 && res.body.length > 0){
+                setUsersData(res.body)
+            }else{
+                showMessage({
+                    message:'Unable to load data',
+                    complementMessage:'Unable to load user data, server could be down, or you are missing internet connection.',
+                    status:400
+                })
+            }
+        })
+    }
 
     return (
         <DataContext.Provider value={{data:usersData, setData:setUsersData}}>
             <div className="flex-column width100" style={{height:'100vh'}}>
-                <HeaderSearch/>
+                {NextPage && 
+                    <SlidePage BodyComponent={NextPage}/>
+                }
+                <HeaderSearch setNextPageMain={setNextPageMain} setForceRender={setForceRender}/>
 
-                <UsersList/>
+                <UsersList setNextPageMain={setNextPageMain} setForceRender={setForceRender}/>
 
             </div>
         </DataContext.Provider>

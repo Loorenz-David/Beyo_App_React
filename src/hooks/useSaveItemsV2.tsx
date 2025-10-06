@@ -1,3 +1,58 @@
+// Type definitions for strict TypeScript
+export interface Dealer {
+    id: number;
+    dealer_name: string;
+    // Add other dealer fields as needed
+}
+
+export interface NoteSubject {
+    id?: number;
+    subject: string;
+}
+
+export interface ItemNote {
+    id?: number;
+    note_content: string;
+    subject: NoteSubject;
+    action: 'Created' | 'Updated' | 'Deleted';
+    original_note?: ItemNote;
+}
+
+export interface NotesFetchDict {
+    Created: ItemNote[];
+    Updated: ItemNote[];
+    Deleted: ItemNote[];
+}
+
+export interface ItemData {
+    article_number: string | string[];
+    category: string;
+    type: string;
+    purchased_price: number;
+    valuation: number;
+    dealer: Dealer;
+    images?: string[];
+    notes?: ItemNote[];
+    [key: string]: any;
+}
+
+export interface FetchDictData {
+    dealer?: object;
+    notes?: object;
+    item_history?: object;
+    article_number?: string | string[];
+    created_by?: string;
+    [key: string]: any;
+}
+
+export interface UploadItemProps {
+    itemData: ItemData;
+    type: 'create' | 'update';
+    baseLineDict?: ItemData | null;
+    showServerMessage?: boolean;
+    createOfflineItemIfFail?: boolean;
+    allowArticleChange?: boolean;
+}
 import {useState,useContext} from 'react'
 
 import {useUploadImage} from '../hooks/useUploadImage.tsx'
@@ -28,7 +83,7 @@ const compareListOfImages = (curVal,baseVal=null)=>{
 }
 
 const getChangedFields =  (currentItemData,baseLine)=>{
-    const changes: Record<string,any> = {}
+    const changes: Partial<ItemData> = {}
 
     for(const key in currentItemData){
         const curVal = currentItemData[key]
@@ -104,7 +159,7 @@ export const useSaveItemsV2= ()=>{
     const handleBuildNotesForFetch = (itemData,userName)=>{
         if(!Array.isArray(itemData.notes)) return {}
 
-        const notesDict:{Created:any[],Updated:any[],Deleted:any[]} = {
+        const notesDict: NotesFetchDict = {
             Created:[],
             Updated:[],
             Deleted:[],
@@ -274,7 +329,7 @@ export const useSaveItemsV2= ()=>{
         
 
         // check if is update...
-        let fixedItemData:any = {}
+    let fixedItemData: Partial<ItemData> = {}
         
         if(baseLineDict){
             fixedItemData = getChangedFields(itemData,baseLineDict)
@@ -289,12 +344,12 @@ export const useSaveItemsV2= ()=>{
         }
         
         // check for images to be uploaded and to be deleted
-        let imagesToUpload:any[] = []
-        let imagesToDelete:any[] = []
-        let originalUrlImages:any[] = []
+    let imagesToUpload: string[] = []
+    let imagesToDelete: string[] = []
+    let originalUrlImages: string[] = []
 
-        let failImageUpload = []
-        let imagesDeleted = true
+    let failImageUpload: string[] = []
+    let imagesDeleted = true
         
         
         if('images' in fixedItemData){
@@ -360,8 +415,8 @@ export const useSaveItemsV2= ()=>{
             userName = userObj.username
         }
 
-        let notesFetchDict = {}
-        const fetchDictData:any = {}
+    let notesFetchDict: NotesFetchDict = { Created: [], Updated: [], Deleted: [] }
+    const fetchDictData: FetchDictData = {}
         for(const key in fixedItemData){
 
             
@@ -486,7 +541,7 @@ export const useSaveItemsV2= ()=>{
 
 
     const uploadItem = async (props)=>{
-        const{itemData,type,baseLineDict=null,showServerMessage=true,createOfflineItemIfFail=true,allowArticleChange=false} = props
+    const{itemData,type,baseLineDict=null,showServerMessage=true,createOfflineItemIfFail=true,allowArticleChange=false}: UploadItemProps = props
         let actionDisplay = 'Created'
         let wasOffline = false
 
@@ -507,7 +562,7 @@ export const useSaveItemsV2= ()=>{
             }
             const {fetchDictData,failImageUpload,imagesDeleted,notesFetchDict} = resultFromBuild
         
-            const fetchDict:any = {
+            const fetchDict: FetchDictData & { model_name: string; object_values: FetchDictData; reference: string; query_filters?: object; update_type?: string; requested_data?: any[] } = {
                 model_name:'Item',
                 object_values: fetchDictData,
                 reference:'Item'

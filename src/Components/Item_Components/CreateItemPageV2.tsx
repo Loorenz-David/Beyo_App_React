@@ -73,6 +73,7 @@ const CreateItemPageV2 = ({
     const [toggleSettings,setToggleSettings] = useState(false)
     const [afterCompletion,setAfterCompletion] = useState(false)
     const [NextPage,setNextPage] = useState<React.ReactNode>(null)
+    const [forceRenderChildren,setForceRenderChildren] = useState(false)
     // --------------------------------------------------------------------------------------------------------------
     
     // useHooks - CreateItemPageV2.CreateItemPageV2 - 
@@ -113,7 +114,7 @@ const CreateItemPageV2 = ({
         {'id':'category','action':activateProp},
         {'id':'type','action':activateProp},
         {'id':'subprop','action':activateProp},
-        {'id':'purchased_price','action':focusProp},
+        {'id':'issues','action':activateProp},
     ]
     
     const updateSliderStep = (
@@ -211,7 +212,7 @@ const CreateItemPageV2 = ({
 
     },[itemData])
 
-    console.log(itemData,'teh datat')
+    
     useEffect(()=>{
         if(typeof recordedItemPage.current == 'number' && typeof currentPageIndex == 'number'){
             if(hasUploadItem.current &&  currentPageIndex < recordedItemPage.current  && forceRenderParent !== null){
@@ -270,14 +271,14 @@ const CreateItemPageV2 = ({
         if(JSON.parse(localStorage.getItem('activeSlider') || 'false')){
             activeSlider.current = true
         }
-
+        setForceRenderChildren(prev => !prev)
         setAfterCompletion(false)
 
     }
     // --------------------------------------------------------------------------------------------------------------
     
     return ( 
-            <DataContext.Provider value={{data:itemData,setData:setItemData, setNextPage}}>
+            <DataContext.Provider value={{data:itemData,setData:setItemData, setNextPage, forceRenderChildren}}>
                 
                 <div className="flex-column width100" style={{height:'100dvh',overflow:'hidden'}}>
                   

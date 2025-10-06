@@ -33,6 +33,11 @@ export interface Dealer{
     dealer:DealerDict
 }
 
+export interface IssueDict{
+    location : string
+    issue:string
+}
+
 export interface ItemDict 
         extends ItemPriceFields, Dealer
 {
@@ -46,6 +51,7 @@ export interface ItemDict
     properties:Record<string,any>
     state:string
     location:string
+    issues:IssueDict[]
     
     
 }

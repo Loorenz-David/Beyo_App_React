@@ -1,6 +1,7 @@
-import {useRef,useState} from 'react'
+import {useEffect, useRef,useState,useContext} from 'react'
 
 import {useSlidePage} from '../contexts/SlidePageContext.tsx'
+import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
 
 import UserIcon from '../assets/icons/General_Icons/UserIcon.svg?react'
 import ArrowBold from  '../assets/icons/General_Icons/ArrowBold.svg?react'
@@ -14,14 +15,45 @@ import {SlidePage} from '../Components/Page_Components/SwapToSlidePage.tsx'
 import UserProfile from '../Components/Menu_Components/Users/UserProfile.tsx'
 import {ManageUsers} from '../Components/Menu_Components/Users/ManageUsers.tsx'
 
+import useFetch from '../hooks/useFetch.tsx'
+
 
 
 const MenuPage = () => {
-    const user = useRef<UserDict>(JSON.parse(localStorage.getItem('user') || '{}'))
+    const [userInfo,setUserInfo] = useState<UserDict>(JSON.parse(localStorage.getItem('user') || '{}'))
     const menuPageRef = useRef<HTMLDivElement | null>(null)
     const [NextPageComponent,setNextPageComponent] = useState<React.ReactNode>(null)
     const {slidePageTo} = useSlidePage()
-    
+    const [forceRender,setForceRender] = useState(false)
+    const {doFetch} = useFetch()
+    const {showMessage} = useContext(ServerMessageContext)
+
+    useEffect(()=>{
+
+        doFetch({
+            url:'/api',
+            method:'POST',
+            body:{'requested_data':['email','phone','id','username','profile_picture',{'roles':['role','id']}]},
+        })
+        .then( res =>{
+           
+            if(res && res.status < 400 && res.body.length > 0){
+                setUserInfo(res.body[0])
+                localStorage.setItem('user',JSON.stringify(res.body[0]))
+
+            }else{
+                showMessage({
+                    message:'Unable to load data',
+                    complementMessage:'Unable to load user data, server could be down, or you are missing internet connection.',
+                    status:400
+
+                })
+            }
+            
+        })
+
+
+    },[forceRender])
 
     return ( 
         
@@ -39,7 +71,7 @@ const MenuPage = () => {
                     <div className="flex-row bg-containers  content-center width100 btn" style={{borderRadius:'10px', padding:'0'}}
                         onClick={(e)=>{
                             e.stopPropagation()
-                            setNextPageComponent(<UserProfile userDict={user.current}/>)
+                            setNextPageComponent(<UserProfile userDict={userInfo} setForceRender={setForceRender}/>)
                             slidePageTo({addNumber:1})
                         }}
                     >
@@ -47,8 +79,8 @@ const MenuPage = () => {
                             <div className="flex-row items-center content-center "
                                 style={{borderRadius:'50%',height:'80px',width:'80px',overflow:'hidden'}}
                             >
-                                {typeof user.current.profile_picture === 'string' && user.current.profile_picture !== '' ?
-                                    <img src={user.current.profile_picture }  
+                                {typeof userInfo.profile_picture === 'string' && userInfo.profile_picture !== '' ?
+                                    <img src={userInfo.profile_picture }  
                                         style={{objectFit:'cover'}}
                                         className="width100 height100"
                                     />
@@ -62,8 +94,8 @@ const MenuPage = () => {
                         <div className="flex-column flex-1 padding-20 height100 gap-1">
                             <div className="flex-row">
                                 <span className="text-25 bold-600">
-                                    {user.current.username &&
-                                    user.current.username.charAt(0).toUpperCase() + user.current.username.slice(1)
+                                    {userInfo.username &&
+                                    userInfo.username.charAt(0).toUpperCase() + userInfo.username.slice(1)
                                     }
                                 </span>
                             </div>
@@ -73,10 +105,10 @@ const MenuPage = () => {
                                 >
                                     <span className="text-9">Admin</span>
                                 </div>
-                                {user.current.roles && user.current.roles.map((role)=>{
+                                {userInfo.roles && userInfo.roles.map((role,i)=>{
 
                                     return(
-                                        <div className="flex-row items-center content-center">
+                                        <div className="flex-row items-center content-center" key={`${role}_${i}`}>
                                         <span className="text-9"> {role.role}</span>
                                         </div>
                                     )

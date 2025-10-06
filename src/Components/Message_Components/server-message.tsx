@@ -35,7 +35,7 @@ function checkStatus(status:number){
 }
 
 const ServerMessage = ({messageDict,onDismiss}: ServerMessageProps) => {
-    let maxHeaderSize = 30
+    let maxHeaderSize = 60
     let displayMessage;
     let [statusClassName, Icon ]= checkStatus(messageDict.status)
     

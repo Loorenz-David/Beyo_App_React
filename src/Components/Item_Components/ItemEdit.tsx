@@ -24,7 +24,7 @@ import {CameraBtn} from './CameraBtn.tsx'
 import {HeaderSlidePage} from '../Navigation_Components/HeaderSlidePage.tsx'
 import {SlidePage} from '../Page_Components/SwapToSlidePage.tsx'
 
-import {ItemTypeMap} from '../../maps/Item_Maps/mapItemTypeV2.tsx'
+import {ItemTypeMapV3} from '../../maps/Item_Maps/mapItemTypeV3.tsx'
 import {ItemsStatesMap} from '../../maps/Item_Maps/mapItemState.tsx'
 
 import MinusCircleIcon from '../../assets/icons/General_Icons/MinusCircleIcon.svg?react'
@@ -149,15 +149,15 @@ export const ItemPropsComp = ({CurrencyInputsComponent,pageSetUp,zIndex=2})=>{
     useEffect(()=>{
 
         if('type' in itemData && 'category' in itemData ){
-        console.log('checking to update the properties of the item properties. ')
-        const targetMapTypeDict = ItemTypeMap[itemData['category']].find(obj => obj.displayName == itemData.type)
+        
+        const targetMapTypeDict = ItemTypeMapV3[itemData['category']].find(obj => obj.displayName == itemData.type)
     
         if( targetMapTypeDict && targetMapTypeDict.next){
             
             let itemPropTypeDictTemp: any = []
 
             targetMapTypeDict.next.forEach(dictName =>{
-                const nextDict = ItemTypeMap[dictName]
+                const nextDict = ItemTypeMapV3[dictName]
                 itemPropTypeDictTemp.push( nextDict )
             })
 
@@ -207,7 +207,7 @@ export const ItemPropsComp = ({CurrencyInputsComponent,pageSetUp,zIndex=2})=>{
                         propDisplay={'category'}
                         propValue={'select...'}
                         handleItemProps={handleItemProps}
-                        objectMap={ ItemTypeMap['category'] }
+                        objectMap={ ItemTypeMapV3['category'] }
                         inputValue={itemData.category}
                         
                     />
@@ -217,7 +217,7 @@ export const ItemPropsComp = ({CurrencyInputsComponent,pageSetUp,zIndex=2})=>{
                         propDisplay={'type'}
                         propValue={'select...'}
                         handleItemProps={handleItemProps}
-                        objectMap={'category' in itemData? ItemTypeMap[itemData['category']] : 'Missing to select category'}
+                        objectMap={'category' in itemData? ItemTypeMapV3[itemData['category']] : 'Missing to select category'}
                         inputValue = {itemData.type}
                     />
                  }
@@ -343,7 +343,7 @@ export const ItemEdit = ({
     const [itemData,setItemData] = useState<Partial<ItemDict>>({})
     const {printLabel,isPrinterConnected} = usePrintLabelWiFi({itemData:itemData})
 
-    console.log(preRenderInfo,'preRenderInfo when pass')
+   
    
     const [toggleEditSettings,setToggleEditSettings] = useState(false)
     const {uploadItem,itemUploading,setUploading} = useSaveItemsV2()
@@ -425,7 +425,7 @@ export const ItemEdit = ({
                 return
             }
             let idToDelete = null 
-            console.log(preRenderInfo)
+            
             if('offlineIndexKey' in preRenderInfo){
                 
                 idToDelete = Array.isArray(preRenderInfo.offlineIndexKey)? preRenderInfo.offlineIndexKey : [preRenderInfo.offlineIndexKey]
@@ -438,9 +438,9 @@ export const ItemEdit = ({
                 
 
             }
-            console.log(idToDelete)
+            
             if(idToDelete !== null){
-                console.log('after if')
+                
                 try{
                     setDeletingItem(true)
                     setToggleEditSettings(false)

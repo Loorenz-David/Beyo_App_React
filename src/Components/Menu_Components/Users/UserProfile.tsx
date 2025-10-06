@@ -8,6 +8,7 @@ import {DataContext} from '../../../contexts/DataContext.tsx'
 import UserIcon from '../../../assets/icons/General_Icons/UserIcon.svg?react'
 import ThreeDotMenu from '../../../assets/icons/General_Icons/ThreeDotMenu.svg?react'
 
+
 import {LiveCamera,ImagePreviewSlider,makeImageUrl} from '../../Item_Components/CameraBtn.tsx'
 import {SlidePage} from '../../Page_Components/SwapToSlidePage.tsx'
 
@@ -30,10 +31,13 @@ type ExtendedUserForm = Partial<UserDict> &{
 
 interface UserProfileProps{
     userDict:UserDict
+    isCreateMode?: 'this-user' | 'create-new' | 'update-existing'
+    setForceRender: React.Dispatch<React.SetStateAction<boolean>>
+    setNextPageMain?: React.Dispatch<React.SetStateAction<React.ReactNode | null>> | null
 }
 
 const UserProfileSettings = ()=>{
-    console.log('in setting of user')
+    
     return(
         <div className=" flex-column width100 items-center content-center" style={{height:'100vh'}}>
             Comming Soon!
@@ -42,14 +46,14 @@ const UserProfileSettings = ()=>{
 }
 
 
-const UserProfile = ({userDict}:UserProfileProps) => {
+const UserProfile = ({userDict,isCreateMode='this-user',setForceRender,setNextPageMain = null}:UserProfileProps) => {
     
     const {showMessage} = useContext(ServerMessageContext)
     const {slidePageTo,currentPageIndex} = useSlidePage()
     const navigate = useNavigate()
-    console.log(currentPageIndex,'in user profile')
+    
 
-    const [user,setUserData] = useState<UserDict>(userDict)
+    const [userInfo,setUserInfo] = useState<Partial<UserDict>>(userDict)
     const [loadingUserPage,setLoadingUserPage] = useState(false)
 
     const imageBlobs = useRef<string[]>([])
@@ -60,43 +64,6 @@ const UserProfile = ({userDict}:UserProfileProps) => {
     const [formData, setFormData] = useState<ExtendedUserForm>({'images':userDict.profile_picture && userDict.profile_picture !== '' ? [userDict.profile_picture] : []})
     const [NextPage,setNextPage] = useState<React.ReactNode>()
     
-    
-    
-    useEffect(()=>{
-       
-        setLoadingUserPage(true)
-
-        doFetch({
-            url:'/api',
-            method:'POST',
-            body:{'requested_data':['email','phone']}
-        })
-        .then( res =>{
-           
-            if(res && res.status < 400 && res.body.length > 0){
-                
-                setUserData(prev =>({...prev,...res.body[0]}))
-
-               
-            }else{
-                showMessage({
-                    message:'Unable to load data',
-                    complementMessage:'Unable to load user data, server could be down, or you are missing internet connection.',
-                    status:400
-
-                })
-            }
-            setLoadingUserPage(false)
-        })
-        
-        return ()=>{
-            if(imageBlobs.current.length > 0){
-                imageBlobs.current.forEach((blob) => URL.revokeObjectURL(blob))
-            }
-        }
-    },[])
-
-
     const handleChange = (e:React.ChangeEvent<HTMLInputElement>) =>{
         const {name,value} = e.target
         
@@ -105,9 +72,13 @@ const UserProfile = ({userDict}:UserProfileProps) => {
     }
 
     const handleFormSubmition = async () =>{
-        
+        // validate form data
+        const mandatoryFields = new Set(['username','email','phone'])
+
+        // set loading state
         setLoadingUserPage(true)
 
+        // prepare data to be upload
         const dataToBeUpload:{
             images?:PictureDict[] | string[]
             profile_picture?:string
@@ -116,6 +87,7 @@ const UserProfile = ({userDict}:UserProfileProps) => {
             
         } = {...formData}
 
+        // handle image upload if any
         if( dataToBeUpload.images && dataToBeUpload.images.length > 0 && typeof dataToBeUpload.images[0] == 'object'){
             
             
@@ -135,46 +107,143 @@ const UserProfile = ({userDict}:UserProfileProps) => {
            
 
         }
-        console.log(dataToBeUpload,'the data that will be uploaded')
         delete dataToBeUpload['images']
+
+        // if changes on user  no changes were made
+        if(isCreateMode === 'this-user'){
+            
+            if(Object.keys(dataToBeUpload).length === 0){
+                showMessage({
+                    message:'No changes detected',
+                    status:400
+                })
+                setLoadingUserPage(false)
+                return
+            }
+        }else{
+            mandatoryFields.add('password')
+        }
         
-        if(Object.keys(dataToBeUpload).length == 0){
+        // check if all mandatory fields are filled
+        const displayMissingField = (field:string) =>{
             showMessage({
-                message:'No changes detected',
+                message:`${field.charAt(0).toUpperCase() + field.slice(1)} is required`,
+                status:400
+            })
+        }
+
+        for(const field of mandatoryFields){
+            if( dataToBeUpload[field as keyof typeof dataToBeUpload] === ''){
+                displayMissingField(field)
+                setLoadingUserPage(false)
+                return
+            }else if( isCreateMode === 'create-new' && !dataToBeUpload[field as keyof typeof dataToBeUpload] ){
+
+                displayMissingField(field)
+                setLoadingUserPage(false)
+                return
+            }
+        }
+
+        // all good, proceed to upload or update user
+        let fetchBody:{} ;
+        const setRules = {'loadServerMessage':true}
+
+        // decide to create or update user
+
+        try{
+            if(isCreateMode === 'create-new'){
+                
+                fetchBody = { 
+                    model_name:'User',
+                    object_values:dataToBeUpload,
+                    requested_data:['id'],
+                    reference:`User_${dataToBeUpload.username}`
+                }
+                
+                await doFetch({
+                    url:'/api/schemes/create_items',
+                    method:'POST',
+                    body:fetchBody,
+                    setRules:setRules,
+                    
+                })
+                .then(res =>{
+                    
+                    if(res && res.status == 201){
+                        showMessage({
+                            message:'User created successfully',
+                            status:201
+                        })
+                        setUserInfo({})
+                        setForceRender(prev => !prev)
+                        slidePageTo({addNumber:-1})
+                        setTimeout(()=>{
+                            if(setNextPageMain){
+                                setNextPageMain(null)
+                            }
+                        },300)
+                    }else{
+                        throw new Error(res.message || 'Unable to create user')
+                    }
+                    setLoadingUserPage(false)
+                }).catch(err =>{
+                    console.log(err,'the error that was caught when creating user')
+                    showMessage({
+                        message:'Unable to create user',
+                        complementMessage: err.message || 'Server could be down, or you are missing internet connection.',
+                        status:400
+                    })
+                    setLoadingUserPage(false)
+                })
+            }else if(isCreateMode === 'this-user' || isCreateMode === 'update-existing'){
+
+                // update user
+                fetchBody = {
+                    'model_name':'User',
+                    'query_filters':{'id':userInfo.id},
+                    'update_type':'first_match',
+                    'object_values':dataToBeUpload,
+                    'reference':'user' 
+                }
+
+
+                
+                await doFetch({
+                    url:'/api/schemes/update_items',
+                    method:'POST',
+                    body:fetchBody,
+                    setRules:setRules}).then(res =>{
+                        if(res.status == 201){
+                            const updateLocalDict:{username?:string,profile_picture?:string} = {}
+                            if(dataToBeUpload.username){
+                                updateLocalDict['username'] = dataToBeUpload.username
+                            }
+                            if(dataToBeUpload.profile_picture){
+                                updateLocalDict['profile_picture'] = dataToBeUpload.profile_picture
+                            }
+                            if(isCreateMode === 'this-user'){
+                                localStorage.setItem('user',JSON.stringify({...userDict,...updateLocalDict}))
+                            }
+                            setForceRender(prev => !prev)
+                            slidePageTo({addNumber:-1})
+                        }
+                        setLoadingUserPage(false)
+                })
+            
+            }
+        }catch(err){
+            console.log(err,'the error that was caught in the outer block')
+            showMessage({
+                message:'Unable to process request',
+                complementMessage: err.message || 'Server could be down, or you are missing internet connection.',
                 status:400
             })
             setLoadingUserPage(false)
-            return
-        }
-        let fetchBody = { 
-            'model_name':'User',
-            'query_filters':{'id':user.id},
-            'update_type':'first_match',
-            'object_values':dataToBeUpload,
-            'reference':'user' }
-        const setRules = {'loadServerMessage':true}
-        
-        doFetch({
-            url:'/api/schemes/update_items',
-            method:'POST',
-            body:fetchBody,
-            setRules:setRules}).then(res =>{
-                if(res.status == 201){
-                    const updateLocalDict:{username?:string,profile_picture?:string} = {}
-                    if(dataToBeUpload.username){
-                        updateLocalDict['username'] = dataToBeUpload.username
-                    }
-                    if(dataToBeUpload.profile_picture){
-                        updateLocalDict['profile_picture'] = dataToBeUpload.profile_picture
-                    }
-                    console.log('the dict that will be updated in local',updateLocalDict)
-                    localStorage.setItem('user',JSON.stringify({...userDict,...updateLocalDict}))
-                }
-            })
-        setLoadingUserPage(false)
 
+        }
     }
-    
+
     const handleLogOut = async() =>{
         const setRules = {'loadServerMessage':true}
         
@@ -200,8 +269,114 @@ const UserProfile = ({userDict}:UserProfileProps) => {
         
         
     }
+
+    const handleDelition = async() =>{
+        if(isCreateMode === 'this-user'){
+            showMessage({
+                message:'Unable to delete user',
+                complementMessage:'You cannot delete the user you are logged in with.',
+                status:400
+            })
+            return
+        }
+        const setRules = {'loadServerMessage':true}
+        setLoadingUserPage(true)
+
+        const fetchBody = {
+            model_name:'User',
+            object_values:{
+                query_filters:{'id':userInfo.id},
+                delition_type:'delete_first'
+            },
+            reference:`User ${userInfo.username}`
+        }
+       
+        await doFetch({
+            url:'/api/schemes/delete_items',
+            method:'POST',
+            body:fetchBody,
+            setRules:setRules
+        })
+        .then( res =>{
+            if(res && res.status == 201){
+                showMessage({
+                    message:'User deleted successfully',
+                    status:200
+                })
+
+                setForceRender(prev => !prev)
+                slidePageTo({addNumber:-1})
+                setTimeout(()=>{
+                    if(setNextPageMain){
+                        console.log('setting to null')
+                        setNextPageMain(null)
+                    }
+                },300)
+            }
+            setLoadingUserPage(false)
+        }).catch(err =>{
+            console.log(err,'the error that was caught when deleting user')
+            showMessage({
+                message:'Unable to delete user',
+                complementMessage: err.message || 'Server could be down, or you are missing internet connection.',
+                status:400
+            })
+            setLoadingUserPage(false)
+        })
+    }
     
-    console.log(formData,'the form data ')
+    let footerActions : React.ReactNode;
+    if(isCreateMode === 'this-user'){
+        footerActions = (
+            <div className="flex-column gap-2 push-bottom width100">
+                <div className="flex-row padding-10 padding-left-20 padding-right-20 content-center">
+                    <div className="btn width100 bg-containers border-blue  padding-top-10 padding-bottom-10"
+                        onClick={handleFormSubmition}   >
+                                Save
+                    </div>
+                </div>
+                
+                <div className="flex-row content-center">
+                    <div className="btn " style={{color:'rgba(231, 66, 66, 1)',}}
+                        onClick={()=>{handleLogOut()}}
+                    >
+                        Log out
+                    </div>
+                </div>
+            </div>
+        )
+
+    }else if( isCreateMode === 'update-existing'){
+        footerActions = (
+             <div className="flex-column gap-2 push-bottom width100">
+                <div className="flex-row padding-10 padding-left-20 padding-right-20 content-center">
+                    <div className="btn width100 bg-containers border-blue  padding-top-10 padding-bottom-10"
+                        onClick={handleFormSubmition}   >
+                                Save
+                    </div>
+                </div>
+                
+                <div className="flex-row content-center">
+                    <div className="btn " style={{color:'rgba(231, 66, 66, 1)',}}
+                        onClick={()=>{handleDelition()}}
+                    >
+                        Delete User
+                    </div>
+                </div>
+            </div>
+        )
+
+    }else if( isCreateMode === 'create-new'){
+        footerActions = (
+            <div className="flex-row width100 padding-10 padding-left-20 padding-right-20 content-center">
+                <div className="btn width100 bg-containers border-blue  padding-top-10 padding-bottom-10"
+                    onClick={handleFormSubmition}   >
+                            Create User
+                </div>
+            </div>       
+        )
+    }
+    
     
     return ( 
         <DataContext.Provider value={{data:formData,setData:setFormData}}>
@@ -277,7 +452,7 @@ const UserProfile = ({userDict}:UserProfileProps) => {
                     </div>
                     <div className="flex-row gap-1 border-bottom padding-05">
                         <input  type="text" name="username" className="text-25 text-center width-150"
-                                defaultValue={user?.username ||  ''}
+                                defaultValue={userInfo?.username ||  ''}
                                 onChange={handleChange} />
                     </div>
 
@@ -288,7 +463,7 @@ const UserProfile = ({userDict}:UserProfileProps) => {
                                 <span className="color-lower-titles">Email:</span>
                             
                                     <input type="text" name='email'  className='width100'
-                                        defaultValue={user?.email || ''}
+                                        defaultValue={userInfo?.email || ''}
                                         onChange={handleChange}/>
                                 
                                 
@@ -297,15 +472,15 @@ const UserProfile = ({userDict}:UserProfileProps) => {
                             <div className="flex-column  width100 gap-05 padding-10">
                                 <span className="color-lower-titles">Phone:</span>
                                 <input type="text" name='phone'  className='width100'
-                                        defaultValue={user?.phone || ''}
+                                        defaultValue={userInfo?.phone || ''}
                                         onChange={handleChange}/>
                             </div>
                         </div>
 
                         <div className="flex-row border-bottom  padding-15">
                             <div className="flex-column gap-05">
-                                <span className="color-lower-titles">Password:</span>
-                                <input type="password" name='password'  defaultValue='dummy-password'
+                                <span className="color-lower-titles">Set password:</span>
+                                <input type="password" name='password'  
                                     onChange={handleChange}/>
                             </div>
                         </div>
@@ -313,7 +488,7 @@ const UserProfile = ({userDict}:UserProfileProps) => {
                     <div className='flex-column padding-10 width100'>
                         <span className="color-lower-titles text-15">Roles:</span>
                         <div className='flex-row  padding-10'>
-                            {user.roles && user?.roles.map((r,i)=>{
+                            {userInfo.roles && userInfo.roles.map((r,i)=>{
                                 return (
                                         <div key={`${r}_${i}`} className='static-info-border padding-10'>
                                             {r.role}
@@ -325,23 +500,10 @@ const UserProfile = ({userDict}:UserProfileProps) => {
                     </div>
 
                 </div>
-                <div className="flex-column gap-2 push-bottom width100">
+
+
+                {footerActions}
                 
-                <div className="flex-row padding-10 padding-left-20 padding-right-20 content-center">
-                        <div className="btn width100 bg-containers border-blue  padding-top-10 padding-bottom-10"
-                            onClick={handleFormSubmition}   >
-                                    Save
-                        </div>
-                    </div>
-                    
-                    <div className="flex-row content-center">
-                        <div className="btn " style={{color:'rgba(231, 66, 66, 1)',}}
-                            onClick={()=>{handleLogOut()}}
-                        >
-                            Log out
-                        </div>
-                    </div>
-                </div>
                 
              
             </div> 

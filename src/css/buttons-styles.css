@@ -41,7 +41,22 @@
 
 }
 
-.active-ck{
-    box-shadow:0 0 10px rgba(255, 242, 65, 0.433);
-    border-color:rgb(190, 128, 22) !important;
+@keyframes scaleUpDown {
+    0% {
+        transform: scale(1);
+    }
+    40% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.active-ck {
+    box-shadow: 0 0 10px rgba(255, 242, 65, 0.433);
+    border-color: rgb(190, 128, 22) !important;
+}
+.bounceBox{
+     animation: scaleUpDown 0.35s cubic-bezier(0.4, 0.0, 0.2, 1) 1;
 }

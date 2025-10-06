@@ -15,7 +15,7 @@ import ThreeDotMenu from '../assets/icons/General_Icons/ThreeDotMenu.svg?react'
 import CheckBoxIcon from '../assets/icons/General_Icons/CheckBoxIcon.svg?react'
 import FilterIcon from '../assets/icons/General_Icons/FilterIcon.svg?react'
 
-import {ItemTypeMap, type ItemType} from '../maps/Item_Maps/mapItemTypeV2.tsx'
+import {ItemTypeMapV3, type ItemType} from '../maps/Item_Maps/mapItemTypeV3.tsx'
 
 import useFetch from '../hooks/useFetch.tsx'
 import {useLongPressAction} from '../hooks/useLongPressActions.tsx'

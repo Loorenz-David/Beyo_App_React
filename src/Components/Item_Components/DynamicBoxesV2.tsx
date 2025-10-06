@@ -3,9 +3,34 @@ import {useRef} from 'react'
 import BackSpaceIcon from '../../assets/icons/General_Icons/BackSpaceIcon.svg?react'
 import {useData} from '../../contexts/DataContext.tsx'
 
-export const CheckBox = ({itemObj,handleClick,inputValue=null,handleClose})=>{
+interface CheckBoxProps {
+    itemObj: {
+        displayName: string
+        icon: React.ReactNode
+        property: string
+        component: string
+        majorProperty?: string
+        next?: string | null
+        parts?: string[]
+    }
+    handleClick:(returnDict:object,handleClose:()=>void)=>void
+    inputValue:string | string[] | null
+    handleClose:()=>void
+    assignClass:string
+}
+
+export const CheckBox = ({itemObj,handleClick,inputValue=null,handleClose,assignClass}:CheckBoxProps)=>{
+    let itemSelected = false
+    if(inputValue ){
+        if(Array.isArray(inputValue)){
+            itemSelected = inputValue.includes(itemObj.displayName)
+        }else if(typeof inputValue === 'string'){
+            itemSelected = inputValue === itemObj.displayName
+        }
+    }
+
     return (
-        <div className={`no-select flex-column padding-10 gap-05 bg-containers border-blue btn   ${inputValue && itemObj.displayName == inputValue? 'active-ck' : ''}`}
+        <div className={`no-select flex-column padding-10 gap-05 bg-containers border-blue btn   ${itemSelected ? assignClass : ''}`}
         style={{width:'100px'}}
         role="button"
         onClick={()=>{
@@ -18,7 +43,7 @@ export const CheckBox = ({itemObj,handleClick,inputValue=null,handleClose})=>{
                 buildDict[itemObj.property] = itemObj.displayName
                 property= itemObj.property
             }
-            console.log(itemObj,'in check box')
+            
 
             
 
@@ -165,11 +190,13 @@ interface DynamicBoxesProps {
     uponCompletion:()=>void
     inputValue:string | null
     handleClose:()=>void
+    assignClass?:string
 }
 export const DynamicBoxesV2 = ({
     objectMap,
     uponCompletion,
     inputValue,
+    assignClass='active-ck',
     handleClose
 }:DynamicBoxesProps)=>{
     
@@ -198,7 +225,7 @@ export const DynamicBoxesV2 = ({
                 
 
                 return Component ? (
-                    <Component key={i} itemObj={itemObj} handleClick={uponCompletion} inputValue={inputValue} handleClose={handleClose}/>
+                    <Component key={i} itemObj={itemObj} handleClick={uponCompletion} inputValue={inputValue} handleClose={handleClose} assignClass={assignClass}/>
                 ) : null
                 })
 
