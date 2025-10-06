@@ -181,7 +181,7 @@ function App() {
       
       <SlidePageProvider value={{slidePageTo,currentPageIndex}}>
         <Routes>
-          <Route path="/login" element={<LoginPage/>}></Route>
+          {/* <Route path="/login" element={<LoginPage/>}></Route> */}
           
           <Route path="/" 
           element={<ProtectedRouter><HomePage/></ProtectedRouter>} 
