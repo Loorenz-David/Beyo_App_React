@@ -364,28 +364,27 @@ export const ItemEdit = ({
     }
     const handleFirstFetch = async() =>{
         
-        const fetch = await doFetch({
+        const response = await doFetch({
             url:'/api/schemes/get_items',
             method:'POST',
             body:fetchDict,
             setRules:setRules,
             setAssignData:setItemData 
         })
-        .then(
-            response => {
-                if(response.body.length == 0){
-                    showMessage({
-                        message:'Article number not found.',
-                        complementMessage:'No article number was found in data base, thus, no infromation will be loaded, and save button will be disabled.',
-                        status:400
-                    })
-                   
-                    setTimeout(()=>{slidePageTo({addNumber:0})},2000)
-                    
-                }
-            }
-        )  
+
+        if(!response || !response.body || response.body.length == 0){
+            showMessage({
+                message:'Article number not found.',
+                complementMessage:'No article number was found in data base, thus, no infromation will be loaded, and save button will be disabled.',
+                status:400
+            })
+            
+            setTimeout(()=>{slidePageTo({addNumber:0})},2000)
+            
+        }
     }
+        
+    
     
     useEffect(()=>{
         
@@ -612,201 +611,3 @@ export const ItemEdit = ({
 
 
  
-
-
-// export const ItemEdit = ({preRenderInfo={},interactiveRef=null,handleDelitionItems,handleClose,setForceRenderParent,fetchWhenOpen,pageSetUp=new Set(),zIndex=2,holdScrollElement}:ItemEditProps) => {
-   
-//     const {doFetch,loading,data} = useFetch()
-//     const [itemData,setItemData] = useState({...preRenderInfo})
-//     const {printLabel,isPrinterConnected} = usePrintLabelWiFi({itemData:itemData})
-   
-//     const [toggleEditSettings,setToggleEditSettings] = useState(false)
-//     const {uploadItem,itemUploading,setUploading} = useSaveItemsV2()
-
-//     const {showMessage} = useContext(ServerMessageContext)
- 
-    
-//     useEffect(()=>{
-
-//         const setRules = {'loadData':true}
-
-//         const fetchDict = {
-//             model_name: 'Item',
-//             requested_data: ['category','properties','dimensions','issues','parts','missing_parts','state','location','created_at','sold_price','valuation','purchased_price','created_by',{'dealer':['dealer_name','id']}],
-//             query_filters:{'id':preRenderInfo.id} ,
-//             per_page:1,
-//         }
-//         const handleFirstFetch = async() =>{
-            
-//             const fetch = await doFetch({
-//                 url:'/api/schemes/get_items',
-//                 method:'POST',
-//                 body:fetchDict,
-//                 setRules:setRules,
-//                 setAssignData:setItemData 
-//             })
-//                     .then(
-//                         response => {
-//                             if(response.body.length == 0){
-//                                 showMessage({
-//                                     message:'Article number not found.',
-//                                     complementMessage:'No article number was found in data base, thus, no infromation will be loaded, and save button will be disabled.',
-//                                     status:400
-//                                 })
-//                                 setTimeout(()=>{handleClose()},2000)
-                                
-//                             }
-//                         }
-//                     )  
-//         }
-
-//         if(fetchWhenOpen){
-//             if(Object.keys(preRenderInfo).length <= 3){
-//                 fetchDict['requested_data'] = [...fetchDict['requested_data'], 'id','type','article_number','reference_number','images']
-
-//             }
-//             if(!('id' in preRenderInfo) && 'article_number' in preRenderInfo){
-//                 fetchDict['query_filters']={'article_number':preRenderInfo.article_number}
-//             }
-//             handleFirstFetch()
-//         }   
-        
-
-//         let interactiveBtn = null
-//         if(interactiveRef && interactiveRef.current){
-//             interactiveBtn = interactiveRef.current
-//             interactiveBtn.addEventListener('click',handleToggleEditSettings) 
-//         }
-//         return()=>{
-//             if(interactiveBtn){
-//                 interactiveBtn.removeEventListener('click',handleToggleEditSettings)
-//             }
-//         }
-        
-//     }
-//     ,[])
-    
-//     const handleEditItemSetting = async(objSetting)=>{
-//         if(objSetting.property == 'delete'){
-//             let idToDelete; 
-//             if('offlineIndexKey' in preRenderInfo){
-                
-//                 idToDelete = Array.isArray(preRenderInfo.offlineIndexKey)? preRenderInfo.offlineIndexKey : [preRenderInfo.offlineIndexKey]
-                
-                
-
-//             }else if ('article_number' in preRenderInfo){
-                
-//                 idToDelete = Array.isArray(preRenderInfo.article_number) ? preRenderInfo.article_number :  [preRenderInfo.article_number]
-                
-
-//             }
-//             await handleDelitionItems(idToDelete,handleClose)
-            
-//         }
-//     }
-
-//     const handleToggleEditSettings = ()=>{
-//         setToggleEditSettings(true)
-//     }
-
-
-//     const handleSaveItem = async ()=>{
-//         if(itemUploading){
-//             return
-//         }
-        
-//         if(fetchWhenOpen && data.length == 0){
-//             showMessage({
-//                             message:'Article number not found.',
-//                             complementMessage:'No article number was found in data base, thus, no infromation will be loaded and, save button will be disabled.',
-//                             status:400
-//                         })
-//             return
-//         }
-
-//         let baseLineDict = null
-
-//         if('handleBatchOfflineUpload' in preRenderInfo){
-//             const {handleBatchOfflineUpload,...rest} = itemData
-//             await preRenderInfo['handleBatchOfflineUpload'](rest)
-            
-//             handleClose()
-//             return 
-//         }
-        
-//         if(data.length > 0 ){
-//             baseLineDict = {...preRenderInfo,...(data.length > 0 && data[0])}
-//         }else if(preRenderInfo.article_number && Array.isArray(preRenderInfo.article_number)){
-//             baseLineDict = {...preRenderInfo}
-//         }
-
-//         let type = 'update'
-//         if('fetchType' in itemData){
-//             type = itemData.fetchType
-//         }
-//         const upload = await uploadItem({
-//             itemData,type,baseLineDict,allowArticleChange:true
-//         })
-//         setUploading(false)
-//         if(upload.success || 'fetchType' in preRenderInfo){
-//             setForceRenderParent(prev => !prev)
-//             handleClose()
-//         }
-        
-        
-//     }
-
-
-//     return ( 
-//         <div ref={holdScrollElement} className="flex-column" style={{height:'100vh',overflowY:'auto'}}>
-//             {toggleEditSettings && interactiveRef && interactiveRef.current && 
-//                 createPortal(
-//                     <SelectPopupV2  setTogglePopup={setToggleEditSettings}
-//                         listOfValues={itemSettingsList}
-//                         onSelect={handleEditItemSetting}
-//                         zIndex={zIndex + 4}
-//                         right={'100%'}
-//                     />,
-//                     interactiveRef.current
-//                 )
-//             }
-
-//             <ItemPropsComp itemData={itemData} setItemData={setItemData} 
-//                 CurrencyInputsComponent={CurrencyInputsEditItem}
-//                 pageSetUp={pageSetUp}
-//                 zIndex={zIndex + 1}
-
-//             />
-           
-
-//             <div className="flex-column width100 gap-2 padding-15 padding-top-30">
-//                 <button className={`btn bg-containers ${isPrinterConnected} flex-row content-center padding-10 items-center`}
-//                     id='printLabel'
-//                     onClick={ ()=>{try{printLabel()}catch(err){console.log(err)}} }
-//                 >
-//                         <span className=" text-15">Print label</span>
-//                 </button>
-                
-                
-//                 <button className="btn bg-secondary flex-row content-center padding-10 items-center"
-//                     onClick={()=>{handleSaveItem()}}
-
-//                 >       
-//                         {itemUploading ? 
-                        
-//                             <LoaderDots
-//                                 dotStyle={{dimensions:'squareWidth-07',bgColor:'bg-primary'}}
-//                                 mainBg={'white'}
-//                             />
-//                         :
-//                             <span className="color-primary text-15">Save Changes</span>
-//                         }
-                        
-//                 </button>
-//             </div>
-           
-//         </div>
-//      );
-// }
-

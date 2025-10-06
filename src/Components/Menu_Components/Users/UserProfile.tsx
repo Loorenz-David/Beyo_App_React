@@ -214,7 +214,7 @@ const UserProfile = ({userDict,isCreateMode='this-user',setForceRender,setNextPa
                     method:'POST',
                     body:fetchBody,
                     setRules:setRules}).then(res =>{
-                        if(res.status == 201){
+                        if(res && res.status == 201){
                             const updateLocalDict:{username?:string,profile_picture?:string} = {}
                             if(dataToBeUpload.username){
                                 updateLocalDict['username'] = dataToBeUpload.username
@@ -254,11 +254,12 @@ const UserProfile = ({userDict,isCreateMode='this-user',setForceRender,setNextPa
             setRules:setRules
         })
         .then((res) => {
-           
-            if(res.status == 200){
+
+            if(res && res.status == 200){
                 slidePageTo({directPage:0})
 
                 localStorage.removeItem('user')
+                localStorage.removeItem('token')
                 navigate('/login')
                 
                 
@@ -381,19 +382,12 @@ const UserProfile = ({userDict,isCreateMode='this-user',setForceRender,setNextPa
     return ( 
         <DataContext.Provider value={{data:formData,setData:setFormData}}>
             <div className="page items-center ">
-                
                 {loadingUserPage  && 
                     <div className="flex-column gap-1 items-center content-center" style={{position:'fixed',top:'0',left:'0',height:'100%',width:'100%',backgroundColor:'rgba(0,0,0,0.5)',zIndex:10}}>
-                        
                             <span className="text-15">Loading </span>
                             <LoaderDots mainBg={''}/>
-                        
-                        
                     </div>
                 }
-
-            
-
                 {NextPage && 
                     <SlidePage
                         BodyComponent={NextPage}

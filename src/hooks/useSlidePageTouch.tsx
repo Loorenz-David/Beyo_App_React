@@ -203,6 +203,7 @@ export const useSlidePageTouch = ({
             
             
             parentRef.current.style.transform = `translateX(${ targetTranslateX }px)`
+           
             startTranslateX.current = targetTranslateX
 
             

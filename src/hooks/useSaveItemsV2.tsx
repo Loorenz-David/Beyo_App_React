@@ -133,7 +133,12 @@ export const useSaveItemsV2= ()=>{
                 body:JSON.stringify(fetchNoteDict[key]),
                 credentials:'include'
             })
-                .then(res => res.json())
+                .then(res => {
+                    if(!res) {
+                        throw new Error('No response from server.')
+                    }
+                    return res.json()
+                })
                 .then(response => {
                     if(response.status >= 400){
                         console.log(response,'response inside if of .then')
@@ -594,7 +599,9 @@ export const useSaveItemsV2= ()=>{
                         body:JSON.stringify(fetchDict),
                         credentials:'include'
                     })
-
+                    if (!response) {
+                        throw Error('No response from server.')
+                    }
                     const resJSON = await response.json()
                     if(resJSON.status < 400 ){
  

@@ -99,9 +99,9 @@ const ItemHistoryPage = ()=>{
             body:fetchDict,
         })
        
-        if(!res.body || !Array.isArray(res.body)){
+        if(res && !res.body || !Array.isArray(res.body)){
             
-            return false
+            return []
         }
 
         if(dataList.length == 0 || res.body.length == 0){

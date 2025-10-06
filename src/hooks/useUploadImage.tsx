@@ -15,6 +15,9 @@ export function useUploadImage(){
         body:JSON.stringify(listOfImages),
         credentials:'include'
         })
+    if(!resUrls || resUrls.status == 400){
+        return {status:400,body:[]}
+    }
     const urlResponse =  await resUrls.json()
     
     return urlResponse
@@ -61,7 +64,9 @@ export function useUploadImage(){
                 body:JSON.stringify(fetchDict),
                 credentials:'include'
             })
-            
+            if(!response || response.status == 400){
+                return {status:400,body:[]}
+            }
             const result = await response.json()
             
             

@@ -107,15 +107,15 @@ function App() {
               credentials:'include'
           })
           .then(res => {
-            if(!res.ok){
+            if(res && !res.ok){
               throw(res.status)
             }
           })
           
         } catch(error){
-          
-          if(!user.username || error == 401){
-            
+
+          if(!user.username){
+
             localStorage.removeItem('user')
             navigate('/login')
             showMessage({

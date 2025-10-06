@@ -724,15 +724,16 @@ const ItemsPage = () => {
             },
             reference:'Item'
         }
-       
-        await doFetch({
+
+        const res = await doFetch({
             url:'/api/schemes/delete_items',
             method:'POST',
             body:fetchDict
         })
-        .then(res => showMessage(res))
         
-       slidePageTo({addNumber:-1})
+        if(res && res.status == 200){
+            showMessage(res)
+        }
 
         if(selectionMode){
             setSelectionMode(false)

@@ -551,9 +551,9 @@ const ItemNoteDisplay = ({handleNoteAction,fetchNotes})=>{
             method:'POST',
             body:fetchDict})
 
-        
-        if(!res.body || !Array.isArray(res.body)) return false
-        
+
+        if(!res || !res.body || !Array.isArray(res.body)) return false
+
         if(dataList.length == 0 || res.body.length == 0 || scrolling === ''){
             setDataList(res.body)
         }

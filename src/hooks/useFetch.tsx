@@ -1,6 +1,7 @@
 import {useState,useContext} from 'react'
 import {ServerMessageContext} from '../contexts/ServerMessageContext.tsx'
-
+import {useNavigate} from 'react-router-dom'
+import {useSlidePage} from '../contexts/SlidePageContext.tsx'
 interface fetchDictProps{
     method: "GET" | "POST" | "PUT" | "DELETE"
     headers: HeadersInit
@@ -27,6 +28,10 @@ function useFetch() {
     const [error,setError] = useState(null)
     const [serverMessageDict,setServerMessageDict] = useState(null)
     const API_URL = import.meta.env.VITE_API_URL ?? ''
+    const navigate = useNavigate()
+    
+
+    // generic fetch function with token handling
 
     const apiFetch = async ({endpoint,method,headers,body,credentials}:apiFetchProps)=>{
         const token = localStorage.getItem('token') ?? ''
@@ -39,7 +44,21 @@ function useFetch() {
        
         
         const result = await fetch(`${API_URL}${endpoint}`,fetchDict)
-        
+        if(result.status == 403){
+            
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+
+            (document.querySelector('.App') as HTMLElement).style.transform = 'translateX(0px)';
+            navigate('/login');
+            showMessage({
+              message:'Session expired.',
+              complementMessage:'Please login again.',
+              status:400
+            })
+            
+        }
+
         return result
     }
 
@@ -64,8 +83,9 @@ function useFetch() {
                 credentials:'include'
 
             })
-            
-            
+            if(!res.ok){
+                throw Error('server return bad request.')
+            }
 
             const result = await res.json()
             response = result
@@ -83,23 +103,22 @@ function useFetch() {
             
             
             if('loadData' in setRules && setRules.loadData){
-                setData(result.body)
+                if(result.body && Array.isArray(result.body)){
+                    setData(result.body)
+                }else{
+                    setData([])
+                }
                 if(setAssignData){
                     setAssignData(prev =>({...prev,...result.body[0]}))
                 }
             }
-            if(!res.ok){
-                throw Error('server return bad request.')
-    
-            }
+                
+            
+            
             
             
         }catch(error){
-            setError(error)
-            setData([])
-
-
-            console.log(error)
+           setData([])
         } finally{
             setLoading(false)
            
