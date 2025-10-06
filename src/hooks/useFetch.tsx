@@ -33,11 +33,10 @@ function useFetch() {
         const fetchDict:fetchDictProps = {
             method:method,
             headers:headers,
-            body:body
+            body:body,
+            credentials:'include'
         }
-        if(credentials){
-            fetchDict['credentials'] = credentials
-        }
+       
         
         const result = await fetch(`${API_URL}${endpoint}`,fetchDict)
         
@@ -60,7 +59,7 @@ function useFetch() {
                 method:method,
                 endpoint:url,
                 body:JSON.stringify(body),
-                headers:{'Content-Type':'application/json'},
+                headers:{'Content-Type':'application/json', "Authorization": `Bearer ${token}`},
                 credentials:'include'
 
             })

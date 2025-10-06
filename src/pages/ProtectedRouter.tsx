@@ -6,10 +6,10 @@ interface Props{
 }
 
 const ProtectedRouter = ({children}:Props) => {
-    // const user = JSON.parse(localStorage.getItem('user') || '{}')
-    // if(!('username' in user)){
-    //     return <Navigate to='/login' replace />
-    // }
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    if(!('username' in user)){
+        return <Navigate to='/login' replace />
+    }
 
 
     return children;
