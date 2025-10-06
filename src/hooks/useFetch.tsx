@@ -29,10 +29,10 @@ function useFetch() {
     const API_URL = import.meta.env.VITE_API_URL ?? ''
 
     const apiFetch = async ({endpoint,method,headers,body,credentials}:apiFetchProps)=>{
-        console.log(body,'body in apiFetch')
+        const token = localStorage.getItem('token') ?? ''
         const fetchDict:fetchDictProps = {
             method:method,
-            headers:headers,
+            headers:{...headers, ...(token !== '' ? {"Authorization": `Bearer ${token}`} : {})},
             body:body,
             credentials:'include'
         }
@@ -55,6 +55,7 @@ function useFetch() {
         
 
         try{
+            const token = localStorage.getItem('token') ?? ''
             const res = await apiFetch({
                 method:method,
                 endpoint:url,

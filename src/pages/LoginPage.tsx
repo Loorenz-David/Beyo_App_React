@@ -82,9 +82,9 @@ const LoginPage = () => {
                     }) 
                 }
                 
-                if(data.body.length > 0 && 'username' in data.body[0]){
-                    localStorage.setItem('user',JSON.stringify(data.body[0]))
-                    
+                if(data.body.length > 0 && 'token' in data.body[0]){
+                    localStorage.setItem('user',JSON.stringify(data.body[0].payload))
+                    localStorage.setItem('token',data.body[0].token)
                     navigate('/')
                 }
 
