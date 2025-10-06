@@ -24,23 +24,17 @@ interface SliderComponentProps{
     listOfImages:PictureDict[]
     currentImageIndex:number
     setCurrentImageIndex: React.Dispatch<React.SetStateAction<number>>
-    imagePreviewSlider:boolean
+    imagePreviewSlider:boolean | undefined
     parentComp:string
 
 }
 
 const SliderComponent = ({
     listOfElements,
-    
-    currentImageIndex,
-    setCurrentImageIndex,
-    imagePreviewSlider,
-    parentComp='',
 
 }: SliderComponentProps)=>{
     const sliderRef = useRef<HTMLDivElement>(null)
     const touchStart = useRef(0)
-    const currentPageIndex = useRef(0)
     const movingInSlider = useRef(false)
     const {data} = useData()
     const listOfImages =  data.images ?? [] as PictureDict[] | string []
@@ -61,13 +55,7 @@ const SliderComponent = ({
       }
     },[listOfImages])
 
-    const changeStyleMarker = (targetElement,scale,opacity)=>{
-        if(targetElement){
-            targetElement.style.transform = `scale(${scale})`
-            targetElement.style.opacity = opacity
-        }
-        
-    }
+    
 
    
     const handleSliderStartTouch = (e:React.TouchEvent<HTMLDivElement>)=>{
@@ -147,9 +135,9 @@ export const makeImageUrl = (img,imageBlobs)=>{
 }
 interface StartCameraProps{
     deviceIdC?:string | null
-    startingCamera: React.RefObject<boolean>
+    startingCamera?: React.RefObject<boolean>
     videoRef?: React.RefObject<HTMLVideoElement | null>
-    streamRef: React.RefObject<MediaStream | null>
+    streamRef?: React.RefObject<MediaStream | null>
     setSelectedCamera?:React.Dispatch<React.SetStateAction<string>>
     selectedCamera?:string
      activeFastSlider?:boolean
@@ -173,8 +161,6 @@ export const ImagePreviewSlider = ({props}:ImagePreviewSliderProps)=>{
         imagePreviewSlider,
         allowOnePicture=false,
         streamRef,
-        selectedCamera,
-        startingCamera,
         activeFastSlider = false
 
     } = props ?? {}

@@ -29,6 +29,7 @@ function useFetch() {
     const API_URL = import.meta.env.VITE_API_URL ?? ''
 
     const apiFetch = async ({endpoint,method,headers,body,credentials}:apiFetchProps)=>{
+        console.log(body,'body in apiFetch')
         const fetchDict:fetchDictProps = {
             method:method,
             headers:headers,
@@ -70,7 +71,7 @@ function useFetch() {
             response = result
 
             
-           console.log(response,'response from useFetch hook')
+           
             if('loadServerMessage' in setRules && setRules.loadServerMessage){
                 showMessage({
                             message:result.message,
