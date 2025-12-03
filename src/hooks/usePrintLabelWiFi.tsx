@@ -14,11 +14,11 @@ const usePrintLableWiFi = ({itemData}) => {
 
   
     const propertiesAllowedToPrint = {
-        'Set Of':'Set Of','Chair Structure':'Structure',
+        'set_of':'Set Of','upholstery':'Structure',
         'Legs Type':'Legs','Extentions Type':'Extentions', 'Extentions Set':'Set Of',
         
     }
-    const numberOfCopiesMap = {'Dining Chair':{'propInfluence':['Set Of'],'Dining Table':['Extentions Set',1]}}
+    const numberOfCopiesMap = {'Dining Chair':{'propInfluence':['set_of']},'Dining Table':{'propInfluence':['Extentions Set',1]}}
 
     const generateLabel = (selectedItemData)=>{
 
@@ -51,16 +51,20 @@ const usePrintLableWiFi = ({itemData}) => {
         let numOfCopies = 1
         let targetMapCounter = numberOfCopiesMap[itemDataDict.type]
        
-        if(itemDataDict.parts){
-            itemDataDict.parts.forEach((part)=>{
-                numOfCopies += part.count
-            })
-        }
+        // if(itemDataDict.parts){
+        //     itemDataDict.parts.forEach((part)=>{
+        //         numOfCopies += part.count
+        //     })
+        // }
+
          if(targetMapCounter){
-            targetMapCounter.propInfluence.forEach((influence)=>{
+
+            let iterationList = targetMapCounter.propInfluence ?? []
+            iterationList.forEach((influence)=>{
                 if(typeof influence == 'string'){
                     if(itemDataDict.properties && itemDataDict.properties[influence]){
                         numOfCopies *= itemDataDict.properties[influence]
+                       
                     }
                     
                 }else if( typeof influence == 'number'){
@@ -69,7 +73,7 @@ const usePrintLableWiFi = ({itemData}) => {
             })
             
         }
-        
+        numOfCopies += 1
 
 
         return `

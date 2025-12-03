@@ -3,6 +3,7 @@ import SecondaryPage from '../Page_Components/SecondaryPage.tsx'
 import {DynamicBoxesV2} from './DynamicBoxesV2.tsx' 
 import BrokenItemIcon from '../../assets/icons/General_Icons/BrokenItemIcon.svg?react'
 import MinusCircleIcon from '../../assets/icons/General_Icons/MinusCircleIcon.svg?react'
+import ArrowBold from '../../assets/icons/General_Icons/ArrowBold.svg?react'
 import {useState,useRef,memo,useEffect,useContext} from 'react'
 
 import {ServerMessageContext} from '../../contexts/ServerMessageContext.tsx'
@@ -160,6 +161,7 @@ export const ItemIssues = ({setItemData,type,issues,zIndex,mandatoryIssueLocatio
                 handleClose={()=>{setToggleItemIssue(false)}}
                 zIndex={zIndex + 1}
                 header={{order:0,display:'Select Issues',class:'color-light-titles'}}
+                closeBtn={{'icon': < ArrowBold with={25} height={25}  />, 'class':'flex-1 content-end padding-05','order':1}}
                 />
             }
 
@@ -221,14 +223,15 @@ export const ItemIssueBtn = ({issues=[],type,setItemData,zIndex}:ItemIssueBtnPro
     const mandatoryIssueLocations = useRef<string []>([])
     const savedIssueLocations = useRef<string[]>([])
     const {showMessage} =  useContext(ServerMessageContext)
-    const {forceRenderChildren} = useData()
+    const {forceRenderChildren,forceSliderUpdate} = useData()
 
     useEffect(() =>{
         savedIssueLocations.current = []
     },[forceRenderChildren])
 
-    const handleClose = () =>{
+    const handleCloseBtn = () =>{
         setToggleItemIssuePage(false)
+       
         const missingToSelect = mandatoryIssueLocations.current.filter(l => !savedIssueLocations.current.includes(l))
         if(missingToSelect.length > 0){
             showMessage({
@@ -237,6 +240,11 @@ export const ItemIssueBtn = ({issues=[],type,setItemData,zIndex}:ItemIssueBtnPro
                 status:400
         })
             return
+        }else{
+            if(forceSliderUpdate ){
+                
+                forceSliderUpdate()
+            }
         }
     }
     return (
@@ -253,7 +261,7 @@ export const ItemIssueBtn = ({issues=[],type,setItemData,zIndex}:ItemIssueBtnPro
                     zIndex={zIndex + 1}
                     pageId={'itemIssues'}
                     // fixing the error message if a location issue is not selected
-                    handleClose={handleClose} 
+                    handleClose={handleCloseBtn} 
                     header={{order:0,display:'Manage Issues',class:'color-light-titles'}}
                 />
             }

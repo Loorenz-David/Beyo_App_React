@@ -77,7 +77,8 @@ const useInfiniteScroll = ({itemHeight,thressholdItems,nextBatchItems,lastLoad,h
             if(removedItems.current.length == 0)return;
 
             const upThresshHold = calculateThresshold(nextBatchItems,itemHeight,clientHeight)
-           
+            
+
             if(!ScrollUp_Loading && scrollTop <= upThresshHold ){
                
                 setScrollUp_Loading(true)

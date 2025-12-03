@@ -6,6 +6,7 @@ interface DataProps<T> {
     setNextPage:React.Dispatch<React.ReactNode> | null
     setForceRenderChildren?: React.Dispatch<React.SetStateAction<boolean>> | null
     forceRenderChildren?: boolean
+    forceSliderUpdate?:()=>void
 }
 
 export const DataContext = createContext<DataProps<any> | null>(null)

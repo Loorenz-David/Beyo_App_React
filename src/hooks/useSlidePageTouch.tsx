@@ -46,6 +46,8 @@ export const useSlidePageTouch = ({
     
 
     const handleTouchStart = (e:React.TouchEvent<HTMLDivElement>)=>{
+        // being depraciated 
+        return 
        if(pageTransition.current) return
         startXRef.current = e.touches[0].clientX
         startYRef.current = e.touches[0].clientY
@@ -66,7 +68,8 @@ export const useSlidePageTouch = ({
     }
 
     const handleTouchMove = (e:React.TouchEvent<HTMLDivElement>)=>{
-        
+        // being depraciated 
+        return
         
         if( !parentRef.current || pageTransition.current) return
 
@@ -106,7 +109,8 @@ export const useSlidePageTouch = ({
     }
 
     const handleTouchEnd = (e:React.TouchEvent<HTMLDivElement>)=>{
-        
+        // being depraciated 
+        return 
         if( !parentRef.current || pageTransition.current  ) return 
         if(isScrollingVertical.current ){
             

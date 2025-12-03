@@ -699,7 +699,10 @@ const ItemsPage = () => {
             const res = await handleFetch()
             setDataList(res)
         }
-       pageFetch()
+        if(!loading){
+            pageFetch()
+
+        }
 
        return ()=>{
             if(imgBlobs.current.length > 0){
@@ -748,7 +751,7 @@ const ItemsPage = () => {
         fetchPerPage:number=180,
         itemsListId:number[]=[]
     ) => {
-
+            
             const getFetchDict:GetFetchDictProps = {
                 model_name:'Item',
                 requested_data:['id','type','article_number','reference_number','properties','images'],
@@ -817,7 +820,9 @@ const ItemsPage = () => {
                     handleDelitionItems={handleDelitionItems} 
                     setForceRenderParent={setForceRender} 
                 />
-                <div className="width100" style={{zIndex:1}}>
+                <div className="width100" style={{zIndex:1}}
+                    
+                >
                     { selectionMode && 
                         <SelectionModeComponent 
                             zIndex={2}

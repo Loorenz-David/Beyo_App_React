@@ -350,8 +350,8 @@ const AddScannerActionOptions = ({listOfOptions,setListOfOptions,currentPageInde
                 />
                 
                 <ItemPropsComp
-                    pageSetUp={new Set(['noHistory','noImages','noFetchNotes'])}
-                    CurrencyInputsComponent={CurrencyInputsPurchase}
+                    pageSetUp={new Set(['noHistory','noImages','noFetchNotes','noCategory','noType','noIssues','noDimensions','noDealer'])}
+                    
                 />
 
                 <div className="flex-row width100 push-bottom padding-bottom-30 padding-10">

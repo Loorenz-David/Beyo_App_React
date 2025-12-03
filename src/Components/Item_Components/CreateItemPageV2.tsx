@@ -5,7 +5,7 @@ import {DataContext} from '../../contexts/DataContext.tsx'
 import {useSlidePage} from '../../contexts/SlidePageContext.tsx'
 
 import ThreeDotMenu from '../../assets/icons/General_Icons/ThreeDotMenu.svg?react'
-import FastSliderIcon from '../../assets/icons/General_Icons/FastSliderIcon.svg?react'
+import SpeedUpIcon from '../../assets/icons/General_Icons/SpeedUpIcon.svg?react'
 
 import {CurrencyInputsPurchase} from './CurrencyInputs.tsx'
 import {ItemPropsComp} from './ItemEdit.tsx'
@@ -92,12 +92,13 @@ const CreateItemPageV2 = ({
     const subPropCount = useRef(0)
     const recordedItemPage = useRef<number | null>(null)
     const hasUploadItem = useRef(false)
+    const [isIssuesComplete,setIsIssuesComplete] = useState(false)
 
     const [pageSetUp,setPageSetUp] = useState(activeSlider.current ? new Set(['noHistory','fastSlider']) : new Set(['noHistory']))
 
     // --------------------------------------------------------------------------------------------------------------
 
-
+    
     // helperFunctions - CreateItemPageV2.CreateItemPageV2 - 
     const activateCamera = (imageBtn:HTMLElement)=>{
         imageBtn.click()
@@ -114,8 +115,13 @@ const CreateItemPageV2 = ({
         {'id':'category','action':activateProp},
         {'id':'type','action':activateProp},
         {'id':'subprop','action':activateProp},
-        {'id':'issues','action':activateProp},
+        {'id':'purchased_price','action':focusProp},
+        
     ]
+
+    const forceSliderUpdate = ()=>{
+        updateSliderStep(sliderStep)
+    }
     
     const updateSliderStep = (
         counterToUpdate:React.RefObject<number>
@@ -134,7 +140,7 @@ const CreateItemPageV2 = ({
             activeSlider.current = false
             return
         }
-
+        console.log(currentDict,'the current dict in the active slide Show')
         if(currentDict.id == 'printLabel'){
             const target = document.getElementById('printLabel') as HTMLDivElement
             if(target){
@@ -142,7 +148,7 @@ const CreateItemPageV2 = ({
             }
             updateSliderStep(sliderStep)
         }
-
+        
         if(currentDict.id == 'subprop'){
            
             const targetElement = document.getElementById('ItemProperties')
@@ -278,7 +284,7 @@ const CreateItemPageV2 = ({
     // --------------------------------------------------------------------------------------------------------------
     
     return ( 
-            <DataContext.Provider value={{data:itemData,setData:setItemData, setNextPage, forceRenderChildren}}>
+            <DataContext.Provider value={{data:itemData,setData:setItemData, setNextPage, forceRenderChildren,forceSliderUpdate}}>
                 
                 <div className="flex-column width100" style={{height:'100dvh',overflow:'hidden'}}>
                   
@@ -297,7 +303,7 @@ const CreateItemPageV2 = ({
                         }
                         rightElement={
                             <div className="flex-row content-center gap-05" style={{position:'relative'}}>
-                                  <div className={`svg-15 btn ${activeSlider.current ? 'svg-bg-blue': ''}`}
+                                  <div className={`svg-20 btn ${activeSlider.current ? 'svg-bg-blue': ''}`}
                                     
                                     onClick={()=>{
                                         let messageText = "Fast Slider "
@@ -319,7 +325,7 @@ const CreateItemPageV2 = ({
                                         })
                                     }}
                                 >
-                                    <FastSliderIcon/>
+                                    <SpeedUpIcon/>
                                 </div>
                                 <div className="svg-15 btn"
                                     onClick={()=>{setToggleSettings(true)}}

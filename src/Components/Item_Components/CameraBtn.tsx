@@ -4,6 +4,7 @@ import PictureIcon from '../../assets/icons/General_Icons/PictureIcon.svg?react'
 import DeleteIcon from '../../assets/icons/General_Icons/DeleteIcon.svg?react'
 
 import OpenFolderIcon from '../../assets/icons/General_Icons/OpenFolderIcon.svg?react'
+import ArrowIcon from '../../assets/icons/General_Icons/ArrowIcon.svg?react'
 import FlashIcon from '../../assets/icons/General_Icons/FlashIcon.svg?react'
 
 
@@ -12,7 +13,7 @@ import {useData} from '../../contexts/DataContext.tsx'
 import {useSlidePage} from '../../contexts/SlidePageContext.tsx'
 
 import {SlidePage} from '../Page_Components/SwapToSlidePage.tsx'
-import SecondaryPage from '../Page_Components/SecondaryPage.tsx'
+
 
 import {useSlidePageTouch} from '../../hooks/useSlidePageTouch.tsx'
 
@@ -218,7 +219,7 @@ export const ImagePreviewSlider = ({props}:ImagePreviewSliderProps)=>{
             {NextPage && 
                 <SlidePage BodyComponent={NextPage} />
             }
-            <div className="width100 height100 flex-row items-center content-center " style={{overflow:'hidden',borderRadius:'10px'}}>
+            <div className="width100 height100 flex-row items-center content-center " style={{overflow:'hidden',borderRadius:'10px',position:'relative'}}>
                 {!allowOnePicture ? 
                     <SliderComponent 
                         imagePreviewSlider={imagePreviewSlider}
@@ -269,40 +270,49 @@ export const ImagePreviewSlider = ({props}:ImagePreviewSliderProps)=>{
                         }
                     </div>
                 }
-                
-               <div className="flex-row space-between width100 " style={{position:'absolute',bottom:'30px',padding:'0 20px'}}>
-                   
-                   {listOfImages.length > 0 ?
-                    <div role={'button'} className="flex-row btn svg-25 svg-bg-container items-center content-center bg-secondary"  
-                        style={{padding:'5px 8px'}}
-                        onClick={()=>{handleImageRemoval()}}
-                    > 
-                        <DeleteIcon/>   
-                    </div>
-                    :
-                    <div className="flex-row" style={{width:'25px',height:'25px'}}>
 
-                    </div>
-                   }
-                    
-                    
-                    {!allowOnePicture && 
-                        <div className="flex-row items-center content-center bg-secondary padding-10 " style={{borderRadius:'50%',zIndex:'1',transition:'transform 0.2s ease-out'}}
-                            onClick={()=>{
-                                
-                                setNextPage( <LiveCamera props={liveCameraProps}/> )
-                                slidePageTo({addNumber:1,setClosePage:setNextPage})
-                            }}
-                            >
-                                
-                            <div className=" flex-row content-center  plus-btn " style={{width:'20px',height:'20px',}}>
-                                <div className="plus-vertical bg-primary" ></div>
-                                <div className="plus-horizontal bg-primary"></div>
-                            </div>
+            <button className="flex-row svg-20 items-center content-center btn " 
+                style={{
+                    backgroundColor:'rgba(21, 70, 91, 0.37)',
+                    position:'absolute',top:'20px',left:'20px',borderRadius:'50%',padding:'6px 6px'
+                }}
+                onClick={()=>{slidePageTo({addNumber:-1})}}
+            >
+                <ArrowIcon/>
+            </button>
+            
+            <div className="flex-row space-between width100 " style={{position:'absolute',bottom:'30px',padding:'0 20px'}}>
+                
+                {listOfImages.length > 0 ?
+                <div role={'button'} className="flex-row btn svg-25 svg-bg-container items-center content-center bg-secondary"  
+                    style={{padding:'5px 8px'}}
+                    onClick={()=>{handleImageRemoval()}}
+                > 
+                    <DeleteIcon/>   
+                </div>
+                :
+                <div className="flex-row" style={{width:'25px',height:'25px'}}>
+
+                </div>
+                }
+                
+                {!allowOnePicture && 
+                    <div className="flex-row items-center content-center bg-secondary padding-10 " style={{borderRadius:'50%',zIndex:'1',transition:'transform 0.2s ease-out'}}
+                        onClick={()=>{
+                            
+                            setNextPage( <LiveCamera props={liveCameraProps}/> )
+                            slidePageTo({addNumber:1,setClosePage:setNextPage})
+                        }}
+                        >
+                            
+                        <div className=" flex-row content-center  plus-btn " style={{width:'20px',height:'20px',}}>
+                            <div className="plus-vertical bg-primary" ></div>
+                            <div className="plus-horizontal bg-primary"></div>
                         </div>
-                    }
-                     
-               </div>
+                    </div>
+                }
+                    
+            </div>
                
             </div>
             
@@ -505,7 +515,7 @@ export const LiveCamera = ({props}:LiveCameraProps )=>{
                             return {...prev, 'images':[imgDict,...(prev.images && Array.isArray(prev.images) ? prev.images : [])]}
                             
                         } )
-                    }   else{
+                    }else{
                         setData(prev =>{
                             return{...prev,'images':[imgDict]}
                         })
@@ -575,6 +585,15 @@ export const LiveCamera = ({props}:LiveCameraProps )=>{
                 style={{width:'100%',height:'100%',objectFit:'cover'}}
             >
             </video>
+             <button className="flex-row svg-20 items-center content-center btn " 
+                style={{
+                    backgroundColor:'rgba(21, 70, 91, 0.37)',
+                    position:'absolute',top:'20px',left:'20px',borderRadius:'50%',padding:'6px 6px'
+                }}
+                onClick={()=>{slidePageTo({addNumber:-1})}}
+            >
+                <ArrowIcon/>
+            </button>
             <button className="flex-row svg-18 items-center content-center btn " 
                 ref={torchRef}
                 style={{
@@ -651,7 +670,7 @@ export const LiveCamera = ({props}:LiveCameraProps )=>{
                 {imageToPreview.current !== '' ?
                     <button className="flex-column  border-blue"
                         style={{width:'40px', height:'40px', overflow:'hidden',borderRadius:'5px'}}
-                        onClick={()=>{slidePageTo({addNumber:-2})}}
+                        onClick={()=>{slidePageTo({addNumber:-1})}}
                         ref={previewRefBtn}
                     >  
                             <img src={imageToPreview.current} className="width100 height100" style={{objectFit:'cover'}} />

@@ -116,7 +116,7 @@ export const CurrencyInputsPurchase =  memo(({setItemData,purchased_price,valuat
             <div className="flex-row width100">
                 <div className="flex-column gap-05 padding-10 width100">
                     <span className="color-lower-titles text-9">
-                        Purchased price:
+                        Purchased price ( per piece ):
                     </span>
                     <input type="number" 
                         id='purchased_price'
@@ -144,7 +144,7 @@ export const CurrencyInputsPurchase =  memo(({setItemData,purchased_price,valuat
             <div className="vertical-line"></div>
             <div className="flex-column gap-05 padding-10 width100">
                 <span className="color-lower-titles text-9">
-                    Valuation in <span className="color-light-titles" style={{paddingLeft:'5px',fontSize:'10px'}}>{currencySelected}</span> :
+                    Valuation ( per piece )  <span className="color-light-titles" style={{paddingLeft:'5px',fontSize:'10px'}}>{currencySelected}</span> :
                 </span>
                 <input type="number"  
                     style={{width:'100%',fontSize:'13px'}}

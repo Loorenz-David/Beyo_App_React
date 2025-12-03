@@ -37,27 +37,33 @@ import type {ItemDict} from '../../types/ItemDict.ts'
 
 
 const CurrencyInputsEditItem = memo(({setItemData,purchased_price,valuation,sold_price,handleFocusScroll})=>{
-    
+
+    function handleCostPrice(value){
+        const newValue = value ? parseInt(value) : null
+        setItemData(prev => (
+                        { ...prev, 'purchased_price':newValue, 'valuation':newValue ? newValue * 4 : newValue}
+            )
+        )
+    }
 
     return(
         <div className="flex-row">
             <div className="flex-column gap-05 padding-10 width100">
                 <span className="color-lower-titles text-9">
-                    Purchased price:
+                    Purchased price per piece:
                 </span>
                 <input type="number" 
                     style={{width:'100%',fontSize:'13px'}}
                     value={purchased_price ?? ""}
                     onFocus={(e)=>{handleFocusScroll(e)}}
-                    onChange={e => setItemData(prev => (
-                        { ...prev, 'purchased_price':e.target.value ? parseInt(e.target.value):null}
-                    ))}
+                    onChange={e => handleCostPrice(e.target.value)}
                 />
             </div>
             <div className="vertical-line"></div>
             <div className="flex-column gap-05 padding-10 width100">
                 <span className="color-lower-titles text-9">
-                    Valuation:
+                    Valuation per piece:
+
                 </span>
                 <input type="number"  
                     style={{width:'100%',fontSize:'13px'}}
@@ -71,7 +77,7 @@ const CurrencyInputsEditItem = memo(({setItemData,purchased_price,valuation,sold
             <div className="vertical-line"></div>
             <div className="flex-column gap-05 padding-10 width100">
                 <span className="color-lower-titles text-9">
-                    Sold Price:
+                    Sold Price per piece:
                 </span>
                 <input type="number"  
                     style={{width:'100%',fontSize:'13px'}}
@@ -264,25 +270,30 @@ export const ItemPropsComp = ({CurrencyInputsComponent,pageSetUp,zIndex=2})=>{
                         />
                     }
                    
-                    
-                    <MemorizedItemDimensionsBtn 
-                        
-                        dimensions = {'dimensions' in itemData && itemData.dimensions !== null && itemData.dimensions }
-                        setItemData={setItemData}
-                    />
-
-                    <MemorizedDealerSelectionBtn/>
+                    {!pageSetUp.has('noDimensions') && 
+                        <MemorizedItemDimensionsBtn 
+                            
+                            dimensions = {'dimensions' in itemData && itemData.dimensions !== null && itemData.dimensions }
+                            setItemData={setItemData}
+                        />
+                    }
+                    {!pageSetUp.has('noDealer') && 
+                        <MemorizedDealerSelectionBtn/>
+                    }
             </div>
             
-            <div className="flex-row border-bottom">
-                    <CurrencyInputsComponent
-                        setItemData={setItemData}
-                        purchased_price={itemData?.purchased_price ?? null}
-                        valuation={itemData?.valuation ?? null}
-                        sold_price={itemData?.sold_price ?? null}
-                        handleFocusScroll={handleFocus}
-                    />
-            </div>
+            {CurrencyInputsComponent &&
+                <div className="flex-row border-bottom">
+                        <CurrencyInputsComponent
+                            setItemData={setItemData}
+                            purchased_price={itemData?.purchased_price ?? null}
+                            valuation={itemData?.valuation ?? null}
+                            sold_price={itemData?.sold_price ?? null}
+                            handleFocusScroll={handleFocus}
+                        />
+                </div>
+            
+            }
             <div className="flex-row border-bottom width100 padding-10">
                     <div className="flex-column gap-05 width100">
                         <span className="text-9 color-lower-titles">Reference_number</span>

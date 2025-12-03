@@ -167,7 +167,6 @@ function App() {
           parentRef:appRef,
           currentPageIndex:currentPageIndex,
           setCurrentPageIndex:setCurrentPageIndex
-        
         })
     
   return (

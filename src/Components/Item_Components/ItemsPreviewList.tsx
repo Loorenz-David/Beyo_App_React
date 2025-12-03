@@ -246,10 +246,53 @@ export const ItemsPreviewList= ({
                 }
             }
         },[])
+
+        const startYRef = useRef<null | number>(null)
+        const reloadThressHold = 120
+        
+        
+        const handleTouchStartReload = (e:React.TouchEvent)=>{
+            const currentTarget = e.currentTarget
+            if(currentTarget && currentTarget.scrollTop === 0){
+                startYRef.current = e.touches[0].clientY
+            }else{
+                startYRef.current = null
+            }
+        }
+
+        const handleTouchMoveReload= (e:React.TouchEvent)=>{
+            if(startYRef.current == null) return;
+
+            const currentTarget = e.currentTarget as HTMLDivElement
+            if(currentTarget){
+                const deltaY = startYRef.current - e.touches[0].clientY
+                const abs = Math.abs(deltaY)
+                if(deltaY < 0 && abs > 10 ){
+                    e.stopPropagation()
+                    console.log(deltaY)
+                    if(abs > reloadThressHold){
+                        setForceRenderParent(prev => !prev)
+                        currentTarget.style.transform = "translateY(0)"
+                        return
+                    }
+                    currentTarget.style.transform = `translateY( ${Math.abs(deltaY)}px)`
+                }
+            }
+        }
+        const handleTouchEndReload = (e:React.TouchEvent)=>{
+            if(startYRef.current === null) return
+            const currentTarget = e.currentTarget as HTMLDivElement
+            currentTarget.style.transform = "translateY(0)"
+
+        }
    
     return (
-        <div className={`flex-column  width100`} style={{overflowY:'auto',paddingBottom:'200px'}}
+        <div className={`flex-column  width100`} 
+        style={{overflowY:'auto',paddingBottom:'200px', transition:'transform 0.3s ease-out'}}
            onScroll={handleScroll}
+           onTouchStart ={handleTouchStartReload}
+           onTouchMove = {handleTouchMoveReload}
+           onTouchEnd = {handleTouchEndReload}
         >   
            
             <div className="flex-column width100 content-end" style={{minHeight:'50px'}}>
@@ -288,120 +331,3 @@ export const ItemsPreviewList= ({
         </div>
     )
 }
-
-
-// export const ItemsPreviewList= ({
-//     data,
-//     handleDelitionItems,
-//     selectionMode,
-//     setSelectionMode,
-//     selectedItems={},
-//     setSelectedItems=null,
-//     setForceRenderParent,
-//     fetchWhenOpen,
-//     selectionTargetKey,
-//     handleScroll,
-//     loaders={},
-//     containerHeight,
-//     zIndex=2,
-//     holdScrollElement=null 
-// }:propsPreviewList) => {
-            
-//         const[openItem,setOpenItem] = useState(false)
-//         const imgBlobs = useRef([])
-    
-
-
-//         const handleActionWhenPress = (targetElement,selectedObj)=>{
-//             const checkMark = targetElement.querySelector('.selectedItem')
-//             checkMark.classList.toggle('hidden')
-
-//             const targetId = selectedObj[selectionTargetKey]
-//             console.log(targetElement)
-//             if(targetId in selectedItems){
-//                 setSelectedItems(prev =>{
-//                 const {[targetId]:_, ...current} = prev
-
-//                 return current
-//             })
-//             }else{
-//                 setSelectedItems(prev =>({...prev,[targetId]:selectedObj}))
-//             }
-
-//         }
-//         const handleDefaultActionWhenClick = ()=>{
-//             setOpenItem(true)
-//         }
-//         const {handlePressStart,handlePressEnd,handleTouchMove,currentSelectedObj} = useLongPressAction({selectionMode,setSelectionMode,handleActionWhenPress,handleDefaultActionWhenClick})
-    
-
-//         useEffect(()=>{
-
-//             return ()=>{
-//                 if(imgBlobs.current.length > 0){
-//                     imgBlobs.current.forEach(url => URL.revokeObjectURL(url))
-//                 }
-//             }
-//         },[])
-   
-//     return (
-//         <div className={`flex-column  width100`} style={{overflowY:'auto', height:'100dvh',paddingBottom:'200px'}}
-//            ref={holdScrollElement}
-//            onScroll={handleScroll}
-//         >
-//             {openItem && 
-//                 <SecondaryPage BodyComponent={ItemEdit}
-//                     bodyProps={{preRenderInfo:currentSelectedObj.current ?? {},
-//                                 handleDelitionItems,
-//                                 setForceRenderParent,
-//                                 fetchWhenOpen
-//                             }} 
-//                     handleClose={()=>{setOpenItem(false)}} 
-//                     zIndex={zIndex} 
-//                     pageId={'ItemEditPage'}
-//                     interactiveBtn ={{iconClass:'svg-15 padding-05 position-relative content-end', order:3,icon:<ThreeDotMenu/>}}
-//                     header={{'display': currentSelectedObj.current ? readArticleNumber(currentSelectedObj.current.article_number) : '', class:'flex-1 content-center text-15',order:2}}
-//                     closeBtn = {{'icon':<ArrowIcon/>,class:'padding-05 content-start',order:0}}
-//                     startAnimation={'slideLeft'}
-//                     endAnimation ={'slideRight'}
-                   
-//                     />
-//             }
-//             <div className="flex-column width100 content-end" style={{minHeight:'50px'}}>
-//                 {loaders.ScrollUp_Loading && 
-//                 <div className="flex-row content-center gap-2">
-//                     <span className="text-15 ">Loading items</span>    <LoaderDots />
-//                 </div>
-                    
-//                 } 
-                
-//             </div>
-
-//             {data.map((itemObj,i)=>{
-//                 let isSelected = false
-//                 if(itemObj[selectionTargetKey] in selectedItems){
-//                     isSelected = true
-//                 } 
-//                 return (
-//                     <ItemPreviewContainer key={`itemPreviewCloud_${i}`} 
-//                         itemObj={itemObj}
-//                         handlePressStart = {handlePressStart}
-//                         handlePressEnd = {handlePressEnd}
-//                         handleTouchMove = {handleTouchMove}
-//                         imgBlobs={imgBlobs.current}
-//                         isSelected ={isSelected}
-//                         containerHeight = {containerHeight}
-//                     />
-//                 )
-//             })}
-
-//             {loaders.ScrollDown_Loading || loaders.loading ? 
-//                 <div className="flex-row width100 content-center items-center gap-2 padding-20">
-//                     <span className="text-15 ">Loading items</span>    <LoaderDots />
-//                 </div>
-//             :
-//             <></>
-//             }
-//         </div>
-//     )
-// }
