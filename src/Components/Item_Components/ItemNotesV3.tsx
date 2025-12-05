@@ -22,7 +22,7 @@ import FilterIcon from '../../assets/icons/General_Icons/FilterIcon.svg?react'
 import MinusCircleIcon from '../../assets/icons/General_Icons/MinusCircleIcon.svg?react'
 import CheckMarkIcon from '../../assets/icons/General_Icons/CheckMarkIcon.svg?react'
 import ThreeDotMenu from '../../assets/icons/General_Icons/ThreeDotMenu.svg?react'
-
+import ArrowIcon from '../../assets/icons/General_Icons/ArrowIcon.svg?react'
 
 import DeleteIcon from '../../assets/icons/General_Icons/DeleteIcon.svg?react'
 
@@ -618,10 +618,22 @@ const ItemNoteDisplay = ({handleNoteAction,fetchNotes})=>{
             {NextPageChild &&
                 <SlidePage BodyComponent={NextPageChild}/>
             }
-
+            <div className="flex-row width100 bg-primary  items-center"
+                style={{paddingLeft:"10px",paddingTop:"10px"}}
+            >
+                <button className="btn svg-25"
+                    onClick={()=>{
+                        slidePageTo({addNumber:-1})
+                    }}
+                >
+                    <ArrowIcon/>
+                </button>
+            </div>
 
             {fetchNotes && 
-                <div className="flex-row padding-15">
+                <div className="flex-row "
+                   style={{paddingLeft:"15px", paddingRight:"15px",paddingTop:'10px'}}
+                >
                     <div className="flex-row width100 bg-containers " style={{borderRadius:'5px'}}>
                         <input type="text" className="width100"  place-holder="Search note" 
                             style={{fontSize:'15px',padding:'8px 10px'}}

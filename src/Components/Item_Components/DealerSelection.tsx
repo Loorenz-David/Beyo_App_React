@@ -12,6 +12,7 @@ import SelectPopupV2 from './SelectPopupV2.tsx'
 
 import FilterIcon from '../../assets/icons/General_Icons/FilterIcon.svg?react'
 import DealerIcon from '../../assets/icons/General_Icons/DealerIcon.svg?react'
+import ArrowIcon from '../../assets/icons/General_Icons/ArrowIcon.svg?react'
 
 
 
@@ -153,40 +154,54 @@ export const DealerSelection = () => {
                 <SlidePage BodyComponent={NextPageChild} />
             }
 
-            <div className="flex-row padding-15 width100 bg-primary" style={{position:'fixed',top:'0',left:'0'}}>
-                <div className="flex-row bg-containers width100" style={{borderRadius:'5px'}}>
-                    <div className="flex-column width100 padding-10"
-                    
+            <div className="flex-col  width100 bg-primary" style={{position:'fixed',top:'0',left:'0'}}>
+                <div className="flex-row " style={{height:'40px',paddingLeft:"10px",paddingTop:"10px"}}>
+                    <button className="btn svg-25"
+                        onClick={()=>{
+                            slidePageTo({addNumber:-1})
+                        }}
                     >
-                        <input type="text" className="width100" style={{fontSize:'15px'}} 
-                        ref={inputRef}
-                        onInput={(e)=>{handleQuery(e.currentTarget.value)}}
-                        />
-                    </div>
-                    <div className="flex-column content-center"
+                        <ArrowIcon/>
+                    </button>
                     
-                    style={{position:'relative'}}
-                    >   
-                    {toggleFilterQuery && 
-                        <SelectPopupV2 
-                            setTogglePopup={setToggleFilterQuery}
-                            listOfValues ={filterVals}
-                            onSelect={handleFilterSelection}
-                            right={'80%'}
-                            top={'90%'}
-                            selectedOption = {selectedFilterRef.current}
-                        />
-                    }
+                </div>
+                <div className=" flex-row padding-15 width100 bg-primary">
+                    
+                    <div className="flex-row bg-containers width100" style={{borderRadius:'5px'}}>
+                        <div className="flex-column width100 padding-10"
                         
-                        <button className="svg-15 btn"
-                        onClick={()=>{setToggleFilterQuery(true)}}
                         >
-                            <FilterIcon/>
-                        </button>
+                            <input type="text" className="width100" style={{fontSize:'15px'}} 
+                            ref={inputRef}
+                            onInput={(e)=>{handleQuery(e.currentTarget.value)}}
+                            />
+                        </div>
+                        <div className="flex-column content-center"
+                        
+                        style={{position:'relative'}}
+                        >   
+                        {toggleFilterQuery && 
+                            <SelectPopupV2 
+                                setTogglePopup={setToggleFilterQuery}
+                                listOfValues ={filterVals}
+                                onSelect={handleFilterSelection}
+                                right={'80%'}
+                                top={'90%'}
+                                selectedOption = {selectedFilterRef.current}
+                            />
+                        }
+                            
+                            <button className="svg-15 btn"
+                            onClick={()=>{setToggleFilterQuery(true)}}
+                            >
+                                <FilterIcon/>
+                            </button>
+                        </div>
                     </div>
                 </div>
+                
             </div>
-            <div  className="flex-column"style={{paddingTop:'80px', paddingBottom:'40px'}} >
+            <div  className="flex-column"style={{paddingTop:'120px', paddingBottom:'40px'}} >
                 {loading && 
                     <div className="no-select flex-row content-center items-center">
                             <LoaderDots />
@@ -194,6 +209,7 @@ export const DealerSelection = () => {
                 }
                 {fetchData && fetchData.length > 0 ?
                     (fetchData as DealerDisplayDict[]).map((obj,i)=>{
+                        console.log(obj)
                         return(
                             <div key={`dealerQuery_${i}`} className="flex-row width100 items-center space-between  padding-20 border-bottom "
                             onClick={()=>{handleDealerSelection(obj)}}

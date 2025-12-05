@@ -58,6 +58,7 @@ const ItemHistoryPage = ()=>{
     const {doFetch,loading} = useFetch()
     const [dataList,setDataList] = useState<ItemHistoryDict[]>([])
     const lastLoad = useRef(false)
+    const {slidePageTo} = useSlidePage()
 
     const {data:itemData} = useData()
 
@@ -160,11 +161,24 @@ const ItemHistoryPage = ()=>{
     
 
     return(
-        <div className="flex-column " style={{height:'100dvh',padding:'30px 20px',overflowY:'auto'}}
+        <>
+         <div className="flex-row width100 bg-primary "
+            style={{paddingLeft:"10px",paddingTop:"10px", paddingBottom:"20px"}}
+        >
+            <button className="btn svg-25"
+                onClick={()=>{
+                    slidePageTo({addNumber:-1})
+                }}
+            >
+                <ArrowIcon/>
+            </button>
+        </div>
+        <div className="flex-column " style={{padding:"10px 30px",height:'100dvh',overflowY:'auto'}}
             onScroll={handleScroll}
         >
             
-                
+               
+
                 <div className="flex-column width100 items-center content-center" style={{minHeight:'50px'}}>
                     {ScrollUp_Loading && 
                         <div className="flex-column content-center gap-2">
@@ -174,7 +188,7 @@ const ItemHistoryPage = ()=>{
                     } 
                 </div>
 
-                <div className=" width100 gap-1" style={{position:'relative',display:'flex', flexDirection:'column'}} >
+                <div className=" width100 gap-1 " style={{position:'relative',display:'flex', flexDirection:'column'}} >
                     <div  style={{position:'absolute',height:'100%',width:'4px',top:'0',left:'6px',backgroundColor:'rgba(104, 104, 104, 1)'}}>
                     </div>
                     {dataList.length > 0  && dataList.map((obj,i)=>{
@@ -320,6 +334,7 @@ const ItemHistoryPage = ()=>{
                 }
 
         </div>
+        </>
     )
 }
 

@@ -50,7 +50,8 @@ export default defineConfig(async ({command}) => {
       host:true,
       proxy:{
         '/api':{
-          target:'https://127.0.0.1:5001',
+          // Backend is running over plain HTTP on 8080, so keep the proxy HTTP to avoid TLS handshake errors
+          target:'http://127.0.0.1:8080',
           changeOrigin:true,
           secure:false}
       }

@@ -426,7 +426,7 @@ export const useSaveItemsV2= ()=>{
 
             
             if(key === 'dealer' ){
-
+                
                 fetchDictData['dealer'] = {
                     'action':'link',
                     'values':{'Dealer':{

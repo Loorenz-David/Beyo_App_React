@@ -15,6 +15,7 @@ import useFetch from '../../hooks/useFetch.tsx'
 
 
 import LocationIcon from '../../assets/icons/General_Icons/LocationIcon.svg?react'
+import ArrowIcon from '../../assets/icons/General_Icons/ArrowIcon.svg?react'
 
 
 interface DealerDict {
@@ -182,7 +183,7 @@ const CreateDealer = ({setData =null}:CreateDealerProps) => {
     }
     
     return (
-    <div className="flex-column " style={{minHeight:'100dvh'}}>
+    <div className="flex-column" style={{minHeight:'100dvh'}}>
         {togglePage !== '' && 
             <SecondaryPage BodyComponent={DynamicBoxesV2} 
                 bodyProps={{
@@ -196,8 +197,16 @@ const CreateDealer = ({setData =null}:CreateDealerProps) => {
             />
         }
 
-        <div className="flex-row width100 bg-primary">
-
+        <div className="flex-row width100 bg-primary "
+            style={{paddingLeft:"10px",paddingTop:"10px"}}
+        >
+            <button className="btn svg-25"
+                onClick={()=>{
+                    slidePageTo({addNumber:-1})
+                }}
+            >
+                <ArrowIcon/>
+            </button>
         </div>
 
         <form >
